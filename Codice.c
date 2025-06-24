@@ -22,8 +22,28 @@ Consegna:   Movhex è una compagnia di autotrasporti che dispone di una flotta d
 //librerie
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
 #include <string.h>
 
+//define
+#define INIT "init"
+#define CAMBIO_COSTO "change_cost"
+#define ROTTA_AEREA "toggle_air_route"
+#define COSTO_VIAGGIO "travel_cost"
+#define AFFERMATIVO "OK"
+#define FALSO "KO"
+#define NOT_VALID_COST -1
+
+//strutture
+typedef struct esagono
+{
+    int costo;
+    int rotta_ar[5];
+    int collegamenti[6];
+}esagono_t;
+
+void comando_init(int col, int rig);
+void comando_change_cost(int x, int y, int v, int raggio);
+void comando_air_route(int x1, int y1, int x2, int y2);
+void comando_travel_cost(int x1, int y1, int x2, int y2);
 
 
