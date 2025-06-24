@@ -25,9 +25,7 @@ Consegna:   Movhex è una compagnia di autotrasporti che dispone di una flotta d
 #include <string.h>
 
 //define
-#ifndef DEBUG
-    #define DEBUG
-#endif
+//#define DEBUG
 #define INIT "init"
 #define CAMBIO_COSTO "change_cost"
 #define ROTTA_AEREA "toggle_air_route"
