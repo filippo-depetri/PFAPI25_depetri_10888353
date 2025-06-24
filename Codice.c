@@ -49,4 +49,6 @@ void comando_change_cost(int x, int y, int v, int raggio);
 void comando_air_route(int x1, int y1, int x2, int y2);
 void comando_travel_cost(int x1, int y1, int x2, int y2);
 
-
+int main(){
+    return 0;
+}
