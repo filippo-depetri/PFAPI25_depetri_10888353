@@ -148,7 +148,6 @@ int main(){
         }
 
     }while(sc!=EOF);
-    free(mappa);
     fclose(f_in);
     return 0;
 }
