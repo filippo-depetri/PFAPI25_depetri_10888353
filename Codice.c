@@ -98,6 +98,6 @@ int main(){
             break;
         }
 
-    }while(fgets(comando, LUNGHEZZA_STR_COMANDO_MAX, f_in)!=EOF);
+    }while(sc!=EOF);
     return 0;
 }
