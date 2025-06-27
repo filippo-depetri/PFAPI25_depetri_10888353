@@ -26,7 +26,7 @@ Consegna:   Movhex è una compagnia di autotrasporti che dispone di una flotta d
 #include <stdint.h>
 
 //define
-//#define DEBUG
+#define DEBUG
 #define INIT "init"
 #define CAMBIO_COSTO "change_cost"
 #define ROTTA_AEREA "toggle_air_route"
@@ -34,7 +34,10 @@ Consegna:   Movhex è una compagnia di autotrasporti che dispone di una flotta d
 #define AFFERMATIVO "OK"
 #define FALSO "KO"
 #define NOT_VALID_COST -1
+#define LUNGHEZZA_STR_COMANDO_MAX 16
 
+
+//strutture
 typedef union rottaar
 {
     u_int16_t x;
@@ -42,7 +45,6 @@ typedef union rottaar
 }rottaar_t;
 
 
-//strutture
 typedef struct esagono
 {
     int costo;
@@ -56,5 +58,13 @@ void comando_air_route(int x1, int y1, int x2, int y2);
 void comando_travel_cost(int x1, int y1, int x2, int y2);
 
 int main(){
+    //PREPARATIVI
+    char comando[LUNGHEZZA_STR_COMANDO_MAX+1];
+    FILE *f_in;
+    f_in=stdin;
+    #ifdef DEBUG
+    fprintf(f_in, stdout);
+    #endif
+    //FINE PREPARATIVI
     return 0;
 }
