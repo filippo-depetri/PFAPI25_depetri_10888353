@@ -59,12 +59,28 @@ void comando_travel_cost(int x1, int y1, int x2, int y2);
 
 int main(){
     //PREPARATIVI
-    char comando[LUNGHEZZA_STR_COMANDO_MAX+1];
+    char comando[LUNGHEZZA_STR_COMANDO_MAX];
+    u_int16_t col;
+    u_int16_t rig;
     FILE *f_in;
     f_in=stdin;
     #ifdef DEBUG
-    fprintf(f_in, stdout);
+    fprintf(stdout, f_in);
     #endif
     //FINE PREPARATIVI
+    do{
+        fscanf(f_in, "%s", &comando);
+        switch (comando[0])
+        {
+        case 105:
+            
+            comando_init(atoi(), atoi());
+            break;
+        
+        default:
+            break;
+        }
+
+    }while(fgets(comando, LUNGHEZZA_STR_COMANDO_MAX, f_in)!=EOF);
     return 0;
 }
