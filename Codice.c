@@ -80,7 +80,7 @@ int main(){
     //allocazione
     sc=fscanf(f_in, "%s", &comando);
     if(sc==EOF){
-        return 0;
+        return -1;
     }
     else{
         ptr_map=alloca_mappa(f_in, comando);
