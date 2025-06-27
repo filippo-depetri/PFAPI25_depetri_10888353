@@ -27,10 +27,10 @@ Consegna:   Movhex è una compagnia di autotrasporti che dispone di una flotta d
 
 //define
 #define DEBUG
-#define INIT "init"
-#define CAMBIO_COSTO "change_cost"
-#define ROTTA_AEREA "toggle_air_route"
-#define COSTO_VIAGGIO "travel_cost"
+#define INIT 'i'
+#define CAMBIO_COSTO 'c'
+#define ROTTA_AEREA "to"
+#define COSTO_VIAGGIO 't'
 #define AFFERMATIVO "OK"
 #define FALSO "KO"
 #define NOT_VALID_COST -1
@@ -38,17 +38,28 @@ Consegna:   Movhex è una compagnia di autotrasporti che dispone di una flotta d
 
 
 //strutture
-typedef union rottaar
+typedef struct rottaar
 {
     u_int16_t x;
     u_int16_t y;
 }rottaar_t;
 
+struct generale_comandi
+{
+    u_int16_t colx;
+    u_int16_t rigx;
+    u_int16_t coly;
+    u_int16_t rigy;
+    u_int16_t v;
+    u_int16_t raggio;
+} gen_comandi;
+
+
 
 typedef struct esagono
 {
     int costo;
-    rottaar_t rotta_ar[5][5];
+    rottaar_t rotta_ar[5];
     u_int8_t already_visited;
 }esagono_t;
 
@@ -60,8 +71,7 @@ void comando_travel_cost(int x1, int y1, int x2, int y2);
 int main(){
     //PREPARATIVI
     char comando[LUNGHEZZA_STR_COMANDO_MAX];
-    u_int16_t col;
-    u_int16_t rig;
+    int sc;
     FILE *f_in;
     f_in=stdin;
     #ifdef DEBUG
@@ -69,14 +79,21 @@ int main(){
     #endif
     //FINE PREPARATIVI
     do{
-        fscanf(f_in, "%s", &comando);
+        sc=fscanf(f_in, "%s", &comando);
         switch (comando[0])
         {
-        case 105:
-            
-            comando_init(atoi(), atoi());
+        case INIT:
+            sc=fscanf(f_in, "%d", &gen_comandi.colx);
+            sc=fscanf(f_in, "%d", &gen_comandi.rigx);
+            comando_init(gen_comandi.colx, gen_comandi.rigx);
             break;
-        
+        case CAMBIO_COSTO:
+            sc=fscanf(f_in, "%d", &gen_comandi.colx);
+            sc=fscanf(f_in, "%d", &gen_comandi.rigx);
+            sc=fscanf(f_in, "%d", &gen_comandi.v);
+            sc=fscanf(f_in, "%d", &gen_comandi.raggio);
+            comando_change_cost(gen_comandi.colx, gen_comandi.rigx, gen_comandi.v, gen_comandi.raggio);
+            break;
         default:
             break;
         }
