@@ -23,6 +23,7 @@ Consegna:   Movhex è una compagnia di autotrasporti che dispone di una flotta d
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 
 //define
 //#define DEBUG
@@ -34,12 +35,14 @@ Consegna:   Movhex è una compagnia di autotrasporti che dispone di una flotta d
 #define FALSO "KO"
 #define NOT_VALID_COST -1
 
+typedef u_int8_t bool;
+
 //strutture
 typedef struct esagono
 {
     int costo;
     int rotta_ar[5];
-    int collegamenti[6];
+    bool already_visited;
 }esagono_t;
 
 void comando_init(int col, int rig);
