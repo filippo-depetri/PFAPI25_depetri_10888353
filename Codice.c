@@ -35,14 +35,19 @@ Consegna:   Movhex è una compagnia di autotrasporti che dispone di una flotta d
 #define FALSO "KO"
 #define NOT_VALID_COST -1
 
-typedef u_int8_t bool;
+typedef union rottaar
+{
+    u_int16_t x;
+    u_int16_t y;
+}rottaar_t;
+
 
 //strutture
 typedef struct esagono
 {
     int costo;
-    int rotta_ar[5];
-    bool already_visited;
+    rottaar_t rotta_ar[5][5];
+    u_int8_t already_visited;
 }esagono_t;
 
 void comando_init(int col, int rig);
