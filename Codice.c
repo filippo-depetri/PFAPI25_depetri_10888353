@@ -54,8 +54,6 @@ struct generale_comandi
     u_int16_t raggio;
 } gen_comandi;
 
-
-
 typedef struct esagono
 {
     int costo;
@@ -63,19 +61,33 @@ typedef struct esagono
     u_int8_t already_visited;
 }esagono_t;
 
-void comando_init(int col, int rig);
-void comando_change_cost(int x, int y, int v, int raggio);
-void comando_air_route(int x1, int y1, int x2, int y2);
-void comando_travel_cost(int x1, int y1, int x2, int y2);
+void comando_init(esagono_t* mappa, int col, int rig);
+void comando_change_cost(esagono_t* mappa, int x, int y, int v, int raggio);
+void comando_air_route(esagono_t* mappa, int x1, int y1, int x2, int y2);
+void comando_travel_cost(esagono_t* mappa, int x1, int y1, int x2, int y2);
+int alloca_mappa(FILE *f_input, char comando[LUNGHEZZA_STR_COMANDO_MAX]);
 
 int main(){
     //PREPARATIVI
     char comando[LUNGHEZZA_STR_COMANDO_MAX];
     int sc;
+    int ptr_map;
     FILE *f_in;
     f_in=stdin;
     #ifdef DEBUG
     fprintf(stdout, f_in);
+    #endif
+    //allocazione
+    sc=fscanf(f_in, "%s", &comando);
+    if(sc==EOF){
+        return 0;
+    }
+    else{
+        ptr_map=alloca_mappa(f_in, comando);
+    }
+    //fine allocazione
+    #ifdef DEBUG
+    printf("INIT0\n");
     #endif
     //FINE PREPARATIVI
     do{
@@ -83,16 +95,20 @@ int main(){
         switch (comando[0])
         {
         case INIT:
-            sc=fscanf(f_in, "%d", &gen_comandi.colx);
-            sc=fscanf(f_in, "%d", &gen_comandi.rigx);
-            comando_init(gen_comandi.colx, gen_comandi.rigx);
+            ptr_map=alloca_mappa;
+            #ifdef DEBUG
+            printf("INIT\n");
+            #endif
             break;
         case CAMBIO_COSTO:
             sc=fscanf(f_in, "%d", &gen_comandi.colx);
             sc=fscanf(f_in, "%d", &gen_comandi.rigx);
             sc=fscanf(f_in, "%d", &gen_comandi.v);
             sc=fscanf(f_in, "%d", &gen_comandi.raggio);
-            comando_change_cost(gen_comandi.colx, gen_comandi.rigx, gen_comandi.v, gen_comandi.raggio);
+            comando_change_cost(ptr_map, gen_comandi.colx, gen_comandi.rigx, gen_comandi.v, gen_comandi.raggio);
+            #ifdef DEBUG
+            printf("CHANGE_COST\n");
+            #endif
             break;
         case COSTO_VIAGGIO:
             if(comando[1]==ROTTA_AEREA){
@@ -100,14 +116,20 @@ int main(){
                 sc=fscanf(f_in, "%d", &gen_comandi.rigx);
                 sc=fscanf(f_in, "%d", &gen_comandi.coly);
                 sc=fscanf(f_in, "%d", &gen_comandi.rigy);
-                comando_air_route(gen_comandi.colx, gen_comandi.rigx,gen_comandi.coly, gen_comandi.rigy);
+                comando_air_route(ptr_map, gen_comandi.colx, gen_comandi.rigx,gen_comandi.coly, gen_comandi.rigy);
+                #ifdef DEBUG
+                printf("AIR_ROUTE\n");
+                #endif
             }
             else{
                 sc=fscanf(f_in, "%d", &gen_comandi.colx);
                 sc=fscanf(f_in, "%d", &gen_comandi.rigx);
                 sc=fscanf(f_in, "%d", &gen_comandi.coly);
                 sc=fscanf(f_in, "%d", &gen_comandi.rigy);
-                comando_travel_cost(gen_comandi.colx, gen_comandi.rigx,gen_comandi.coly, gen_comandi.rigy);
+                comando_travel_cost(ptr_map, gen_comandi.colx, gen_comandi.rigx,gen_comandi.coly, gen_comandi.rigy);
+                #ifdef DEBUG
+                printf("TRAVEL\n");
+                #endif
             }
             break;
 
@@ -116,5 +138,15 @@ int main(){
         }
 
     }while(sc!=EOF);
+    fclose(f_in);
     return 0;
+}
+
+int alloca_mappa(FILE* f_input, char comando[LUNGHEZZA_STR_COMANDO_MAX]){
+    int sc;
+    sc=fscanf(f_input, "%d", &gen_comandi.colx);
+    sc=fscanf(f_input, "%d", &gen_comandi.rigx);
+    esagono_t mappa[gen_comandi.rigx][gen_comandi.colx];
+    comando_init(mappa, gen_comandi.colx, gen_comandi.rigx);
+    return (&mappa);
 }
