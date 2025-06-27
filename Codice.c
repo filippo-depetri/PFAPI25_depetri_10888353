@@ -53,6 +53,12 @@ struct generale_comandi
     u_int16_t v;
     u_int16_t raggio;
 } gen_comandi;
+struct dimensioni_mappa
+{
+    u_int16_t dimx;     //dim righe
+    u_int16_t dimy;     //dim colonne
+}dim_mappa;
+
 
 typedef struct esagono
 {
@@ -144,9 +150,9 @@ int main(){
 
 int alloca_mappa(FILE* f_input, char comando[LUNGHEZZA_STR_COMANDO_MAX]){
     int sc;
-    sc=fscanf(f_input, "%d", &gen_comandi.colx);
-    sc=fscanf(f_input, "%d", &gen_comandi.rigx);
-    esagono_t mappa[gen_comandi.rigx][gen_comandi.colx];
-    comando_init(mappa, gen_comandi.colx, gen_comandi.rigx);
+    sc=fscanf(f_input, "%d", &dim_mappa.dimx);
+    sc=fscanf(f_input, "%d", &dim_mappa.dimy);
+    esagono_t mappa[dim_mappa.dimx][dim_mappa.dimy];
+    comando_init(mappa, dim_mappa.dimx, dim_mappa.dimy);
     return (&mappa);
 }
