@@ -71,7 +71,6 @@ void comando_init(esagono_t* mappa, int col, int rig);
 void comando_change_cost(esagono_t* mappa, int x, int y, int v, int raggio);
 void comando_air_route(esagono_t* mappa, int x1, int y1, int x2, int y2);
 void comando_travel_cost(esagono_t* mappa, int x1, int y1, int x2, int y2);
-int alloca_mappa(FILE *f_input, char comando[LUNGHEZZA_STR_COMANDO_MAX]);
 
 int main(){
     //PREPARATIVI
@@ -80,85 +79,77 @@ int main(){
         int sc;
         FILE *f_in;
         f_in=stdin;
+        u_int16_t inizializzata=0;
     //fine variabili gestione comandi
-    int ptr_map;    //punta alla mappa esagonale
     #ifdef DEBUG
     fprintf(stdout, f_in);
     #endif
     //allocazione
         sc=fscanf(f_in, "%s", &comando);
-        if(sc==EOF){
+        if (sc==EOF || comando[0]!=INIT)
+        {
             return -1;
         }
-        else{
-            ptr_map=alloca_mappa(f_in, comando);
-        }
+        sc=fscanf(f_in, "%d", &dim_mappa.dimx);
+        sc=fscanf(f_in, "%d", &dim_mappa.dimy);
+        esagono_t mappa[dim_mappa.dimx][dim_mappa.dimy];
+        comando_init(mappa, dim_mappa.dimx, dim_mappa.dimy);
+        #ifdef DEBUG
+        printf("INIT\n");
+        #endif
     //fine allocazione
-    #ifdef DEBUG
-    printf("INIT0\n");
-    #endif
     //FINE PREPARATIVI
     //COMANDI DOPO LA PRIMA INIZIALIZZAZIONE
     do{
         sc=fscanf(f_in, "%s", &comando);
-        switch (comando[0])
-        {
-        case INIT:
-            free(ptr_map);      //se arrivo qui ho già fatto la prima inizializzazione quindi la libero per poterne creare una nuova
-            ptr_map=alloca_mappa;
+       if(comando[0]==INIT){
+            sc=fscanf(f_in, "%d", &dim_mappa.dimx);
+            sc=fscanf(f_in, "%d", &dim_mappa.dimy);
+            esagono_t mappa[dim_mappa.dimx][dim_mappa.dimy];
+            comando_init(mappa, dim_mappa.dimx, dim_mappa.dimy);
+            inizializzata++;
             #ifdef DEBUG
             printf("INIT\n");
             #endif
-            break;
-        case CAMBIO_COSTO:
+        }
+        else {
+            if(comando[0]==CAMBIO_COSTO) {
             sc=fscanf(f_in, "%d", &gen_comandi.colx);
             sc=fscanf(f_in, "%d", &gen_comandi.rigx);
             sc=fscanf(f_in, "%d", &gen_comandi.v);
             sc=fscanf(f_in, "%d", &gen_comandi.raggio);
-            comando_change_cost(ptr_map, gen_comandi.colx, gen_comandi.rigx, gen_comandi.v, gen_comandi.raggio);
+            comando_change_cost(mappa, gen_comandi.colx, gen_comandi.rigx, gen_comandi.v, gen_comandi.raggio);
             #ifdef DEBUG
             printf("CHANGE_COST\n");
             #endif
-            break;
-        case COSTO_VIAGGIO:
-            if(comando[1]==ROTTA_AEREA){
-                sc=fscanf(f_in, "%d", &gen_comandi.colx);
-                sc=fscanf(f_in, "%d", &gen_comandi.rigx);
-                sc=fscanf(f_in, "%d", &gen_comandi.coly);
-                sc=fscanf(f_in, "%d", &gen_comandi.rigy);
-                comando_air_route(ptr_map, gen_comandi.colx, gen_comandi.rigx,gen_comandi.coly, gen_comandi.rigy);
-                #ifdef DEBUG
-                printf("AIR_ROUTE\n");
-                #endif
             }
             else{
-                sc=fscanf(f_in, "%d", &gen_comandi.colx);
-                sc=fscanf(f_in, "%d", &gen_comandi.rigx);
-                sc=fscanf(f_in, "%d", &gen_comandi.coly);
-                sc=fscanf(f_in, "%d", &gen_comandi.rigy);
-                comando_travel_cost(ptr_map, gen_comandi.colx, gen_comandi.rigx,gen_comandi.coly, gen_comandi.rigy);
-                #ifdef DEBUG
-                printf("TRAVEL\n");
-                #endif
+                if(comando[1]==ROTTA_AEREA){
+                    sc=fscanf(f_in, "%d", &gen_comandi.colx);
+                    sc=fscanf(f_in, "%d", &gen_comandi.rigx);
+                    sc=fscanf(f_in, "%d", &gen_comandi.coly);
+                    sc=fscanf(f_in, "%d", &gen_comandi.rigy);
+                    comando_air_route(mappa, gen_comandi.colx, gen_comandi.rigx,gen_comandi.coly, gen_comandi.rigy);
+                    #ifdef DEBUG
+                    printf("AIR_ROUTE\n");
+                    #endif
+                }
+                else{
+                    sc=fscanf(f_in, "%d", &gen_comandi.colx);
+                    sc=fscanf(f_in, "%d", &gen_comandi.rigx);
+                    sc=fscanf(f_in, "%d", &gen_comandi.coly);
+                    sc=fscanf(f_in, "%d", &gen_comandi.rigy);
+                    comando_travel_cost(mappa, gen_comandi.colx, gen_comandi.rigx,gen_comandi.coly, gen_comandi.rigy);
+                    #ifdef DEBUG
+                    printf("TRAVEL\n");
+                    #endif
+                }
             }
-            break;
-
-        default:
-            break;
         }
 
     }while(sc!=EOF);
-    free(ptr_map);
+    free(mappa);
     fclose(f_in);
     return 0;
 }
 
-//funzione per allocazione mappa iniziale e successiva inizializzazione
-int alloca_mappa(FILE* f_input, char comando[LUNGHEZZA_STR_COMANDO_MAX]){
-    int sc;
-    sc=fscanf(f_input, "%d", &dim_mappa.dimx);
-    sc=fscanf(f_input, "%d", &dim_mappa.dimy);
-    esagono_t mappa[dim_mappa.dimx][dim_mappa.dimy];
-    comando_init(mappa, dim_mappa.dimx, dim_mappa.dimy);
-    return (&mappa);
-}
