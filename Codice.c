@@ -52,7 +52,7 @@ struct generale_comandi
     u_int16_t rigy;
     u_int16_t v;
     u_int16_t raggio;
-} gen_comandi;
+}gen_comandi;
 struct dimensioni_mappa
 {
     u_int16_t dimx;     //dim righe
@@ -75,32 +75,36 @@ int alloca_mappa(FILE *f_input, char comando[LUNGHEZZA_STR_COMANDO_MAX]);
 
 int main(){
     //PREPARATIVI
-    char comando[LUNGHEZZA_STR_COMANDO_MAX];
-    int sc;
-    int ptr_map;
-    FILE *f_in;
-    f_in=stdin;
+    //variabili per gestione comandi
+        char comando[LUNGHEZZA_STR_COMANDO_MAX];
+        int sc;
+        FILE *f_in;
+        f_in=stdin;
+    //fine variabili gestione comandi
+    int ptr_map;    //punta alla mappa esagonale
     #ifdef DEBUG
     fprintf(stdout, f_in);
     #endif
     //allocazione
-    sc=fscanf(f_in, "%s", &comando);
-    if(sc==EOF){
-        return -1;
-    }
-    else{
-        ptr_map=alloca_mappa(f_in, comando);
-    }
+        sc=fscanf(f_in, "%s", &comando);
+        if(sc==EOF){
+            return -1;
+        }
+        else{
+            ptr_map=alloca_mappa(f_in, comando);
+        }
     //fine allocazione
     #ifdef DEBUG
     printf("INIT0\n");
     #endif
     //FINE PREPARATIVI
+    //COMANDI DOPO LA PRIMA INIZIALIZZAZIONE
     do{
         sc=fscanf(f_in, "%s", &comando);
         switch (comando[0])
         {
         case INIT:
+            free(ptr_map);      //se arrivo qui ho già fatto la prima inizializzazione quindi la libero per poterne creare una nuova
             ptr_map=alloca_mappa;
             #ifdef DEBUG
             printf("INIT\n");
@@ -144,10 +148,12 @@ int main(){
         }
 
     }while(sc!=EOF);
+    free(ptr_map);
     fclose(f_in);
     return 0;
 }
 
+//funzione per allocazione mappa iniziale e successiva inizializzazione
 int alloca_mappa(FILE* f_input, char comando[LUNGHEZZA_STR_COMANDO_MAX]){
     int sc;
     sc=fscanf(f_input, "%d", &dim_mappa.dimx);
