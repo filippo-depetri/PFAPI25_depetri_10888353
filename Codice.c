@@ -29,7 +29,7 @@ Consegna:   Movhex è una compagnia di autotrasporti che dispone di una flotta d
 #define DEBUG
 #define INIT 'i'
 #define CAMBIO_COSTO 'c'
-#define ROTTA_AEREA "to"
+#define ROTTA_AEREA "o"
 #define COSTO_VIAGGIO 't'
 #define AFFERMATIVO "OK"
 #define FALSO "KO"
@@ -94,6 +94,23 @@ int main(){
             sc=fscanf(f_in, "%d", &gen_comandi.raggio);
             comando_change_cost(gen_comandi.colx, gen_comandi.rigx, gen_comandi.v, gen_comandi.raggio);
             break;
+        case COSTO_VIAGGIO:
+            if(comando[1]==ROTTA_AEREA){
+                sc=fscanf(f_in, "%d", &gen_comandi.colx);
+                sc=fscanf(f_in, "%d", &gen_comandi.rigx);
+                sc=fscanf(f_in, "%d", &gen_comandi.coly);
+                sc=fscanf(f_in, "%d", &gen_comandi.rigy);
+                comando_air_route(gen_comandi.colx, gen_comandi.rigx,gen_comandi.coly, gen_comandi.rigy);
+            }
+            else{
+                sc=fscanf(f_in, "%d", &gen_comandi.colx);
+                sc=fscanf(f_in, "%d", &gen_comandi.rigx);
+                sc=fscanf(f_in, "%d", &gen_comandi.coly);
+                sc=fscanf(f_in, "%d", &gen_comandi.rigy);
+                comando_travel_cost(gen_comandi.colx, gen_comandi.rigx,gen_comandi.coly, gen_comandi.rigy);
+            }
+            break;
+
         default:
             break;
         }
