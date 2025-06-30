@@ -82,7 +82,7 @@ int main(){
         f_out=stdout;
     //fine variabili gestione comandi
     #ifdef DEBUG
-    fprintf(stdout, f_in);
+    fprintf(f_out, f_in);
     #endif
     //allocazione
         sc=fscanf(f_in, "%s", &comando);
@@ -95,7 +95,7 @@ int main(){
         esagono_t mappa[dim_mappa.dimx][dim_mappa.dimy];
         comando_init(mappa, dim_mappa.dimx, dim_mappa.dimy);
         #ifdef DEBUG
-        printf("INIT\n");
+        printf("INIT0\n");
         #endif
     //fine allocazione
     //FINE PREPARATIVI
@@ -148,6 +148,7 @@ int main(){
 
     }while(sc!=EOF);
     fclose(f_in);
+    fclose(f_out);
     return 0;
 }
 
