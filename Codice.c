@@ -82,7 +82,12 @@ int main(){
         f_out=stdout;
     //fine variabili gestione comandi
     #ifdef DEBUG
-    fprintf(f_out, f_in);
+    int ssc;
+    char c;
+    do{
+        fscanf(f_in, "%c", &c);
+        fprintf(f_out, "%c", c);
+    }while(ssc!=EOF);
     #endif
     //allocazione
         sc=fscanf(f_in, "%s", &comando);
