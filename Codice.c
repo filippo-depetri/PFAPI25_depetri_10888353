@@ -67,10 +67,10 @@ typedef struct esagono
     u_int8_t already_visited;
 }esagono_t;
 
-void comando_init(esagono_t *mappa[dim_mappa.dimx][dim_mappa.dimy], int col, int rig);
-void comando_change_cost(esagono_t *mappa[dim_mappa.dimx][dim_mappa.dimy], int x, int y, int v, int raggio);
-void comando_air_route(esagono_t *mappa[dim_mappa.dimx][dim_mappa.dimy], int x1, int y1, int x2, int y2);
-void comando_travel_cost(esagono_t *mappa[dim_mappa.dimx][dim_mappa.dimy], int x1, int y1, int x2, int y2);
+void comando_init(esagono_t mappa[dim_mappa.dimx][dim_mappa.dimy], int col, int rig);
+void comando_change_cost(esagono_t mappa[dim_mappa.dimx][dim_mappa.dimy], int x, int y, int v, int raggio);
+void comando_air_route(esagono_t mappa[dim_mappa.dimx][dim_mappa.dimy], int x1, int y1, int x2, int y2);
+void comando_travel_cost(esagono_t mappa[dim_mappa.dimx][dim_mappa.dimy], int x1, int y1, int x2, int y2);
 
 int main(){
     //PREPARATIVI
