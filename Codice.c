@@ -77,9 +77,9 @@ int main(){
     //variabili per gestione comandi
         char comando[LUNGHEZZA_STR_COMANDO_MAX];
         int sc;
-        FILE *f_in;
+        FILE *f_in, *f_out;
         f_in=stdin;
-        u_int16_t inizializzata=0;
+        f_out=stdout;
     //fine variabili gestione comandi
     #ifdef DEBUG
     fprintf(stdout, f_in);
@@ -107,7 +107,6 @@ int main(){
             sc=fscanf(f_in, "%d", &dim_mappa.dimy);
             esagono_t mappa[dim_mappa.dimx][dim_mappa.dimy];
             comando_init(mappa, dim_mappa.dimx, dim_mappa.dimy);
-            inizializzata++;
             #ifdef DEBUG
             printf("INIT\n");
             #endif
