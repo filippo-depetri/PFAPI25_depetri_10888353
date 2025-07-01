@@ -205,6 +205,12 @@ void comando_air_route(esagono_t mappa[dim_mappa.dimx][dim_mappa.dimy], int x1, 
     u_int8_t cancellazione=0;
     u_int16_t mediapercosto=0;
     u_int8_t count=1;
+    if (x1>=dim_mappa.dimx || x1<0 || x2>=dim_mappa.dimx || x2<0 || y1>=dim_mappa.dimy || y1<0 || y2>=dim_mappa.dimy || y2<0)
+    {
+        fprintf(output, "%s", FALSO);
+        return;
+    }
+    
     if (mappa[x1][y1].costo!=0 || mappa[x2][y2].costo!=0)
     {
         for(int i=0; i<MAX_ROTTE_AR; i++){
