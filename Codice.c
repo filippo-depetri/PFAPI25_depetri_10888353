@@ -37,7 +37,7 @@ Consegna:   Movhex è una compagnia di autotrasporti che dispone di una flotta d
 #define NOT_VALID_COST 0
 #define LUNGHEZZA_STR_COMANDO_MAX 16
 #define MAX_ROTTE_AR 5
-#define NOT_VALID NULL
+#define NOT_VALID -2
 
 
 //strutture
@@ -231,7 +231,7 @@ void comando_air_route(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *
     {  
         for (int i = 0; i < MAX_ROTTE_AR; i++)
         {
-            if (mappa[x1][y1].rotta_ar[i].x!=NULL && mappa[x1][y1].rotta_ar[i].y!=NULL)
+            if (mappa[x1][y1].rotta_ar[i].x!=NOT_VALID && mappa[x1][y1].rotta_ar[i].y!=NOT_VALID)
             {
                 nrotte++;
             }
