@@ -112,10 +112,10 @@ int main(){
         }
         else {
             if(comando[0]==CAMBIO_COSTO) {
-            sc=fscanf(f_in, "%hd", &gen_comandi.colx);
-            sc=fscanf(f_in, "%hd", &gen_comandi.rigx);
-            sc=fscanf(f_in, "%hd", &gen_comandi.v);
-            sc=fscanf(f_in, "%hd", &gen_comandi.raggio);
+            sc=fscanf(f_in, "%d", &gen_comandi.colx);
+            sc=fscanf(f_in, "%d", &gen_comandi.rigx);
+            sc=fscanf(f_in, "%d", &gen_comandi.v);
+            sc=fscanf(f_in, "%d", &gen_comandi.raggio);
             comando_change_cost(mappa, gen_comandi.colx, gen_comandi.rigx, gen_comandi.v, gen_comandi.raggio, f_out);
             #ifdef DEBUG
             printf("CHANGE_COST\n");
@@ -123,20 +123,20 @@ int main(){
             }
             else{
                 if(comando[1]==ROTTA_AEREA){
-                    sc=fscanf(f_in, "%hd", &gen_comandi.colx);
-                    sc=fscanf(f_in, "%hd", &gen_comandi.rigx);
-                    sc=fscanf(f_in, "%hd", &gen_comandi.coly);
-                    sc=fscanf(f_in, "%hd", &gen_comandi.rigy);
+                    sc=fscanf(f_in, "%d", &gen_comandi.colx);
+                    sc=fscanf(f_in, "%d", &gen_comandi.rigx);
+                    sc=fscanf(f_in, "%d", &gen_comandi.coly);
+                    sc=fscanf(f_in, "%d", &gen_comandi.rigy);
                     comando_air_route(mappa, gen_comandi.colx, gen_comandi.rigx,gen_comandi.coly, gen_comandi.rigy, f_out);
                     #ifdef DEBUG
                     printf("AIR_ROUTE\n");
                     #endif
                 }
                 else{
-                    sc=fscanf(f_in, "%hd", &gen_comandi.colx);
-                    sc=fscanf(f_in, "%hd", &gen_comandi.rigx);
-                    sc=fscanf(f_in, "%hd", &gen_comandi.coly);
-                    sc=fscanf(f_in, "%hd", &gen_comandi.rigy);
+                    sc=fscanf(f_in, "%d", &gen_comandi.colx);
+                    sc=fscanf(f_in, "%d", &gen_comandi.rigx);
+                    sc=fscanf(f_in, "%d", &gen_comandi.coly);
+                    sc=fscanf(f_in, "%d", &gen_comandi.rigy);
                     comando_travel_cost(mappa, gen_comandi.colx, gen_comandi.rigx,gen_comandi.coly, gen_comandi.rigy, f_out);
                     #ifdef DEBUG
                     printf("TRAVEL\n");
