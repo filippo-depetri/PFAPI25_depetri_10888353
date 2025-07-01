@@ -85,8 +85,8 @@ int main(){
         FILE *f_in, *f_out;
         f_in=stdin;
         f_out=stdout;
-        esagono_t **mappa;
-        int i=0;
+        esagono_t **mappa=NULL;
+        u_int16_t i;
     //fine variabili gestione comandi
     #ifdef DEBUGTEST
     int ssc;
@@ -105,6 +105,7 @@ int main(){
             sc=fscanf(f_in, "%hd", &dim_mappa.dimy);
             sc=fscanf(f_in, "%hd", &dim_mappa.dimx);
             mappa=malloc(dim_mappa.dimx*sizeof(esagono_t *));
+            i=0;
             while (i<dim_mappa.dimx)
             {
                 mappa[i]=malloc(dim_mappa.dimy*sizeof(esagono_t));
@@ -164,7 +165,7 @@ void comando_init(esagono_t** mappa, FILE *output){
         for (int j = 0; j < dim_mappa.dimy; j++)
         {
             mappa[i][j].costo=1;
-            for (int k = 0; i < MAX_ROTTE_AR; i++)
+            for (int k = 0; k < MAX_ROTTE_AR; i++)
             {
                 mappa[i][j].rotta_ar[k].costo=NOT_VALID_COST;       //inizializzo vettori rotte aeree
                 mappa[i][j].rotta_ar[k].x=NOT_VALID_COST;
