@@ -240,11 +240,6 @@ void comando_air_route(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *
             {
                 nrotte2++;
             }
-            if (nrotte==MAX_ROTTE_AR || nrotte2==MAX_ROTTE_AR)
-            {
-                fprintf(output, "%s", FALSO);
-                return;
-            }
         }
         if (mappa[x1][y1].rotta_ar[nrotte].x==x2 && mappa[x1][y1].rotta_ar[nrotte].y==y2) 
         {
@@ -259,10 +254,17 @@ void comando_air_route(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *
             mappa[x2][y2].rotta_ar[nrotte2].x=NOT_VALID;
             mappa[x2][y2].rotta_ar[nrotte2].y=NOT_VALID;
             cancellazione++;
+            nrotte--;
+            nrotte2--;
             fprintf(output, "%s", AFFERMATIVO);
         }
         if (cancellazione==0)
         {
+            if (nrotte==MAX_ROTTE_AR || nrotte2==MAX_ROTTE_AR)
+            {
+                fprintf(output, "%s", FALSO);
+                return;
+            }
             for (int j = 0; j < MAX_ROTTE_AR; j++)          //calcolo costo rotta aerea
             {
                 if (mappa[x1][y1].rotta_ar[j].costo!=NOT_VALID)
