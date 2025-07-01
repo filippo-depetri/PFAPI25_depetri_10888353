@@ -292,5 +292,3 @@ void comando_air_route(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *
 void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *output){
 
 }
-
-//da cambiare allocazione mappa perchè l'init non si rialloca: rifarlo con le malloc
