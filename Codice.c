@@ -98,7 +98,6 @@ int main(){
     }while(ssc!=EOF);
     #endif
     //FINE PREPARATIVI
-    //COMANDI DOPO LA PRIMA INIZIALIZZAZIONE
     do{
         sc=fscanf(f_in, "%s", &comando);
        if(comando[0]==INIT){
