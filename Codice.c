@@ -255,12 +255,16 @@ void comando_air_route(esagono_t mappa[dim_mappa.dimx][dim_mappa.dimy], int x1, 
             #ifdef DEBUG
             fprintf(output, "%d %d %d %d", x1, y1, x2, y2);
             #endif
-            
+
         }
         
     }
     else {
         fprintf(output, "%s", FALSO);
     }
+    
+}
+
+void comando_travel_cost(esagono_t mappa[dim_mappa.dimx][dim_mappa.dimy], int x1, int y1, int x2, int y2, FILE *output){
     
 }
