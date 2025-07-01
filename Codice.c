@@ -49,12 +49,12 @@ typedef struct rottaar
 
 struct generale_comandi
 {
-    u_int16_t colx;
-    u_int16_t rigx;
-    u_int16_t coly;
-    u_int16_t rigy;
-    u_int16_t v;
-    u_int16_t raggio;
+    int colx;
+    int rigx;
+    int coly;
+    int rigy;
+    int v;
+    int raggio;
 }gen_comandi;
 struct dimensioni_mappa
 {
