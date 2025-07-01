@@ -34,9 +34,10 @@ Consegna:   Movhex è una compagnia di autotrasporti che dispone di una flotta d
 #define COSTO_VIAGGIO 't'
 #define AFFERMATIVO "OK"
 #define FALSO "KO"
-#define NOT_VALID_COST -1
+#define NOT_VALID_COST 0
 #define LUNGHEZZA_STR_COMANDO_MAX 16
 #define MAX_ROTTE_AR 5
+#define NOT_VALID NULL
 
 
 //strutture
@@ -75,7 +76,7 @@ void comando_init(esagono_t **mappa, FILE *output);
 void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FILE *output);
 void comando_air_route(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *output);
 void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *output);
-void alloca_mappa(esagono_t ***ptr_map);
+void alloca_mappa(esagono_t **mappa);
 void libera_mappa(esagono_t **mappa);
 
 int main(){
@@ -87,7 +88,6 @@ int main(){
         f_in=stdin;
         f_out=stdout;
         esagono_t **mappa=NULL;
-        esagono_t ***ptr_map=&mappa;
     //fine variabili gestione comandi
     #ifdef DEBUGTEST
     int ssc;
@@ -104,7 +104,7 @@ int main(){
             libera_mappa(mappa);
             sc=fscanf(f_in, "%hd", &dim_mappa.dimy);
             sc=fscanf(f_in, "%hd", &dim_mappa.dimx);
-            alloca_mappa(ptr_map);
+            alloca_mappa(mappa);
             comando_init(mappa, f_out);
             #ifdef DEBUG
             printf("INIT\n");
@@ -153,11 +153,11 @@ int main(){
 }
 
 //alloca mappa
-void alloca_mappa(esagono_t ***ptr_map){
-        (*ptr_map)=malloc(dim_mappa.dimx * sizeof(esagono_t *));
+void alloca_mappa(esagono_t **mappa){
+        mappa=malloc(dim_mappa.dimx * sizeof(esagono_t *));
         for (int i = 0; i < dim_mappa.dimx; i++)
         {
-            (*ptr_map)[i]=malloc(dim_mappa.dimy * sizeof(esagono_t));
+            mappa[i]=malloc(dim_mappa.dimy * sizeof(esagono_t));
         }
 }
 void libera_mappa(esagono_t **mappa){
@@ -185,9 +185,9 @@ void comando_init(esagono_t **mappa, FILE *output){
             mappa[i][j].costo=1;
             for (int k = 0; k < MAX_ROTTE_AR; k++)
             {
-                mappa[i][j].rotta_ar[k].costo=NOT_VALID_COST;       //inizializzo vettori rotte aeree
-                mappa[i][j].rotta_ar[k].x=NOT_VALID_COST;
-                mappa[i][j].rotta_ar[k].y=NOT_VALID_COST;
+                mappa[i][j].rotta_ar[k].costo=NOT_VALID;       //inizializzo vettori rotte aeree
+                mappa[i][j].rotta_ar[k].x=NOT_VALID;
+                mappa[i][j].rotta_ar[k].y=NOT_VALID;
                 #ifdef DEBUG
                 fprintf(output, "%d", mappa[i][j].rotta_ar[k].costo);
                 #endif
@@ -219,68 +219,86 @@ void comando_air_route(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *
     u_int8_t cancellazione=0;
     u_int16_t mediapercosto=0;
     u_int8_t count=1;
+    u_int8_t nrotte=0;
     if (x1>=dim_mappa.dimx || x1<0 || x2>=dim_mappa.dimx || x2<0 || y1>=dim_mappa.dimy || y1<0 || y2>=dim_mappa.dimy || y2<0)
     {
         fprintf(output, "%s", FALSO);
         return;
     }
     
-    if (mappa[x1][y1].costo!=0 || mappa[x2][y2].costo!=0)
-    {
-        for(int i=0; i<MAX_ROTTE_AR; i++){
-            if (mappa[x1][y1].rotta_ar[i].x==x2 && mappa[x1][y1].rotta_ar[i].y==y2)
-            {
-                #ifdef DEBUG
-                fprintf(output, "%d %d %d %d", x1, y1, x2, y2);
-                #endif
-
-                mappa[x1][y1].rotta_ar[i].costo=NOT_VALID_COST;       //cancello rotta aerea
-                mappa[x1][y1].rotta_ar[i].x=NOT_VALID_COST;
-                mappa[x1][y1].rotta_ar[i].y=NOT_VALID_COST;
-                mappa[x2][y2].rotta_ar[i].costo=NOT_VALID_COST;       //cancello rotta aerea
-                mappa[x2][y2].rotta_ar[i].x=NOT_VALID_COST;
-                mappa[x2][y2].rotta_ar[i].y=NOT_VALID_COST;
-                cancellazione++;
-                fprintf(output, "%s", AFFERMATIVO);
-            }
-            break;
-        }
-        if (cancellazione==0)
+    if (mappa[x1][y1].costo!=NOT_VALID_COST || mappa[x2][y2].costo!=NOT_VALID_COST)
+    {  
+        for (int i = 0; i < MAX_ROTTE_AR; i++)
         {
-            for (int i = 0; i < MAX_ROTTE_AR; i++)          //calcolo costo rotta aerea
+            if (mappa[x1][y1].rotta_ar[i].x!=NULL && mappa[x1][y1].rotta_ar[i].y!=NULL)
             {
-                if (mappa[x1][y1].rotta_ar[i].costo!=NOT_VALID_COST)
-                {
-                    count++;
-                    mediapercosto+=mappa[x1][y1].rotta_ar[i].costo;
-                }
-                
+                nrotte++;
             }
-            mediapercosto+=mappa[x1][y1].costo;
-            mediapercosto=mediapercosto/count;
-
-            #ifdef DEBUG
-            fprintf(output, "%d", mediapercosto);
-            #endif
-
-            for (int i = 0; i < MAX_ROTTE_AR; i++)
+            if (nrotte==MAX_ROTTE_AR)
             {
-                if (mappa[x1][y1].rotta_ar[i].costo==NOT_VALID_COST && mappa[x1][y1].rotta_ar[i].x==NOT_VALID_COST && mappa[x1][y1].rotta_ar[i].y==NOT_VALID_COST)
-                {
-                    mappa[x1][y1].rotta_ar[i].costo=mediapercosto;       //creo rotta aerea
-                    mappa[x1][y1].rotta_ar[i].x=x2;
-                    mappa[x1][y1].rotta_ar[i].y=y2;
-                }
-                
+                fprintf(output, "%s", FALSO);
             }
-            fprintf(output, "%s", AFFERMATIVO);
+            else{
+                if (mappa[x1][y1].rotta_ar[nrotte].x==x2 && mappa[x1][y1].rotta_ar[nrotte].y==y2) 
+                {
+                    #ifdef DEBUG
+                    fprintf(output, "%d %d %d %d", x1, y1, x2, y2);
+                    #endif
 
-            #ifdef DEBUG
-            fprintf(output, "%d %d %d %d", x1, y1, x2, y2);
-            #endif
+                    mappa[x1][y1].rotta_ar[nrotte].costo=NOT_VALID;       //cancello rotta aerea
+                    mappa[x1][y1].rotta_ar[nrotte].x=NOT_VALID;
+                    mappa[x1][y1].rotta_ar[nrotte].y=NOT_VALID;
+                    mappa[x2][y2].rotta_ar[nrotte].costo=NOT_VALID;       //cancello rotta aerea
+                    mappa[x2][y2].rotta_ar[nrotte].x=NOT_VALID;
+                    mappa[x2][y2].rotta_ar[nrotte].y=NOT_VALID;
+                    cancellazione++;
+                    fprintf(output, "%s", AFFERMATIVO);
+                }
+                if (cancellazione==0)
+                {
+                    for (int j = 0; j < MAX_ROTTE_AR; j++)          //calcolo costo rotta aerea
+                    {
+                        if (mappa[x1][y1].rotta_ar[j].costo!=NOT_VALID)
+                        {
+                            count++;
+                            mediapercosto+=mappa[x1][y1].rotta_ar[j].costo;
+                        }
+                
+                    }
+                    mediapercosto+=mappa[x1][y1].costo;
+                    mediapercosto=mediapercosto/count;
 
+                    #ifdef DEBUG
+                    fprintf(output, "%d", mediapercosto);
+                    #endif
+
+                    for (int j = 0; j < MAX_ROTTE_AR; j++)
+                        {
+                            if (mappa[x1][y1].rotta_ar[j].costo==NOT_VALID && mappa[x1][y1].rotta_ar[j].x==NOT_VALID && mappa[x1][y1].rotta_ar[j].y==NOT_VALID)
+                            {
+                                mappa[x1][y1].rotta_ar[j].costo=mediapercosto;       //creo rotta aerea
+                                mappa[x1][y1].rotta_ar[j].x=x2;
+                                mappa[x1][y1].rotta_ar[i].y=y2;
+                            }
+                            if (mappa[x2][y2].rotta_ar[j].costo==NOT_VALID && mappa[x2][y2].rotta_ar[j].x==NOT_VALID && mappa[x2][y2].rotta_ar[j].y==NOT_VALID)
+                            {
+                                mappa[x2][y2].rotta_ar[j].costo=mediapercosto;       //creo rotta aerea
+                                mappa[x2][y2].rotta_ar[j].x=x1;
+                                mappa[x2][y2].rotta_ar[i].y=y1;
+                            }
+                
+                        }
+                    fprintf(output, "%s", AFFERMATIVO);
+
+                    #ifdef DEBUG
+                    fprintf(output, "%d %d %d %d", x1, y1, x2, y2);
+                    #endif
+
+                }
+            }
+            
+            
         }
-        
     }
     else {
         fprintf(output, "%s", FALSO);
