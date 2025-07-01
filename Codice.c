@@ -207,6 +207,10 @@ void comando_air_route(esagono_t mappa[dim_mappa.dimx][dim_mappa.dimy], int x1, 
         for(int i=0; i<MAX_ROTTE_AR; i++){
             if (mappa[x1][y1].rotta_ar[i].x==x2 && mappa[x1][y1].rotta_ar[i].y==y2)
             {
+                #ifdef DEBUG
+                fprintf(output, "%d %d %d %d", x1, y1, x2, y2);
+                #endif
+
                 mappa[x1][y1].rotta_ar[i].costo=NOT_VALID_COST;       //cancello rotta aerea
                 mappa[x1][y1].rotta_ar[i].x=NOT_VALID_COST;
                 mappa[x1][y1].rotta_ar[i].y=NOT_VALID_COST;
@@ -231,7 +235,11 @@ void comando_air_route(esagono_t mappa[dim_mappa.dimx][dim_mappa.dimy], int x1, 
             }
             mediapercosto+=mappa[x1][y1].costo;
             mediapercosto=mediapercosto/count;
-            
+
+            #ifdef DEBUG
+            fprintf(output, "%d", mediapercosto);
+            #endif
+
             for (int i = 0; i < MAX_ROTTE_AR; i++)
             {
                 if (mappa[x1][y1].rotta_ar[i].costo==NOT_VALID_COST && mappa[x1][y1].rotta_ar[i].x==NOT_VALID_COST && mappa[x1][y1].rotta_ar[i].y==NOT_VALID_COST)
@@ -243,6 +251,11 @@ void comando_air_route(esagono_t mappa[dim_mappa.dimx][dim_mappa.dimy], int x1, 
                 
             }
             fprintf(output, "%s", AFFERMATIVO);
+
+            #ifdef DEBUG
+            fprintf(output, "%d %d %d %d", x1, y1, x2, y2);
+            #endif
+            
         }
         
     }
