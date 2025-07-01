@@ -60,8 +60,8 @@ struct generale_comandi
 }gen_comandi;
 struct dimensioni_mappa
 {
-    u_int16_t dimx;     //dim righe
-    u_int16_t dimy;     //dim colonne
+    int dimx;     //dim righe
+    int dimy;     //dim colonne
 }dim_mappa;
 
 
@@ -104,8 +104,8 @@ int main(){
         sc=fscanf(f_in, "%s", &comando);
        if(comando[0]==INIT){
             libera_mappa(mappa);
-            sc=fscanf(f_in, "%hd", &dim_mappa.dimy);
-            sc=fscanf(f_in, "%hd", &dim_mappa.dimx);
+            sc=fscanf(f_in, "%d", &dim_mappa.dimy);
+            sc=fscanf(f_in, "%d", &dim_mappa.dimx);
             alloca_mappa(ptr_map);
             comando_init(mappa, f_out);
             #ifdef DEBUG
