@@ -230,7 +230,7 @@ void comando_air_route(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *
     
     if (mappa[x1][y1].costo!=NOT_VALID_COST || mappa[x2][y2].costo!=NOT_VALID_COST)
     {  
-        for (int i = 0; i < MAX_ROTTE_AR; i++)      //calcolo posizione rotta
+        for (int i = 0; i < MAX_ROTTE_AR; i++)      //calcolo posizione rotta e massimi rotte in esagoni
         {
             if (mappa[x1][y1].rotta_ar[i].x!=NOT_VALID && mappa[x1][y1].rotta_ar[i].y!=NOT_VALID)
             {
@@ -240,8 +240,22 @@ void comando_air_route(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *
             {
                 nrotte2++;
             }
-            if (nrotte==MAX_ROTTE_AR || nrotte2==MAX_ROTTE_AR)
+            if ((nrotte==MAX_ROTTE_AR || nrotte2==MAX_ROTTE_AR) && (mappa[x1][y1].rotta_ar[nrotte].x==x2 && mappa[x1][y1].rotta_ar[nrotte].y==y2))
             {
+                #ifdef DEBUG
+                fprintf(output, "%d %d %d %d", x1, y1, x2, y2);
+                #endif
+
+                mappa[x1][y1].rotta_ar[nrotte].costo=NOT_VALID;       //cancello rotta aerea
+                mappa[x1][y1].rotta_ar[nrotte].x=NOT_VALID;
+                mappa[x1][y1].rotta_ar[nrotte].y=NOT_VALID;
+                mappa[x2][y2].rotta_ar[nrotte2].costo=NOT_VALID;       //cancello rotta aerea
+                mappa[x2][y2].rotta_ar[nrotte2].x=NOT_VALID;
+                mappa[x2][y2].rotta_ar[nrotte2].y=NOT_VALID;
+                cancellazione++;
+                fprintf(output, "%s", AFFERMATIVO);
+            }
+            else{
                 fprintf(output, "%s", FALSO);
                 return;
             }
