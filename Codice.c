@@ -71,10 +71,11 @@ typedef struct esagono
     u_int8_t already_visited;
 }esagono_t;
 
-void comando_init(esagono_t mappa[dim_mappa.dimx][dim_mappa.dimy], FILE *output);
-void comando_change_cost(esagono_t mappa[dim_mappa.dimx][dim_mappa.dimy], int x, int y, int v, int raggio, FILE *output);
-void comando_air_route(esagono_t mappa[dim_mappa.dimx][dim_mappa.dimy], int x1, int y1, int x2, int y2, FILE *output);
-void comando_travel_cost(esagono_t mappa[dim_mappa.dimx][dim_mappa.dimy], int x1, int y1, int x2, int y2, FILE *output);
+void comando_init(esagono_t **mappa, FILE *output);
+void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FILE *output);
+void comando_air_route(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *output);
+void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *output);
+void liberamappa(esagono_t** mappa);
 
 int main(){
     //PREPARATIVI
@@ -84,6 +85,8 @@ int main(){
         FILE *f_in, *f_out;
         f_in=stdin;
         f_out=stdout;
+        esagono_t **mappa;
+        int i=0;
     //fine variabili gestione comandi
     #ifdef DEBUGTEST
     int ssc;
@@ -93,28 +96,20 @@ int main(){
         fprintf(f_out, "%c", c);
     }while(ssc!=EOF);
     #endif
-    //allocazione
-        sc=fscanf(f_in, "%s", &comando);
-        if (sc==EOF || comando[0]!=INIT)
-        {
-            return -1;
-        }
-        sc=fscanf(f_in, "%hd", &dim_mappa.dimx);
-        sc=fscanf(f_in, "%hd", &dim_mappa.dimy);
-        esagono_t mappa[dim_mappa.dimx][dim_mappa.dimy];
-        comando_init(mappa, f_out);
-        #ifdef DEBUG
-        printf("INIT0\n");
-        #endif
-    //fine allocazione
     //FINE PREPARATIVI
     //COMANDI DOPO LA PRIMA INIZIALIZZAZIONE
     do{
         sc=fscanf(f_in, "%s", &comando);
        if(comando[0]==INIT){
-            sc=fscanf(f_in, "%hd", &dim_mappa.dimx);
+            liberamappa(mappa);
             sc=fscanf(f_in, "%hd", &dim_mappa.dimy);
-            esagono_t mappa[dim_mappa.dimx][dim_mappa.dimy];
+            sc=fscanf(f_in, "%hd", &dim_mappa.dimx);
+            mappa=malloc(dim_mappa.dimx*sizeof(esagono_t *));
+            while (i<dim_mappa.dimx)
+            {
+                mappa[i]=malloc(dim_mappa.dimy*sizeof(esagono_t));
+                i++;
+            }
             comando_init(mappa, f_out);
             #ifdef DEBUG
             printf("INIT\n");
@@ -163,7 +158,7 @@ int main(){
 
 
 //comando init: costo di ogni esagono inizializzato a 1 (ottimizzabile)
-void comando_init(esagono_t mappa[dim_mappa.dimx][dim_mappa.dimy], FILE *output){
+void comando_init(esagono_t** mappa, FILE *output){
     for (int i = dim_mappa.dimx-1; i >= 0; i--)
     {
         for (int j = 0; j < dim_mappa.dimy; j++)
@@ -193,12 +188,12 @@ void comando_init(esagono_t mappa[dim_mappa.dimx][dim_mappa.dimy], FILE *output)
 
 
 //comando change cost
-void comando_change_cost(esagono_t mappa[dim_mappa.dimx][dim_mappa.dimy], int x, int y, int v, int raggio, FILE *output){
+void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FILE *output){
 
 }
 
 //comando air_route
-void comando_air_route(esagono_t mappa[dim_mappa.dimx][dim_mappa.dimy], int x1, int y1, int x2, int y2, FILE *output){
+void comando_air_route(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *output){
     u_int8_t cancellazione=0;
     u_int16_t mediapercosto=0;
     u_int8_t count=1;
@@ -265,6 +260,16 @@ void comando_air_route(esagono_t mappa[dim_mappa.dimx][dim_mappa.dimy], int x1, 
     
 }
 
-void comando_travel_cost(esagono_t mappa[dim_mappa.dimx][dim_mappa.dimy], int x1, int y1, int x2, int y2, FILE *output){
-    
+void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *output){
+
+}
+
+void liberamappa(esagono_t **mappa){
+    if (mappa!=NULL){
+        for (int j = 0; j < dim_mappa.dimx; j++)
+        {
+            free(mappa[j]);
+        }
+        free(mappa);
+    }
 }
