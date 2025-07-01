@@ -42,9 +42,9 @@ Consegna:   Movhex è una compagnia di autotrasporti che dispone di una flotta d
 //strutture
 typedef struct rottaar
 {
-    u_int16_t x;
-    u_int16_t y;
-    u_int16_t costo;
+    int x;
+    int y;
+    int costo;
 }rottaar_t;
 
 struct generale_comandi
@@ -84,8 +84,6 @@ int main(){
         FILE *f_in, *f_out;
         f_in=stdin;
         f_out=stdout;
-        esagono_t **mappa=NULL;
-        u_int16_t i;
     //fine variabili gestione comandi
     #ifdef DEBUGTEST
     int ssc;
@@ -171,11 +169,14 @@ void comando_init(esagono_t mappa[dim_mappa.dimx][dim_mappa.dimy], FILE *output)
         for (int j = 0; j < dim_mappa.dimy; j++)
         {
             mappa[i][j].costo=1;
-            for (int k = 0; k < MAX_ROTTE_AR; i++)
+            for (int k = 0; k < MAX_ROTTE_AR; k++)
             {
                 mappa[i][j].rotta_ar[k].costo=NOT_VALID_COST;       //inizializzo vettori rotte aeree
                 mappa[i][j].rotta_ar[k].x=NOT_VALID_COST;
                 mappa[i][j].rotta_ar[k].y=NOT_VALID_COST;
+                #ifdef DEBUG
+                fprintf(output, "%d", mappa[i][j].rotta_ar[k].costo);
+                #endif
             }
         }
         
@@ -221,8 +222,8 @@ void comando_air_route(esagono_t mappa[dim_mappa.dimx][dim_mappa.dimy], int x1, 
                 mappa[x2][y2].rotta_ar[i].y=NOT_VALID_COST;
                 cancellazione++;
                 fprintf(output, "%s", AFFERMATIVO);
-                break;
             }
+            break;
         }
         if (cancellazione==0)
         {
