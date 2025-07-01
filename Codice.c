@@ -36,6 +36,7 @@ Consegna:   Movhex è una compagnia di autotrasporti che dispone di una flotta d
 #define FALSO "KO"
 #define NOT_VALID_COST -1
 #define LUNGHEZZA_STR_COMANDO_MAX 16
+#define MAX_ROTTE_AR 5
 
 
 //strutture
@@ -43,6 +44,7 @@ typedef struct rottaar
 {
     u_int16_t x;
     u_int16_t y;
+    u_int16_t costo;
 }rottaar_t;
 
 struct generale_comandi
@@ -65,6 +67,7 @@ typedef struct esagono
 {
     int costo;
     rottaar_t rotta_ar[5];
+    u_int8_t completo;
     u_int8_t already_visited;
 }esagono_t;
 
@@ -159,13 +162,19 @@ int main(){
 }
 
 
-//associazioni esagoni mappa: comando init
+//comando init: costo di ogni esagono inizializzato a 1 (ottimizzabile)
 void comando_init(esagono_t mappa[dim_mappa.dimx][dim_mappa.dimy], FILE *output){
     for (int i = dim_mappa.dimx-1; i >= 0; i--)
     {
         for (int j = 0; j < dim_mappa.dimy; j++)
         {
             mappa[i][j].costo=1;
+            for (int k = 0; i < MAX_ROTTE_AR; i++)
+            {
+                mappa[i][j].rotta_ar[k].costo=NOT_VALID_COST;       //inizializzo vettori rotte aeree
+                mappa[i][j].rotta_ar[k].x=NOT_VALID_COST;
+                mappa[i][j].rotta_ar[k].y=NOT_VALID_COST;
+            }
         }
         
     }
@@ -182,3 +191,63 @@ void comando_init(esagono_t mappa[dim_mappa.dimx][dim_mappa.dimy], FILE *output)
     #endif    
 }
 
+
+//comando change cost
+void comando_change_cost(esagono_t mappa[dim_mappa.dimx][dim_mappa.dimy], int x, int y, int v, int raggio, FILE *output){
+
+}
+
+//comando air_route
+void comando_air_route(esagono_t mappa[dim_mappa.dimx][dim_mappa.dimy], int x1, int y1, int x2, int y2, FILE *output){
+    u_int8_t cancellazione=0;
+    u_int16_t mediapercosto=0;
+    u_int8_t count=1;
+    if (mappa[x1][y1].costo!=0 || mappa[x2][y2].costo!=0)
+    {
+        for(int i=0; i<MAX_ROTTE_AR; i++){
+            if (mappa[x1][y1].rotta_ar[i].x==x2 && mappa[x1][y1].rotta_ar[i].y==y2)
+            {
+                mappa[x1][y1].rotta_ar[i].costo=NOT_VALID_COST;       //cancello rotta aerea
+                mappa[x1][y1].rotta_ar[i].x=NOT_VALID_COST;
+                mappa[x1][y1].rotta_ar[i].y=NOT_VALID_COST;
+                mappa[x2][y2].rotta_ar[i].costo=NOT_VALID_COST;       //cancello rotta aerea
+                mappa[x2][y2].rotta_ar[i].x=NOT_VALID_COST;
+                mappa[x2][y2].rotta_ar[i].y=NOT_VALID_COST;
+                cancellazione++;
+                fprintf(output, "%s", AFFERMATIVO);
+                break;
+            }
+        }
+        if (cancellazione==0)
+        {
+            for (int i = 0; i < MAX_ROTTE_AR; i++)          //calcolo costo rotta aerea
+            {
+                if (mappa[x1][y1].rotta_ar[i].costo!=NOT_VALID_COST)
+                {
+                    count++;
+                    mediapercosto+=mappa[x1][y1].rotta_ar[i].costo;
+                }
+                
+            }
+            mediapercosto+=mappa[x1][y1].costo;
+            mediapercosto=mediapercosto/count;
+            
+            for (int i = 0; i < MAX_ROTTE_AR; i++)
+            {
+                if (mappa[x1][y1].rotta_ar[i].costo==NOT_VALID_COST && mappa[x1][y1].rotta_ar[i].x==NOT_VALID_COST && mappa[x1][y1].rotta_ar[i].y==NOT_VALID_COST)
+                {
+                    mappa[x1][y1].rotta_ar[i].costo=mediapercosto;       //creo rotta aerea
+                    mappa[x1][y1].rotta_ar[i].x=x2;
+                    mappa[x1][y1].rotta_ar[i].y=y2;
+                }
+                
+            }
+            fprintf(output, "%s", AFFERMATIVO);
+        }
+        
+    }
+    else {
+        fprintf(output, "%s", FALSO);
+    }
+    
+}
