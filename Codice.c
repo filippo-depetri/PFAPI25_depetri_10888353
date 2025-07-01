@@ -68,7 +68,7 @@ typedef struct esagono
     u_int8_t already_visited;
 }esagono_t;
 
-void comando_init(esagono_t mappa[dim_mappa.dimx][dim_mappa.dimy], int col, int rig);
+void comando_init(esagono_t mappa[dim_mappa.dimx][dim_mappa.dimy], FILE *f_out);
 void comando_change_cost(esagono_t mappa[dim_mappa.dimx][dim_mappa.dimy], int x, int y, int v, int raggio);
 void comando_air_route(esagono_t mappa[dim_mappa.dimx][dim_mappa.dimy], int x1, int y1, int x2, int y2);
 void comando_travel_cost(esagono_t mappa[dim_mappa.dimx][dim_mappa.dimy], int x1, int y1, int x2, int y2);
@@ -99,7 +99,7 @@ int main(){
         sc=fscanf(f_in, "%hd", &dim_mappa.dimx);
         sc=fscanf(f_in, "%hd", &dim_mappa.dimy);
         esagono_t mappa[dim_mappa.dimx][dim_mappa.dimy];
-        comando_init(mappa, dim_mappa.dimx, dim_mappa.dimy);
+        comando_init(mappa, f_out);
         #ifdef DEBUG
         printf("INIT0\n");
         #endif
@@ -112,7 +112,7 @@ int main(){
             sc=fscanf(f_in, "%hd", &dim_mappa.dimx);
             sc=fscanf(f_in, "%hd", &dim_mappa.dimy);
             esagono_t mappa[dim_mappa.dimx][dim_mappa.dimy];
-            comando_init(mappa, dim_mappa.dimx, dim_mappa.dimy);
+            comando_init(mappa, f_out);
             #ifdef DEBUG
             printf("INIT\n");
             #endif
@@ -156,5 +156,29 @@ int main(){
     fclose(f_in);
     fclose(f_out);
     return 0;
+}
+
+
+//associazioni esagoni mappa: comando init
+void comando_init(esagono_t mappa[dim_mappa.dimx][dim_mappa.dimy], FILE *f_out){
+    for (int i = dim_mappa.dimx-1; i >= 0; i--)
+    {
+        for (int j = 0; j < dim_mappa.dimy; j++)
+        {
+            mappa[i][j].costo=1;
+        }
+        
+    }
+    fprintf(f_out, "%s", AFFERMATIVO);
+    #ifdef DEBUG
+    for (int i = dim_mappa.dimx-1; i >= 0; i--)
+    {
+        for (int j = 0; j < dim_mappa.dimy; j++)
+        {
+            fprintf(f_out, "%d", mappa[i][j].costo);
+        }
+        
+    }
+    #endif    
 }
 
