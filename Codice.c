@@ -104,7 +104,7 @@ int main(){
             libera_mappa(mappa);
             sc=fscanf(f_in, "%hd", &dim_mappa.dimy);
             sc=fscanf(f_in, "%hd", &dim_mappa.dimx);
-            allocamappa(mappa);
+            alloca_mappa(mappa);
             comando_init(mappa, f_out);
             #ifdef DEBUG
             printf("INIT\n");
