@@ -278,3 +278,4 @@ void comando_travel_cost(esagono_t mappa[dim_mappa.dimx][dim_mappa.dimy], int x1
 
 }
 
+//da cambiare allocazione mappa perchè l'init non si rialloca: rifarlo con le malloc
