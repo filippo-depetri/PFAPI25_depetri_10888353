@@ -46,7 +46,6 @@ typedef struct rottaar
     int x;
     int y;
     int costo;
-    int indice;
 }rottaar_t;
 
 struct generale_comandi
@@ -221,12 +220,21 @@ void comando_air_route(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *
     u_int8_t cancellazione=0;
     int mediapercosto=0;
     u_int8_t count=1;
+    u_int8_t rotte1=0;
+    u_int8_t rotte2=0;
     if (x1>=dim_mappa.dimx || x1<0 || x2>=dim_mappa.dimx || x2<0 || y1>=dim_mappa.dimy || y1<0 || y2>=dim_mappa.dimy || y2<0)
     {
         fprintf(output, "%s", FALSO);
         return;
     }
-    
+    while (mappa[x1][y1].rotta_ar[rotte1].costo!=NOT_VALID)
+    {
+        rotte1++;
+    }
+    while (mappa[x2][y2].rotta_ar[rotte2].costo!=NOT_VALID)
+    {
+        rotte2++;
+    }
     if (mappa[x1][y1].costo!=NOT_VALID_COST || mappa[x2][y2].costo!=NOT_VALID_COST)
     {
         for(int i=0; i <MAX_ROTTE_AR; i++){
@@ -244,8 +252,6 @@ void comando_air_route(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *
                     mappa[x2][y2].rotta_ar[j].x=NOT_VALID;
                     mappa[x2][y2].rotta_ar[j].y=NOT_VALID;
                     cancellazione++;
-                    mappa[x1][y1].rotta_ar->indice=mappa[x1][y1].rotta_ar->indice-1;
-                    mappa[x2][y2].rotta_ar->indice=mappa[x2][y2].rotta_ar->indice-1;
                     fprintf(output, "%s", AFFERMATIVO);
                     return;
                 }
@@ -253,7 +259,7 @@ void comando_air_route(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *
         }
         if (cancellazione==0)
         {
-            if (mappa[x1][y1].rotta_ar->indice==MAX_ROTTE_AR || mappa[x2][y2].rotta_ar->indice==MAX_ROTTE_AR)
+            if (rotte1==MAX_ROTTE_AR || rotte2==MAX_ROTTE_AR)
             {
                 fprintf(output, "%s", FALSO);
                 return;
@@ -274,19 +280,16 @@ void comando_air_route(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *
             fprintf(output, "%d", mediapercosto);
             #endif
 
-            mappa[x1][y1].rotta_ar[mappa[x1][y1].rotta_ar->indice].costo=mediapercosto;       //creo rotta aerea
-            mappa[x1][y1].rotta_ar[mappa[x1][y1].rotta_ar->indice].x=x2;
-            mappa[x1][y1].rotta_ar[mappa[x1][y1].rotta_ar->indice].y=y2;
-            mappa[x2][y2].rotta_ar[mappa[x2][y2].rotta_ar->indice].costo=mediapercosto;       //creo rotta aerea
-            mappa[x2][y2].rotta_ar[mappa[x2][y2].rotta_ar->indice].x=x1;
-            mappa[x2][y2].rotta_ar[mappa[x2][y2].rotta_ar->indice].y=y1;
+            mappa[x1][y1].rotta_ar[rotte1].costo=mediapercosto;       //creo rotta aerea
+            mappa[x1][y1].rotta_ar[rotte1].x=x2;
+            mappa[x1][y1].rotta_ar[rotte1].y=y2;
+            mappa[x2][y2].rotta_ar[rotte2].costo=mediapercosto;       //creo rotta aerea
+            mappa[x2][y2].rotta_ar[rotte2].x=x1;
+            mappa[x2][y2].rotta_ar[rotte2].y=y1;
             fprintf(output, "%s", AFFERMATIVO);
-            mappa[x1][y1].rotta_ar->indice=mappa[x1][y1].rotta_ar->indice+1,
-            mappa[x2][y2].rotta_ar->indice=mappa[x2][y2].rotta_ar->indice+1;
-
             #ifdef DEBUG
             fprintf(output, "%d %d %d %d", x1, y1, x2, y2);
-            fprintf(output, "%d %d", mappa[x1][y1].rotta_ar->indice, mappa[x2][y2].rotta_ar->indice);
+            fprintf(output, "%d %d", rotte1, rotte2);
             #endif
             return;
         }
