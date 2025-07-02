@@ -223,6 +223,11 @@ void comando_air_route(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *
     u_int8_t count=1;
     u_int8_t rotte1=0;
     u_int8_t rotte2=0;
+    if (mappa==NULL)
+    {
+        fprintf(output, "%s", FALSO);
+        return;
+    }
     if (x1>=dim_mappa.dimx || x1<0 || x2>=dim_mappa.dimx || x2<0 || y1>=dim_mappa.dimy || y1<0 || y2>=dim_mappa.dimy || y2<0)
     {
         fprintf(output, "%s", FALSO);
