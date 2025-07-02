@@ -76,7 +76,7 @@ void comando_init(esagono_t **mappa, FILE *output);
 void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FILE *output);
 void comando_air_route(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *output);
 void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *output);
-void alloca_mappa(esagono_t ***ptr_map);
+esagono_t **alloca_mappa();
 void libera_mappa(esagono_t **mappa);
 
 int main(){
@@ -88,7 +88,6 @@ int main(){
         f_in=stdin;
         f_out=stdout;
         esagono_t **mappa=NULL;
-        esagono_t ***ptr_map=&mappa;
     //fine variabili gestione comandi
     #ifdef DEBUGTEST
     int ssc;
@@ -105,7 +104,7 @@ int main(){
             libera_mappa(mappa);
             sc=fscanf(f_in, "%d", &dim_mappa.dimy);
             sc=fscanf(f_in, "%d", &dim_mappa.dimx);
-            alloca_mappa(ptr_map);
+            mappa=alloca_mappa();
             comando_init(mappa, f_out);
             #ifdef DEBUG
             printf("INIT\n");
@@ -154,12 +153,14 @@ int main(){
 }
 
 //alloca mappa
-void alloca_mappa(esagono_t ***ptr_map){
-        (*ptr_map)=malloc(dim_mappa.dimx * sizeof(esagono_t *));
+esagono_t **alloca_mappa(){
+        esagono_t **mappa;
+        mappa=malloc(dim_mappa.dimx*sizeof(esagono_t *));
         for (int i = 0; i < dim_mappa.dimx; i++)
         {
-            (*ptr_map)[i]=malloc(dim_mappa.dimy * sizeof(esagono_t));
+            mappa[i]=malloc(dim_mappa.dimy*sizeof(esagono_t));
         }
+        return(mappa);
 }
 void libera_mappa(esagono_t **mappa){
     if (mappa==NULL)
