@@ -24,6 +24,7 @@ Consegna:   Movhex è una compagnia di autotrasporti che dispone di una flotta d
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include <math.h>
 
 //define
 //#define DEBUGTEST
@@ -38,6 +39,7 @@ Consegna:   Movhex è una compagnia di autotrasporti che dispone di una flotta d
 #define LUNGHEZZA_STR_COMANDO_MAX 16
 #define MAX_ROTTE_AR 5
 #define NOT_VALID -2
+#define NON_USCENTE 1       //per definire se un esagono è destinazione o partenza di una rotta aerea 
 
 
 //strutture
@@ -78,6 +80,8 @@ void comando_air_route(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *
 void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *output);
 esagono_t **alloca_mappa();
 void libera_mappa(esagono_t **mappa);
+int max (int n1, int n2);
+int aggiorna_costo(esagono_t **mappa, int xloc, int yloc, int v, int raggio, int dist_esagoni);
 
 int main(){
     //PREPARATIVI
@@ -213,6 +217,31 @@ void comando_init(esagono_t **mappa, FILE *output){
 
 //comando change cost
 void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FILE *output){
+    int dist_esagoni=0;
+    int nuovo_costo_prog=0;
+    int xloc=x;
+    int yloc=y;
+    if (mappa==NULL)        //check se mappa è stata creata
+    {
+        fprintf(output, "%s", FALSO);
+        return;
+    }
+    if (x>=dim_mappa.dimx || x<0 || y>=dim_mappa.dimy || y<0 || raggio==0 || v<-10 || v>10)   //check se sono nei limiti mappa o se raggio=0 o se v non è compreso tra -10 e 10
+    {
+        fprintf(output, "%s", FALSO);
+        return;
+    }
+    while (dist_esagoni<raggio)
+    {
+        //aggiornamento costo singolo esagono
+        nuovo_costo_prog=aggiorna_costo(mappa, xloc, yloc, v, raggio, dist_esagoni);
+        dist_esagoni++;
+        #ifdef DEBUG
+        fprintf(output, "%d %d", nuovo_costo_prog, dist_esagoni);
+        #endif
+    }
+    
+    
 
 }
 
@@ -289,7 +318,7 @@ void comando_air_route(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *
             mappa[x1][y1].rotta_ar[rotte1].costo=mediapercosto;       //creo rotta aerea
             mappa[x1][y1].rotta_ar[rotte1].x=x2;
             mappa[x1][y1].rotta_ar[rotte1].y=y2;
-            mappa[x2][y2].rotta_ar[rotte2].costo=mediapercosto;       //creo rotta aerea
+            mappa[x2][y2].rotta_ar[rotte2].costo=NON_USCENTE;       //creo rotta aerea
             mappa[x2][y2].rotta_ar[rotte2].x=x1;
             mappa[x2][y2].rotta_ar[rotte2].y=y1;
             fprintf(output, "%s", AFFERMATIVO);
@@ -309,4 +338,27 @@ void comando_air_route(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *
 
 void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *output){
 
+}
+
+int max(int n1, int n2){
+    if (n1>n2)
+    {
+        return n1;
+    }
+    else{
+        return n2;
+    }
+}
+int aggiorna_costo(esagono_t **mappa, int xloc, int yloc, int v, int raggio, int dist_esagoni){
+    int prog=0;
+    prog=mappa[xloc][yloc].costo+floor(v*max(0,(raggio-dist_esagoni)/raggio));
+    mappa[xloc][yloc].costo=prog;
+    for (int i = 0; i < MAX_ROTTE_AR; i++)
+    {
+        if (mappa[xloc][yloc].rotta_ar[i].costo!=NOT_VALID && mappa[xloc][yloc].rotta_ar[i].costo!=NON_USCENTE)
+        {
+            mappa[xloc][yloc].rotta_ar[i].costo=prog;
+        }
+    }
+    return prog;
 }
