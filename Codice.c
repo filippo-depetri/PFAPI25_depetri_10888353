@@ -235,13 +235,13 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FIL
     {
         //aggiornamento costo singolo esagono
         nuovo_costo_prog=aggiorna_costo(mappa, xloc, yloc, v, raggio, dist_esagoni);
-        dist_esagoni++;
         #ifdef DEBUG
         fprintf(output, "%d %d", nuovo_costo_prog, dist_esagoni);
         #endif
+        //modifica dei parametri per cambiare esagono
     }
     
-    
+    //manca dist esagoni++ da fare quando finisci di vedere tutti gli esagoni in circolo a cui hai cambiato il costo
 
 }
 
@@ -360,5 +360,6 @@ int aggiorna_costo(esagono_t **mappa, int xloc, int yloc, int v, int raggio, int
             mappa[xloc][yloc].rotta_ar[i].costo=prog;
         }
     }
+    mappa[xloc][yloc].already_visited=1;
     return prog;
 }
