@@ -265,7 +265,7 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FIL
         nodi_adiacenti(xloc, yloc);
         for (int i = 0; i < COLLEGAMENTI; i++)
         {
-            if ((coordinate[i][0]>=0 && coordinate[i][0]<=dim_mappa.dimx && coordinate[i][1]>=0 && coordinate[i][1]<=dim_mappa.dimy) && mappa[coordinate[i][0]][coordinate[i][1]].already_visited==BIANCO)
+            if ((coordinate[i][0]>=0 && coordinate[i][0]<dim_mappa.dimx && coordinate[i][1]>=0 && coordinate[i][1]<dim_mappa.dimy) && mappa[coordinate[i][0]][coordinate[i][1]].already_visited==BIANCO)
             {
                 coda[indice_coda][0]=coordinate[i][0];
                 coda[indice_coda][1]=coordinate[i][1];
@@ -301,6 +301,12 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FIL
         fprintf(output, "%d\n", mappa[coda[i][0]][coda[i][1]].costo);
     }
     #endif
+    //reset dell'already visited
+    for(int i = 0; i<dim_coda; i++){
+        mappa[coda[i][0]][coda[i][1]].already_visited=BIANCO;
+    }
+    mappa[x][y].already_visited=BIANCO;
+    return;
 }
 
 //comando air_route
