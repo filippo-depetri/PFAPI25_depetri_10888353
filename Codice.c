@@ -86,7 +86,7 @@ void comando_air_route(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *
 void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *output);
 esagono_t **alloca_mappa();
 void libera_mappa(esagono_t **mappa);
-int max (int n1, int n2);
+float max (float n1, float n2);
 int aggiorna_costo(esagono_t **mappa, int xloc, int yloc, int v, int raggio, int dist_esagoni);
 void nodi_adiacenti(int x, int y);
 
@@ -252,7 +252,7 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FIL
     //aggiornamento nodo sorgente
     nuovo_costo_prog=aggiorna_costo(mappa, x, y, v, raggio, dist_esagoni);
     #ifdef DEBUG
-    fprintf(output, "%d %d", nuovo_costo_prog, dist_esagoni);
+    fprintf(output, "%d\n %d\n", nuovo_costo_prog, dist_esagoni);
     #endif
     mappa[x][y].already_visited=GRIGIO;
     xloc=x;
@@ -284,8 +284,15 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FIL
             dist_esagoni++;
         }
         aggiorna_costo(mappa, coda[indice_coda][0], coda[indice_coda][1], v, raggio, dist_esagoni);
+        indice_coda++;
     }
     fprintf(output, "%s", AFFERMATIVO);
+    #ifdef DEBUG
+    for (int i = 0; i < dim_coda; i++)
+    {
+        fprintf(output, "%d\n", mappa[coda[i][0]][coda[i][1]].costo);
+    }
+    #endif
 }
 
 //comando air_route
@@ -383,7 +390,7 @@ void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE
 
 }
 
-int max(int n1, int n2){
+float max(float n1, float n2){
     if (n1>n2)
     {
         return n1;
