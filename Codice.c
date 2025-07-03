@@ -460,9 +460,10 @@ void nodi_adiacenti(int x, int y){
     }
 }
 u_int8_t sommatoria(u_int8_t x){
+    u_int8_t prog=0;
     for (int i = 0; i < x; i++)
     {
-        x+=6*x;
+        prog+=6*i;
     }
     return x;
 }
