@@ -278,6 +278,12 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FIL
         yloc=coda[j][1];
         j++;
     }
+    #ifdef DEBUG
+    for (int i = 0; i < dim_coda; i++)
+    {
+        fprintf(output, "%d %d\n", coda[i][0], coda[i][1]);
+    }
+    #endif
     //aggiornamento costo
     indice_coda=0;
     while (indice_coda<dim_coda)
