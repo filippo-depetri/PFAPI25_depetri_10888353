@@ -280,11 +280,13 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FIL
     }
     //aggiornamento costo
     indice_coda=0;
+    j=0;
     while (indice_coda<dim_coda)
     {
-        if (indice_coda%6==0)
+        if (indice_coda%(6*j)==0)
         {
             dist_esagoni++;
+            j++;
         }
         aggiorna_costo(mappa, coda[indice_coda][0], coda[indice_coda][1], v, raggio, dist_esagoni);
         indice_coda++;
@@ -405,6 +407,14 @@ float max(float n1, float n2){
 int aggiorna_costo(esagono_t **mappa, int xloc, int yloc, int v, int raggio, int dist_esagoni){
     int prog=0;
     prog=mappa[xloc][yloc].costo+floor(v*max(0.0f,(raggio-dist_esagoni)/(float)raggio));
+    if (prog<0)
+    {
+        prog=0;
+    }
+    if (prog>100)
+    {
+        prog=100;
+    }
     mappa[xloc][yloc].costo=prog;
     for (int i = 0; i < MAX_ROTTE_AR; i++)
     {
