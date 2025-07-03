@@ -229,7 +229,7 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FIL
     int nuovo_costo_prog=0;
     int xloc;
     int yloc;
-    int dim_coda=1;
+    int dim_coda=0;
     int indice_coda=0;
     int j=0;
     if (mappa==NULL)        //check se mappa è stata creata
@@ -270,7 +270,7 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FIL
                 mappa[coordinate[i][0]][coordinate[i][1]].already_visited=GRIGIO;
                 indice_coda++;
                 #ifdef DEBUG
-                fprintf(output, "%d\n%d\n", coordinate[i][0], coordinate[i][1]);
+                fprintf(output, "%d %d\n", coordinate[i][0], coordinate[i][1]);
                 #endif
             }
         }
@@ -278,12 +278,6 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FIL
         yloc=coda[j][1];
         j++;
     }
-    #ifdef DEBUG
-    for (int i = 0; i < dim_coda; i++)
-    {
-        fprintf(output, "%d %d\n", coda[i][0], coda[i][1]);
-    }
-    #endif
     //aggiornamento costo
     indice_coda=0;
     while (indice_coda<dim_coda)
