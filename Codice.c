@@ -269,6 +269,9 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FIL
                 coda[indice_coda][1]=coordinate[i][1];
                 mappa[coordinate[i][0]][coordinate[i][1]].already_visited=GRIGIO;
                 indice_coda++;
+                #ifdef DEBUG
+                fprintf(output, "%d\n%d\n", coordinate[i][0], coordinate[i][1]);
+                #endif
             }
         }
         xloc=coda[j][0];
