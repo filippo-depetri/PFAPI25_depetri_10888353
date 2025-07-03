@@ -404,7 +404,7 @@ float max(float n1, float n2){
 }
 int aggiorna_costo(esagono_t **mappa, int xloc, int yloc, int v, int raggio, int dist_esagoni){
     int prog=0;
-    prog=(int)mappa[xloc][yloc].costo+floor(v*max(0,(raggio-dist_esagoni)/raggio));
+    prog=mappa[xloc][yloc].costo+floor(v*max(0.0f,(raggio-dist_esagoni)/(float)raggio));
     mappa[xloc][yloc].costo=prog;
     for (int i = 0; i < MAX_ROTTE_AR; i++)
     {
