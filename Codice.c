@@ -232,6 +232,7 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FIL
     int dim_coda=0;
     int indice_coda=0;
     int j=0;
+    u_int8_t count=1;
     if (mappa==NULL)        //check se mappa è stata creata
     {
         fprintf(output, "%s", FALSO);
@@ -280,13 +281,14 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FIL
     }
     //aggiornamento costo
     indice_coda=0;
-    j=0;
+    j=6;
     while (indice_coda<dim_coda)
     {
-        if (indice_coda%(6*j)==0)
+        if (indice_coda%j==0)
         {
             dist_esagoni++;
-            j++;
+            count++;
+            j=j*count;
         }
         aggiorna_costo(mappa, coda[indice_coda][0], coda[indice_coda][1], v, raggio, dist_esagoni);
         indice_coda++;
