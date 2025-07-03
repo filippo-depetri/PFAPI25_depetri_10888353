@@ -232,7 +232,6 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FIL
     int dim_coda=0;
     int indice_coda=0;
     int j=0;
-    u_int8_t count=1;
     if (mappa==NULL)        //check se mappa è stata creata
     {
         fprintf(output, "%s", FALSO);
@@ -256,6 +255,7 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FIL
     fprintf(output, "%d\n %d\n", nuovo_costo_prog, dist_esagoni);
     #endif
     mappa[x][y].already_visited=GRIGIO;
+    dist_esagoni++;
     xloc=x;
     yloc=y;
     //incodamento nodi adiacenti
@@ -281,15 +281,10 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FIL
     }
     //aggiornamento costo
     indice_coda=0;
-    j=6;
+    j=1;
     while (indice_coda<dim_coda)
     {
-        if (indice_coda%j==0)
-        {
-            dist_esagoni++;
-            j=j*count;
-            count++;
-        }
+        dist_esagoni=coda[indice_coda][0]-x;   
         aggiorna_costo(mappa, coda[indice_coda][0], coda[indice_coda][1], v, raggio, dist_esagoni);
         indice_coda++;
     }
