@@ -89,6 +89,7 @@ void libera_mappa(esagono_t **mappa);
 float max (float n1, float n2);
 int aggiorna_costo(esagono_t **mappa, int xloc, int yloc, int v, int raggio, int dist_esagoni);
 void nodi_adiacenti(int x, int y);
+u_int8_t sommatoria(u_int8_t x);
 
 int main(){
     //PREPARATIVI
@@ -231,7 +232,7 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FIL
     int yloc;
     int dim_coda=0;
     int indice_coda=0;
-    int j=0;
+    u_int8_t j=0;
     if (mappa==NULL)        //check se mappa è stata creata
     {
         fprintf(output, "%s", FALSO);
@@ -281,10 +282,15 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FIL
     }
     //aggiornamento costo
     indice_coda=0;
-    j=1;
+    j=2;
     while (indice_coda<dim_coda)
     {
-        dist_esagoni=coda[indice_coda][0]-x;   
+        if (indice_coda==sommatoria(j))
+        {
+            dist_esagoni++;
+            j++;
+        }
+        
         aggiorna_costo(mappa, coda[indice_coda][0], coda[indice_coda][1], v, raggio, dist_esagoni);
         indice_coda++;
     }
@@ -452,4 +458,11 @@ void nodi_adiacenti(int x, int y){
         coordinate[5][0]=x;
         coordinate[5][1]=y-1;
     }
+}
+u_int8_t sommatoria(u_int8_t x){
+    for (int i = 0; i < x; i++)
+    {
+        x+=6*x;
+    }
+    return x;
 }
