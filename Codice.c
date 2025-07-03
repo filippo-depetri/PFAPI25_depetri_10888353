@@ -40,6 +40,10 @@ Consegna:   Movhex è una compagnia di autotrasporti che dispone di una flotta d
 #define MAX_ROTTE_AR 5
 #define NOT_VALID -2
 #define NON_USCENTE 1       //per definire se un esagono è destinazione o partenza di una rotta aerea 
+#define GRIGIO 7
+#define NERO 8
+#define BIANCO 9
+#define COLLEGAMENTI 6
 
 
 //strutture
@@ -65,12 +69,14 @@ struct dimensioni_mappa
     int dimy;     //dim colonne
 }dim_mappa;
 
+u_int8_t coordinate[6][2];
+
+
 
 typedef struct esagono
 {
     int costo;
     rottaar_t rotta_ar[5];
-    u_int8_t completo;
     u_int8_t already_visited;
 }esagono_t;
 
@@ -82,6 +88,7 @@ esagono_t **alloca_mappa();
 void libera_mappa(esagono_t **mappa);
 int max (int n1, int n2);
 int aggiorna_costo(esagono_t **mappa, int xloc, int yloc, int v, int raggio, int dist_esagoni);
+void nodi_adiacenti(int x, int y);
 
 int main(){
     //PREPARATIVI
@@ -189,6 +196,7 @@ void comando_init(esagono_t **mappa, FILE *output){
         for (int j = 0; j < dim_mappa.dimy; j++)
         {
             mappa[i][j].costo=1;
+            mappa[i][j].already_visited=BIANCO;
             for (int k = 0; k < MAX_ROTTE_AR; k++)
             {
                 mappa[i][j].rotta_ar[k].costo=NOT_VALID;       //inizializzo vettori rotte aeree
@@ -219,8 +227,11 @@ void comando_init(esagono_t **mappa, FILE *output){
 void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FILE *output){
     int dist_esagoni=0;
     int nuovo_costo_prog=0;
-    int xloc=x;
-    int yloc=y;
+    int xloc;
+    int yloc;
+    int dim_coda=1;
+    int indice_coda=0;
+    int j=0;
     if (mappa==NULL)        //check se mappa è stata creata
     {
         fprintf(output, "%s", FALSO);
@@ -231,18 +242,50 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FIL
         fprintf(output, "%s", FALSO);
         return;
     }
-    while (dist_esagoni<raggio)
+    //dimensioni della coda di coordinate
+    for (int i = 1; i <= raggio; i++)
     {
-        //aggiornamento costo singolo esagono
-        nuovo_costo_prog=aggiorna_costo(mappa, xloc, yloc, v, raggio, dist_esagoni);
-        #ifdef DEBUG
-        fprintf(output, "%d %d", nuovo_costo_prog, dist_esagoni);
-        #endif
-        //modifica dei parametri per cambiare esagono
+        dim_coda+=COLLEGAMENTI*i;
     }
-    
-    //manca dist esagoni++ da fare quando finisci di vedere tutti gli esagoni in circolo a cui hai cambiato il costo
-
+    //creazione coda di coordinate
+    u_int8_t coda[dim_coda][2];
+    //aggiornamento nodo sorgente
+    nuovo_costo_prog=aggiorna_costo(mappa, x, y, v, raggio, dist_esagoni);
+    #ifdef DEBUG
+    fprintf(output, "%d %d", nuovo_costo_prog, dist_esagoni);
+    #endif
+    mappa[x][y].already_visited=GRIGIO;
+    xloc=x;
+    yloc=y;
+    //incodamento nodi adiacenti
+    while (indice_coda<dim_coda)
+    {
+        nodi_adiacenti(xloc, yloc);
+        for (int i = 0; i < COLLEGAMENTI; i++)
+        {
+            if ((coordinate[i][0]>=0 && coordinate[i][0]<=dim_mappa.dimx && coordinate[i][1]>=0 && coordinate[i][1]<=dim_mappa.dimy) && mappa[coordinate[i][0]][coordinate[i][1]].already_visited==BIANCO)
+            {
+                coda[indice_coda][0]=coordinate[i][0];
+                coda[indice_coda][1]=coordinate[i][1];
+                mappa[coordinate[i][0]][coordinate[i][1]].already_visited=GRIGIO;
+                indice_coda++;
+            }
+        }
+        xloc=coda[j][0];
+        yloc=coda[j][1];
+        j++;
+    }
+    //aggiornamento costo
+    indice_coda=0;
+    while (indice_coda<dim_coda)
+    {
+        if (indice_coda%6==0)
+        {
+            dist_esagoni++;
+        }
+        aggiorna_costo(mappa, coda[indice_coda][0], coda[indice_coda][1], v, raggio, dist_esagoni);
+    }
+    fprintf(output, "%s", AFFERMATIVO);
 }
 
 //comando air_route
@@ -360,6 +403,36 @@ int aggiorna_costo(esagono_t **mappa, int xloc, int yloc, int v, int raggio, int
             mappa[xloc][yloc].rotta_ar[i].costo=prog;
         }
     }
-    mappa[xloc][yloc].already_visited=1;
     return prog;
+}
+void nodi_adiacenti(int x, int y){
+    if (x%2==0)
+    {
+        coordinate[0][0]=x+1;
+        coordinate[0][1]=y;
+        coordinate[1][0]=x;
+        coordinate[1][1]=y+1;
+        coordinate[2][0]=x-1;
+        coordinate[2][1]=y;
+        coordinate[3][0]=x-1;
+        coordinate[3][1]=y-1;
+        coordinate[4][0]=x;
+        coordinate[4][1]=y-1;
+        coordinate[5][0]=x+1;
+        coordinate[5][1]=y+1;
+    }
+    else{
+        coordinate[0][0]=x+1;
+        coordinate[0][1]=y;
+        coordinate[1][0]=x+1;
+        coordinate[1][1]=y+1;
+        coordinate[2][0]=x;
+        coordinate[2][1]=y-1;
+        coordinate[3][0]=x-1;
+        coordinate[3][1]=y-1;
+        coordinate[4][0]=x-1;
+        coordinate[4][1]=y;
+        coordinate[5][0]=x;
+        coordinate[5][1]=y-1;
+    }
 }
