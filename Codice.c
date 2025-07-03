@@ -232,7 +232,7 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FIL
     int yloc;
     int dim_coda=0;
     int indice_coda=0;
-    u_int8_t j=0;
+    int j=0;
     if (mappa==NULL)        //check se mappa è stata creata
     {
         fprintf(output, "%s", FALSO);
@@ -249,7 +249,7 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FIL
         dim_coda+=COLLEGAMENTI*i;
     }
     //creazione coda di coordinate
-    u_int8_t coda[dim_coda][2];
+    int coda[dim_coda][2];
     //aggiornamento nodo sorgente
     nuovo_costo_prog=aggiorna_costo(mappa, x, y, v, raggio, dist_esagoni);
     #ifdef DEBUG
