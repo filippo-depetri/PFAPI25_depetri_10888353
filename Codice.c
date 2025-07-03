@@ -287,8 +287,8 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FIL
         if (indice_coda%j==0)
         {
             dist_esagoni++;
-            count++;
             j=j*count;
+            count++;
         }
         aggiorna_costo(mappa, coda[indice_coda][0], coda[indice_coda][1], v, raggio, dist_esagoni);
         indice_coda++;
