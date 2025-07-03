@@ -465,5 +465,5 @@ u_int8_t sommatoria(u_int8_t x){
     {
         prog+=6*i;
     }
-    return x;
+    return prog;
 }
