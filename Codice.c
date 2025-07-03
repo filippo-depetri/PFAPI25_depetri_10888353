@@ -89,7 +89,7 @@ void libera_mappa(esagono_t **mappa);
 float max (float n1, float n2);
 int aggiorna_costo(esagono_t **mappa, int xloc, int yloc, int v, int raggio, int dist_esagoni);
 void nodi_adiacenti(int x, int y);
-u_int8_t sommatoria(u_int8_t x);
+int sommatoria(int x);
 
 int main(){
     //PREPARATIVI
@@ -465,8 +465,8 @@ void nodi_adiacenti(int x, int y){
         coordinate[5][1]=y-1;
     }
 }
-u_int8_t sommatoria(u_int8_t x){
-    u_int8_t prog=0;
+int sommatoria(int x){
+    int prog=0;
     for (int i = 0; i < x; i++)
     {
         prog+=6*i;
