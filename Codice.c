@@ -276,13 +276,16 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FIL
                     coda[indice_coda][0]=coordinate[i][0];
                     coda[indice_coda][1]=coordinate[i][1];
                     mappa[coordinate[i][0]][coordinate[i][1]].already_visited=GRIGIO;
-                    indice_coda++;
                     #ifdef DEBUG
-                    fprintf(output, "%d %d\n", coordinate[i][0], coordinate[i][1]);
+                    fprintf(output, "%d %d %d\n", coordinate[i][0], coordinate[i][1], indice_coda);
                     #endif
+                    indice_coda++;
                 }
             }
         }
+        #ifdef DEBUG
+        fprintf(output, "%d\n", j);
+        #endif
         xloc=coda[j][0];
         yloc=coda[j][1];
         j++;
@@ -459,7 +462,7 @@ void nodi_adiacenti(int x, int y){
         coordinate[4][0]=x;
         coordinate[4][1]=y-1;
         coordinate[5][0]=x+1;
-        coordinate[5][1]=y+1;
+        coordinate[5][1]=y-1;
     }
     else{
         coordinate[0][0]=x+1;
@@ -467,7 +470,7 @@ void nodi_adiacenti(int x, int y){
         coordinate[1][0]=x+1;
         coordinate[1][1]=y+1;
         coordinate[2][0]=x;
-        coordinate[2][1]=y-1;
+        coordinate[2][1]=y+1;
         coordinate[3][0]=x-1;
         coordinate[3][1]=y-1;
         coordinate[4][0]=x-1;
