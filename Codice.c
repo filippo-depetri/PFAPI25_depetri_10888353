@@ -236,6 +236,7 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FIL
     int indice_coda=0;
     int j=0;
     int **coda=NULL;
+      int i=0;
     if (mappa==NULL)        //check se mappa è stata creata
     {
         fprintf(output, "%s", FALSO);
@@ -246,13 +247,12 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FIL
         fprintf(output, "%s", FALSO);
         return;
     }
-    //dimensioni della coda di coordinate
-    for (int i = 1; i <= raggio; i++)
+    //dimensioni della coda di coordinate al massimo
+    for (i = 1; i <= raggio; i++)
     {
         dim_coda+=COLLEGAMENTI*i;
     }
     //creazione coda di coordinate
-    libera_coda(coda, dim_coda);
     coda=alloca_coda(dim_coda);
     //aggiornamento nodo sorgente
     nuovo_costo_prog=aggiorna_costo(mappa, x, y, v, raggio, dist_esagoni);
@@ -267,17 +267,20 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FIL
     while (indice_coda<dim_coda)
     {
         nodi_adiacenti(xloc, yloc);
-        for (int i = 0; i < COLLEGAMENTI; i++)
+        for (i = 0; i < COLLEGAMENTI; i++)
         {
-            if ((coordinate[i][0]>=0 && coordinate[i][0]<dim_mappa.dimx && coordinate[i][1]>=0 && coordinate[i][1]<dim_mappa.dimy) && mappa[coordinate[i][0]][coordinate[i][1]].already_visited==BIANCO)
+            if (coordinate[i][0]>=0 && coordinate[i][0]<dim_mappa.dimx && coordinate[i][1]>=0 && coordinate[i][1]<dim_mappa.dimy)
             {
-                coda[indice_coda][0]=coordinate[i][0];
-                coda[indice_coda][1]=coordinate[i][1];
-                mappa[coordinate[i][0]][coordinate[i][1]].already_visited=GRIGIO;
-                indice_coda++;
-                #ifdef DEBUG
-                fprintf(output, "%d %d\n", coordinate[i][0], coordinate[i][1]);
-                #endif
+                if (mappa[coordinate[i][0]][coordinate[i][1]].already_visited==BIANCO)
+                {
+                    coda[indice_coda][0]=coordinate[i][0];
+                    coda[indice_coda][1]=coordinate[i][1];
+                    mappa[coordinate[i][0]][coordinate[i][1]].already_visited=GRIGIO;
+                    indice_coda++;
+                    #ifdef DEBUG
+                    fprintf(output, "%d %d\n", coordinate[i][0], coordinate[i][1]);
+                    #endif
+                }
             }
         }
         xloc=coda[j][0];
@@ -285,28 +288,28 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FIL
         j++;
     }
     //aggiornamento costo
-    indice_coda=0;
+    i=0;
     j=2;
-    while (indice_coda<dim_coda)
+    while (i<indice_coda)
     {
-        if (indice_coda==sommatoria(j))
+        if (i==sommatoria(j))
         {
             dist_esagoni++;
             j++;
         }
         
-        aggiorna_costo(mappa, coda[indice_coda][0], coda[indice_coda][1], v, raggio, dist_esagoni);
-        indice_coda++;
+        aggiorna_costo(mappa, coda[i][0], coda[i][1], v, raggio, dist_esagoni);
+        i++;
     }
     fprintf(output, "%s", AFFERMATIVO);
     #ifdef DEBUG
-    for (int i = 0; i < dim_coda; i++)
+    for (i = 0; i < indice_coda; i++)
     {
         fprintf(output, "%d\n", mappa[coda[i][0]][coda[i][1]].costo);
     }
     #endif
     //reset dell'already visited
-    for(int i = 0; i<dim_coda; i++){
+    for(i = 0; i<indice_coda; i++){
         mappa[coda[i][0]][coda[i][1]].already_visited=BIANCO;
     }
     mappa[x][y].already_visited=BIANCO;
