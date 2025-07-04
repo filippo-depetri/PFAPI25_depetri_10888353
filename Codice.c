@@ -113,7 +113,7 @@ int main(){
     #endif
     //FINE PREPARATIVI
     do{
-        sc=fscanf(f_in, "%s", &comando);
+        sc=fscanf(f_in, "%s", comando);
         if(comando[0]==INIT){
                 libera_mappa(mappa);
                 sc=fscanf(f_in, "%d", &dim_mappa.dimy);
@@ -158,12 +158,11 @@ int main(){
                     }
                 }
             }
-
-        }while(sc!=EOF);
-        fclose(f_in);
-        fclose(f_out);
-        libera_mappa(mappa);
-        return 0;
+    }while(sc!=EOF);
+    fclose(f_in);
+    fclose(f_out);
+    libera_mappa(mappa);
+    return 0;
 }
 
 //alloca mappa
