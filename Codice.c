@@ -286,6 +286,9 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FIL
         #ifdef DEBUG
         fprintf(output, "%d\n", j);
         #endif
+        if (j==indice_coda){
+            break;
+        }
         xloc=coda[j][0];
         yloc=coda[j][1];
         j++;
