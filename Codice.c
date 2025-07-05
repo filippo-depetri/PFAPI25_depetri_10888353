@@ -38,7 +38,7 @@ Consegna:   Movhex è una compagnia di autotrasporti che dispone di una flotta d
 #define NOT_VALID_COST 0
 #define LUNGHEZZA_STR_COMANDO_MAX 16
 #define MAX_ROTTE_AR 5
-#define NOT_VALID -2
+#define NOT_VALID (u_int16_t)-2
 #define NON_USCENTE 1       //per definire se un esagono è destinazione o partenza di una rotta aerea 
 #define GRIGIO 7
 #define NERO 8
@@ -208,6 +208,12 @@ void comando_init(esagono_t **mappa, FILE *output){
                 fprintf(output, "%d", mappa[i][j].rotta_ar[k].costo);
                 #endif
             }
+            for (int k = 0; k < MAX_NO_USCENTI; k++)
+            {
+                mappa[i][j].uscenti[k].costo=NOT_VALID;       //inizializzo vettori rotte aeree
+                mappa[i][j].uscenti[k].x=NOT_VALID;
+                mappa[i][j].uscenti[k].y=NOT_VALID;
+            }
         }
         
     }
@@ -346,7 +352,7 @@ void comando_air_route(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *
     {
         rotte++;
     }
-    while (mappa[x1][y1].uscenti[rottenousc].costo!=NOT_VALID)
+    while (mappa[x2][y2].uscenti[rottenousc].costo!=NOT_VALID)
     {
         rottenousc++;
     }
@@ -354,7 +360,7 @@ void comando_air_route(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *
     {
         for(int i=0; i <MAX_ROTTE_AR; i++){
             for(int j=0; j<MAX_NO_USCENTI; j++){
-                if (mappa[x1][y1].rotta_ar[i].x==x2 && mappa[x1][y1].uscenti[j].y==y2) 
+                if (mappa[x1][y1].rotta_ar[i].x==x2 && mappa[x1][y1].rotta_ar[i].y==y2 && mappa[x2][y2].uscenti[j].x==x1 && mappa[x2][y2].uscenti[j].y==y1) 
                 {
                     #ifdef DEBUG
                     fprintf(output, "%d %d %d %d", x1, y1, x2, y2);
@@ -374,7 +380,12 @@ void comando_air_route(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *
         }
         if (cancellazione==0)
         {
-            if (rotte==MAX_ROTTE_AR || rottenousc==MAX_NO_USCENTI)
+            if (rotte>=MAX_ROTTE_AR)
+            {
+                fprintf(output, "%s", FALSO);
+                return;
+            }
+            if (rottenousc>=MAX_NO_USCENTI)
             {
                 fprintf(output, "%s", FALSO);
                 return;
