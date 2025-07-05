@@ -486,7 +486,7 @@ void nodi_adiacenti(int x, int y){
         coordinate[2][0]=x;
         coordinate[2][1]=y+1;
         coordinate[3][0]=x-1;
-        coordinate[3][1]=y-1;
+        coordinate[3][1]=y+1;
         coordinate[4][0]=x-1;
         coordinate[4][1]=y;
         coordinate[5][0]=x;
@@ -526,40 +526,93 @@ void libera_coda(int **coda, int dim_coda){
 }
 
 int dist_esag(int startX, int startY, int arrX, int arrY){
-    int xloc=startX;
-    int yloc=startY;
     int dist=0;
-    int minX;
-    int minY;
-    int diffX;
-    int diffY;
-    while (xloc!=arrX && yloc!=arrY)
+    while (startX!=arrX || startY!=arrY)
     {
-        nodi_adiacenti(xloc, yloc);
-        diffX=NULL;
-        diffY=NULL;
-        for (int i = 0; i < COLLEGAMENTI; i++)
+        if (startX==arrX)
         {
-            if (diffX>abs(arrX-coordinate[i][0]))
+            dist+=abs(arrY-startY);
+            break;
+        }
+        if(startY==arrY)
+        {
+            dist+=abs(arrX-startX);
+            break;
+        }
+        if (startX%2==0)
+        {
+            if (startX>arrX)
             {
-                diffX=abs(arrX-coordinate[i][0]);
-                minX=coordinate[i][0];
+                if (startY>arrY)
+                {
+                    startX=startX-1;
+                    startY=startY-1;
+                }
+                else{
+                    if (startY<arrY)
+                    {
+                        startX=startX-1;
+                    }
+                    
+                }
+                
             }
-            if (diffY>abs(arrY-coordinate[i][1]))
+            else{
+                if (startX<arrX)
+                {
+                    if (startY>arrY)
+                    {
+                        startX=startX+1;
+                        startY=startY-1;
+                    }
+                    else{
+                        if(startY<arrY)
+                        {
+                            startX=startX+1;
+                        }
+                    
+                    }
+                }
+                
+            }
+            
+        }
+        else{
+            if (startX>arrX)
             {
-                diffY=abs(arrY-coordinate[i][1]);
-                minY=coordinate[i][1];
+                if (startY>arrY)
+                {
+                    startX=startX-1;
+                }
+                else{
+                    if (startY<arrY)
+                    {
+                        startX=startX-1;
+                        startY=startY+1;
+                    }
+                    
+                }
+                
             }
-            if (diffX<diffY)
-            {
-                minY=coordinate[i][1];
-            }
-            else {
-                minX=coordinate[i][0];
+            else{
+                if (startX<arrX)
+                {
+                    if (startY>arrY)
+                    {
+                        startX=startX+1;
+                    }
+                    else{
+                        if(startY<arrY)
+                        {
+                            startX=startX+1;
+                            startY=startY+1;
+                        }
+                    
+                    }
+                }
+                
             }
         }
-        xloc=minX;
-        yloc=minY;
         dist++;
     }
     return dist;
