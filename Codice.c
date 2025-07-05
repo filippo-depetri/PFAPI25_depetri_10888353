@@ -373,7 +373,7 @@ void comando_air_route(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *
             mediapercosto=floor(mediapercosto/(float)count);
 
             #ifdef DEBUG
-            fprintf(output, "%d", mediapercosto);
+            fprintf(output, "%f", mediapercosto);
             #endif
 
             mappa[x1][y1].rotta_ar[rotte].costo=mediapercosto;       //creo rotta aerea
@@ -382,7 +382,7 @@ void comando_air_route(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *
             fprintf(output, "%s", AFFERMATIVO);
             #ifdef DEBUG
             fprintf(output, "%d %d %d %d", x1, y1, x2, y2);
-            fprintf(output, "%d %d", rotte);
+            fprintf(output, "%d", rotte);
             #endif
             return;
         }
