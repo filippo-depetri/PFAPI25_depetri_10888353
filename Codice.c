@@ -92,6 +92,7 @@ void nodi_adiacenti(int x, int y);
 int sommatoria(int x);
 int **alloca_coda(int dim_coda);
 void libera_coda(int **coda, int dim_coda);
+int dist_esag(int startX, int startY, int arrX, int arrY);
 
 int main(){
     //PREPARATIVI
@@ -306,12 +307,12 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FIL
     j=2;
     while (i<indice_coda)
     {
-        if (i==sommatoria(j))
+        /*if (i==sommatoria(j))
         {
             dist_esagoni++;
             j++;
-        }
-        
+        }*/
+        dist_esagoni=dist_esag(x, y, coda[i][0], coda[i][1]);
         aggiorna_costo(mappa, coda[i][0], coda[i][1], v, raggio, dist_esagoni);
         i++;
     }
@@ -522,4 +523,44 @@ void libera_coda(int **coda, int dim_coda){
         free(coda);
     }
     
+}
+
+int dist_esag(int startX, int startY, int arrX, int arrY){
+    int xloc=startX;
+    int yloc=startY;
+    int dist=0;
+    int minX;
+    int minY;
+    int diffX;
+    int diffY;
+    while (xloc!=arrX && yloc!=arrY)
+    {
+        nodi_adiacenti(xloc, yloc);
+        diffX=NULL;
+        diffY=NULL;
+        for (int i = 0; i < COLLEGAMENTI; i++)
+        {
+            if (diffX>abs(arrX-coordinate[i][0]))
+            {
+                diffX=abs(arrX-coordinate[i][0]);
+                minX=coordinate[i][0];
+            }
+            if (diffY>abs(arrY-coordinate[i][1]))
+            {
+                diffY=abs(arrY-coordinate[i][1]);
+                minY=coordinate[i][1];
+            }
+            if (diffX<diffY)
+            {
+                minY=coordinate[i][1];
+            }
+            else {
+                minX=coordinate[i][0];
+            }
+        }
+        xloc=minX;
+        yloc=minY;
+        dist++;
+    }
+    return dist;
 }
