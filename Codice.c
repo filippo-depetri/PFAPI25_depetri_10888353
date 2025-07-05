@@ -39,12 +39,10 @@ Consegna:   Movhex è una compagnia di autotrasporti che dispone di una flotta d
 #define LUNGHEZZA_STR_COMANDO_MAX 16
 #define MAX_ROTTE_AR (u_int16_t)5
 #define NOT_VALID (u_int16_t)-2
-#define NON_USCENTE 1       //per definire se un esagono è destinazione o partenza di una rotta aerea 
 #define GRIGIO 7
 #define NERO 8
 #define BIANCO 9
 #define COLLEGAMENTI 6
-#define MAX_NO_USCENTI 20
 
 
 //strutture
@@ -76,7 +74,6 @@ typedef struct esagono
 {
     int costo;
     rottaar_t rotta_ar[MAX_ROTTE_AR];
-    rottaar_t uscenti[MAX_NO_USCENTI];
     u_int8_t already_visited;
 }esagono_t;
 
@@ -208,12 +205,6 @@ void comando_init(esagono_t **mappa, FILE *output){
                 fprintf(output, "%d", mappa[i][j].rotta_ar[k].costo);
                 #endif
             }
-            for (int k = 0; k < MAX_NO_USCENTI; k++)
-            {
-                mappa[i][j].uscenti[k].costo=NOT_VALID;       //inizializzo vettori rotte aeree
-                mappa[i][j].uscenti[k].x=NOT_VALID;
-                mappa[i][j].uscenti[k].y=NOT_VALID;
-            }
         }
         
     }
@@ -265,7 +256,6 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FIL
     fprintf(output, "%d\n %d\n", nuovo_costo_prog, dist_esagoni);
     #endif
     mappa[x][y].already_visited=GRIGIO;
-    dist_esagoni++;
     xloc=x;
     yloc=y;
     //incodamento nodi adiacenti
@@ -329,10 +319,9 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FIL
 //comando air_route
 void comando_air_route(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *output){
     u_int8_t cancellazione=0;
-    int mediapercosto=0;
+    float mediapercosto=0;
     u_int8_t count=1;
     u_int8_t rotte=0;
-    u_int8_t rottenousc=0;
     if (mappa==NULL)        //check se mappa è stata creata
     {
         fprintf(output, "%s", FALSO);
@@ -347,40 +336,26 @@ void comando_air_route(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *
     {
         rotte++;
     }
-    while (mappa[x2][y2].uscenti[rottenousc].costo!=NOT_VALID)
-    {
-        rottenousc++;
-    }
     if (mappa[x1][y1].costo!=NOT_VALID_COST || mappa[x2][y2].costo!=NOT_VALID_COST)
     {
         for(int i=0; i <MAX_ROTTE_AR; i++){
-            for(int j=0; j<MAX_NO_USCENTI; j++){
-                if (mappa[x1][y1].rotta_ar[i].x==x2 && mappa[x1][y1].rotta_ar[i].y==y2 && mappa[x2][y2].uscenti[j].x==x1 && mappa[x2][y2].uscenti[j].y==y1) 
-                {
-                    #ifdef DEBUG
-                    fprintf(output, "%d %d %d %d", x1, y1, x2, y2);
-                    #endif
+            if (mappa[x1][y1].rotta_ar[i].x==x2 && mappa[x1][y1].rotta_ar[i].y==y2) 
+            {
+                #ifdef DEBUG
+                fprintf(output, "%d %d %d %d", x1, y1, x2, y2);
+                #endif
 
-                    mappa[x1][y1].rotta_ar[i].costo=NOT_VALID;       //cancello rotta aerea
-                    mappa[x1][y1].rotta_ar[i].x=NOT_VALID;
-                    mappa[x1][y1].rotta_ar[i].y=NOT_VALID;
-                    mappa[x2][y2].uscenti[j].costo=NOT_VALID;       //cancello rotta aerea
-                    mappa[x2][y2].uscenti[j].x=NOT_VALID;
-                    mappa[x2][y2].uscenti[j].y=NOT_VALID;
-                    cancellazione++;
-                    fprintf(output, "%s", AFFERMATIVO);
-                    return;
-                }
+                mappa[x1][y1].rotta_ar[i].costo=NOT_VALID;       //cancello rotta aerea
+                mappa[x1][y1].rotta_ar[i].x=NOT_VALID;
+                mappa[x1][y1].rotta_ar[i].y=NOT_VALID;
+                cancellazione++;
+                fprintf(output, "%s", AFFERMATIVO);
+                return;
             }
         }
         if (cancellazione==0)
         {
             if (rotte>=MAX_ROTTE_AR)
-            {
-                fprintf(output, "%s", FALSO);
-                return;
-            }
-            if (rottenousc>=MAX_NO_USCENTI)
             {
                 fprintf(output, "%s", FALSO);
                 return;
@@ -395,7 +370,7 @@ void comando_air_route(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *
         
             }
             mediapercosto+=mappa[x1][y1].costo;
-            mediapercosto=mediapercosto/count;
+            mediapercosto=floor(mediapercosto/(float)count);
 
             #ifdef DEBUG
             fprintf(output, "%d", mediapercosto);
@@ -404,13 +379,10 @@ void comando_air_route(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *
             mappa[x1][y1].rotta_ar[rotte].costo=mediapercosto;       //creo rotta aerea
             mappa[x1][y1].rotta_ar[rotte].x=x2;
             mappa[x1][y1].rotta_ar[rotte].y=y2;
-            mappa[x2][y2].uscenti[rottenousc].costo=mediapercosto;       //creo rotta aerea
-            mappa[x2][y2].uscenti[rottenousc].x=x1;
-            mappa[x2][y2].uscenti[rottenousc].y=y1;
             fprintf(output, "%s", AFFERMATIVO);
             #ifdef DEBUG
             fprintf(output, "%d %d %d %d", x1, y1, x2, y2);
-            fprintf(output, "%d %d", rotte, rottenousc);
+            fprintf(output, "%d %d", rotte);
             #endif
             return;
         }
@@ -449,7 +421,7 @@ int aggiorna_costo(esagono_t **mappa, int xloc, int yloc, int v, int raggio, int
     mappa[xloc][yloc].costo=prog;
     for (int i = 0; i < MAX_ROTTE_AR; i++)
     {
-        if (mappa[xloc][yloc].rotta_ar[i].costo!=NOT_VALID && mappa[xloc][yloc].rotta_ar[i].costo!=NON_USCENTE)
+        if (mappa[xloc][yloc].rotta_ar[i].costo!=NOT_VALID)
         {
             mappa[xloc][yloc].rotta_ar[i].costo=prog;
         }
