@@ -89,7 +89,6 @@ void libera_mappa(esagono_t **mappa);
 float max (float n1, float n2);
 int aggiorna_costo(esagono_t **mappa, int xloc, int yloc, int v, int raggio, int dist_esagoni);
 void nodi_adiacenti(int x, int y);
-int sommatoria(int x);
 int **alloca_coda(int dim_coda);
 void libera_coda(int **coda, int dim_coda);
 int dist_esag(int startX, int startY, int arrX, int arrY);
@@ -307,11 +306,6 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FIL
     j=2;
     while (i<indice_coda)
     {
-        /*if (i==sommatoria(j))
-        {
-            dist_esagoni++;
-            j++;
-        }*/
         dist_esagoni=dist_esag(x, y, coda[i][0], coda[i][1]);
         aggiorna_costo(mappa, coda[i][0], coda[i][1], v, raggio, dist_esagoni);
         i++;
@@ -492,14 +486,6 @@ void nodi_adiacenti(int x, int y){
         coordinate[5][0]=x;
         coordinate[5][1]=y-1;
     }
-}
-int sommatoria(int x){
-    int prog=0;
-    for (int i = 0; i < x; i++)
-    {
-        prog+=6*i;
-    }
-    return prog;
 }
 int **alloca_coda(int dim_coda){
         int **coda;
