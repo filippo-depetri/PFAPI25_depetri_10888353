@@ -599,6 +599,22 @@ int dist_esag(int startX, int startY, int arrX, int arrY){
                 
             }
         }
+        if (startX<0)
+        {
+            startX=0;
+        }
+        if (startX>=dim_mappa.dimx)
+        {
+            startX=dim_mappa.dimx-1;
+        }
+        if (startY<0)
+        {
+            startY=0;
+        }
+        if (startY>=dim_mappa.dimy)
+        {
+            startY=dim_mappa.dimy-1;
+        }
         dist++;
     }
     return dist;
