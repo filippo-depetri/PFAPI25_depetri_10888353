@@ -40,9 +40,9 @@ Consegna:   Movhex è una compagnia di autotrasporti che dispone di una flotta d
 #define MAX_ROTTE_AR (u_int16_t)5
 #define NOT_VALID (u_int16_t)-2
 #define GRIGIO 7
-#define NERO 8
 #define BIANCO 9
 #define COLLEGAMENTI 6
+#define MAX_COST 100000
 
 
 //strutture
@@ -395,6 +395,14 @@ void comando_air_route(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *
 
 void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *output){
     int costo=0;
+    int mincost;
+    int mindist;
+    int **coda=NULL;
+    int dist=0;
+    int indice_coda=0;
+    u_int8_t indice_costo;
+    u_int8_t indice_distanza;
+    u_int8_t aggiornato=0;
     if (mappa==NULL)        //check se mappa è stata creata
     {
         fprintf(output, "%s", FALSO);
@@ -407,9 +415,47 @@ void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE
     }
     if(x1==x2 && y1==y2)
     {
-        fprintf(output, "%d", costo);
+        fprintf(output, "%d", NOT_VALID_COST);
+        return;
     }
-
+    coda=malloc(2*sizeof(int *));
+    coda[0]=coda[1]=NULL;
+    while (x1!=x2 || y1!=y2)
+    {
+        nodi_adiacenti(x1, y1);
+        mincost=MAX_COST;
+        mindist=MAX_COST;
+        for (int i = 0; i < COLLEGAMENTI; i++)
+        {
+            if (coordinate[i][0]>=0 && coordinate[i][0]<dim_mappa.dimx && coordinate[i][1]>=0 && coordinate[i][1]<dim_mappa.dimy)       //check se sono nei boundary sennò non analizzo
+            {
+                if (mappa[coordinate[i][0]][coordinate[i][1]].costo<mincost)        //verifico il minimo costo
+                {
+                    mincost=mappa[coordinate[i][0]][coordinate[i][1]].costo;
+                    indice_costo=i;
+                }
+                dist=dist_esag(coordinate[i][0], coordinate[i][1], x2, y2);
+                if (dist<mindist)                   //verifico la minima distanza
+                {
+                    mindist=dist;
+                    indice_distanza=i;
+                }
+                if (indice_costo==indice_distanza)
+                {
+                    coda[0]=realloc(coda[0], (indice_coda+1)*sizeof(int));
+                    coda[1]=realloc(coda[1], (indice_coda+1)*sizeof(int));
+                    coda[0][indice_coda]=coordinate[indice_costo][0];
+                    coda[1][indice_coda]=coordinate[indice_costo][1];
+                    indice_coda++;
+                    aggiornato++;
+                }
+                
+            }
+            
+        }
+        
+    }
+    
 }
 
 float max(float n1, float n2){
