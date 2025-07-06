@@ -84,7 +84,7 @@ void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE
 esagono_t **alloca_mappa();
 void libera_mappa(esagono_t **mappa);
 float max (float n1, float n2);
-int aggiorna_costo(esagono_t **mappa, int xloc, int yloc, int v, int raggio, int dist_esagoni);
+void aggiorna_costo(esagono_t **mappa, int xloc, int yloc, int v, int raggio, int dist_esagoni);
 void nodi_adiacenti(int x, int y);
 int **alloca_coda(int dim_coda);
 void libera_coda(int **coda, int dim_coda);
@@ -225,14 +225,13 @@ void comando_init(esagono_t **mappa, FILE *output){
 //comando change cost
 void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FILE *output){
     int dist_esagoni=0;
-    int nuovo_costo_prog=0;
     int xloc;
     int yloc;
     int dim_coda=0;
     int indice_coda=0;
     int j=0;
     int **coda=NULL;
-      int i=0;
+    int i=0;
     if (mappa==NULL)        //check se mappa è stata creata
     {
         fprintf(output, "%s", FALSO);
@@ -251,9 +250,9 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FIL
     //creazione coda di coordinate
     coda=alloca_coda(dim_coda);
     //aggiornamento nodo sorgente
-    nuovo_costo_prog=aggiorna_costo(mappa, x, y, v, raggio, dist_esagoni);
+    aggiorna_costo(mappa, x, y, v, raggio, dist_esagoni);
     #ifdef DEBUG
-    fprintf(output, "%d\n %d\n", nuovo_costo_prog, dist_esagoni);
+    fprintf(output, "%d\n %d\n", mappa[x][y].costo, dist_esagoni);
     #endif
     mappa[x][y].already_visited=GRIGIO;
     xloc=x;
@@ -395,6 +394,21 @@ void comando_air_route(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *
 }
 
 void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *output){
+    int costo=0;
+    if (mappa==NULL)        //check se mappa è stata creata
+    {
+        fprintf(output, "%s", FALSO);
+        return;
+    }
+    if (x1>=dim_mappa.dimx || x1<0 || x2>=dim_mappa.dimx || x2<0 || y1>=dim_mappa.dimy || y1<0 || y2>=dim_mappa.dimy || y2<0 || mappa[x1][y1].costo==0)   //check se sono nei limiti mappa
+    {
+        fprintf(output, "%s", FALSO);
+        return;
+    }
+    if(x1==x2 && y1==y2)
+    {
+        fprintf(output, "%d", costo);
+    }
 
 }
 
@@ -407,7 +421,7 @@ float max(float n1, float n2){
         return n2;
     }
 }
-int aggiorna_costo(esagono_t **mappa, int xloc, int yloc, int v, int raggio, int dist_esagoni){
+void aggiorna_costo(esagono_t **mappa, int xloc, int yloc, int v, int raggio, int dist_esagoni){
     int prog=0;
     prog=mappa[xloc][yloc].costo+floor(v*max(0.0f,(raggio-dist_esagoni)/(float)raggio));
     if (prog<0)
@@ -426,7 +440,6 @@ int aggiorna_costo(esagono_t **mappa, int xloc, int yloc, int v, int raggio, int
             mappa[xloc][yloc].rotta_ar[i].costo=prog;
         }
     }
-    return prog;
 }
 void nodi_adiacenti(int x, int y){
     if (x%2==0)
