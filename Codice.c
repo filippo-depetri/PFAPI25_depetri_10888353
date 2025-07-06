@@ -560,7 +560,7 @@ void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE
         y1=coda[1][indice_coda];
         indice_coda++;
     }
-    for (int i = 0; i < indice_coda; i++)
+    for (int i = 0; i < indice_coda-1; i++)
     {
         costo+=mappa[coda[0][i]][coda[1][i]].costo;
     }
