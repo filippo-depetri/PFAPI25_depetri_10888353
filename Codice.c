@@ -518,6 +518,9 @@ void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE
         if (aggiornato_air==NOT_VALID && aggiornato_terra==NOT_VALID)
         {
             fprintf(output, "%d", NOT_VALID_TRAVEL);
+            free(coda[0]);
+            free(coda[1]);
+            free(coda);
             return;
         }
         if (aggiornato_air==NOT_VALID && aggiornato_terra!=NOT_VALID)
@@ -561,10 +564,12 @@ void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE
     {
         costo+=mappa[coda[0][i]][coda[1][i]].costo;
     }
+    fprintf(output, "%d", costo);
     //libero memoria
     free(coda[0]);
     free(coda[1]);
     free(coda);
+    return;
 }
 
 float max(float n1, float n2){
