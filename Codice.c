@@ -493,14 +493,14 @@ void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE
         {
             if (indice_costo==indice_distanza)
             {
-                coord_aria[0][0]=coordinate[indice_distanza][0];
-                coord_aria[0][1]=coordinate[indice_distanza][1];
+                coord_aria[0][0]=mappa[x1][y1].rotta_ar[indice_distanza].x;
+                coord_aria[0][1]=mappa[x1][y1].rotta_ar[indice_distanza].y;
                 aggiornato_air++;
             }
             if (aggiornato_air==NOT_VALID)
             {
-                coord_aria[0][0]=coordinate[indice_distanza][0];
-                coord_aria[0][1]=coordinate[indice_distanza][1];
+                coord_aria[0][0]=mappa[x1][y1].rotta_ar[indice_distanza].x;
+                coord_aria[0][1]=mappa[x1][y1].rotta_ar[indice_distanza].y;
                 aggiornato_air++;
             }
         }
@@ -561,9 +561,10 @@ void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE
     for (int i = 0; i < indice_coda; i++)
     {
         costo+=mappa[coda[0][i]][coda[1][i]].costo;
-        free(coda[0][i]);
-        free(coda[1][i]);
     }
+    //libero memoria
+    free(coda[0]);
+    free(coda[1]);
     free(coda);
 }
 
