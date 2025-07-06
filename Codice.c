@@ -44,6 +44,7 @@ Consegna:   Movhex è una compagnia di autotrasporti che dispone di una flotta d
 #define BIANCO 9
 #define COLLEGAMENTI 6
 #define MAX_COST 100000
+#define MAX_ALLOCATED 20
 
 
 //strutture
@@ -401,6 +402,7 @@ void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE
     int mincost_air;
     int mindist_air;
     int **coda=NULL;
+    int max_coda=MAX_ALLOCATED;
     int dist=0;
     int indice_coda=0;
     int coord_terra[1][2];
@@ -426,9 +428,18 @@ void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE
     }
     coda=malloc(2*sizeof(int *));
     coda[0]=coda[1]=NULL;
+    coda[0]=malloc(max_coda*sizeof(int));     //metodo allocazione a step, prima allocazione a 20 blocchi
+    coda[1]=malloc(max_coda*sizeof(int));
     costo+=mappa[x1][y1].costo;
     while (x1!=x2 || y1!=y2)
     {
+        if (indice_coda>=max_coda)
+        {
+            coda[0]=realloc(coda[0], (max_coda+MAX_ALLOCATED)*sizeof(int));
+            coda[1]=realloc(coda[1], (max_coda+MAX_ALLOCATED)*sizeof(int));
+            max_coda+=MAX_ALLOCATED;
+        }
+        
         nodi_adiacenti(x1, y1);
         mincost_terra=MAX_COST;
         mindist_terra=dim_mappa.dimx*dim_mappa.dimy;
@@ -511,44 +522,32 @@ void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE
         }
         if (aggiornato_air==NOT_VALID && aggiornato_terra!=NOT_VALID)
         {
-            coda[0]=realloc(coda[0], (indice_coda+1)*sizeof(int));
-            coda[1]=realloc(coda[1], (indice_coda+1)*sizeof(int));
             coda[0][indice_coda]=coord_terra[0][0];
             coda[1][indice_coda]=coord_terra[0][1];
         }
         else{
             if (aggiornato_air!=NOT_VALID && aggiornato_terra==NOT_VALID)
             {
-                coda[0]=realloc(coda[0], (indice_coda+1)*sizeof(int));
-                coda[1]=realloc(coda[1], (indice_coda+1)*sizeof(int));
                 coda[0][indice_coda]=coord_aria[0][0];
                 coda[1][indice_coda]=coord_aria[0][1];
             }
             else{
                 if (mindist_air<mindist_terra && mincost_air<mincost_terra)
                 {
-                    coda[0]=realloc(coda[0], (indice_coda+1)*sizeof(int));
-                    coda[1]=realloc(coda[1], (indice_coda+1)*sizeof(int));
                     coda[0][indice_coda]=coord_aria[0][0];
                     coda[1][indice_coda]=coord_aria[0][1];
                 }
                 if (mindist_terra<mindist_air && mincost_terra<mincost_air)
                 {
-                    coda[0]=realloc(coda[0], (indice_coda+1)*sizeof(int));
-                    coda[1]=realloc(coda[1], (indice_coda+1)*sizeof(int));
                     coda[0][indice_coda]=coord_terra[0][0];
                     coda[1][indice_coda]=coord_terra[0][1];
                 }
                 if (mindist_air<mindist_terra)
                 {
-                    coda[0]=realloc(coda[0], (indice_coda+1)*sizeof(int));
-                    coda[1]=realloc(coda[1], (indice_coda+1)*sizeof(int));
                     coda[0][indice_coda]=coord_aria[0][0];
                     coda[1][indice_coda]=coord_aria[0][1];
                 }
                 else{
-                    coda[0]=realloc(coda[0], (indice_coda+1)*sizeof(int));
-                    coda[1]=realloc(coda[1], (indice_coda+1)*sizeof(int));
                     coda[0][indice_coda]=coord_terra[0][0];
                     coda[1][indice_coda]=coord_terra[0][1];
                 }
