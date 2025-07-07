@@ -583,7 +583,7 @@ float max(float n1, float n2){
 }
 void aggiorna_costo(esagono_t **mappa, int xloc, int yloc, int v, int raggio, int dist_esagoni){
     int prog=0;
-    prog=mappa[xloc][yloc].costo+floor(v*max(0.0f,(raggio-dist_esagoni)/(float)raggio));
+    prog=mappa[xloc][yloc].costo+floor((float)v*max(0.0f,(raggio-dist_esagoni)/(float)raggio));
     if (prog<0)
     {
         prog=0;
