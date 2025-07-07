@@ -451,7 +451,7 @@ void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE
         indice_distanza=NOT_VALID;
         for (int i = 0; i < COLLEGAMENTI; i++)      //collegamenti terra
         {
-            if (coordinate[i][0]>=0 && coordinate[i][0]<dim_mappa.dimx && coordinate[i][1]>=0 && coordinate[i][1]<dim_mappa.dimy && mappa[coordinate[i][0]][coordinate[i][1]].costo!=0)       //check se sono nei boundary e intransitabilità sennò non analizzo
+            if (coordinate[i][0]>=0 && coordinate[i][0]<dim_mappa.dimx && coordinate[i][1]>=0 && coordinate[i][1]<dim_mappa.dimy && (mappa[coordinate[i][0]][coordinate[i][1]].costo!=0 || (mappa[coordinate[i][0]][coordinate[i][1]].costo==0 && (coordinate[i][0]==x2 && coordinate[i][1]==y2))))       //check se sono nei boundary e intransitabilità sennò non analizzo
             {
                 if (mappa[coordinate[i][0]][coordinate[i][1]].costo<mincost_terra)        //verifico il minimo costo
                 {
