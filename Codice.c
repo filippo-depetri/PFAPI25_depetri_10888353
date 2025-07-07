@@ -233,6 +233,7 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FIL
     int j=0;
     int **coda=NULL;
     int i=0;
+    x=dim_mappa.dimx-x-1;
     if (mappa==NULL)        //check se mappa è stata creata
     {
         fprintf(output, "%s", FALSO);
@@ -321,6 +322,8 @@ void comando_air_route(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *
     float mediapercosto=0;
     u_int8_t count=1;
     u_int8_t rotte=0;
+    x1=dim_mappa.dimx-x1-1;
+    x2=dim_mappa.dimx-x2-1;
     if (mappa==NULL)        //check se mappa è stata creata
     {
         fprintf(output, "%s", FALSO);
@@ -409,6 +412,8 @@ void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE
     u_int16_t indice_distanza;
     u_int16_t aggiornato_terra;
     u_int16_t aggiornato_air;
+    x1=dim_mappa.dimx-x1-1;
+    x2=dim_mappa.dimx-x2-1;
     if (mappa==NULL)        //check se mappa è stata creata
     {
         fprintf(output, "%s", FALSO);
