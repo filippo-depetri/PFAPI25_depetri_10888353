@@ -406,8 +406,8 @@ void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE
     int max_coda=MAX_ALLOCATED;
     int dist=0;
     int indice_coda=0;
-    int coord_terra[1][2]={NOT_VALID, NOT_VALID};
-    int coord_aria[1][2]={NOT_VALID, NOT_VALID};
+    int coord_terra[1][2]={{NOT_VALID, NOT_VALID}};
+    int coord_aria[1][2]={{NOT_VALID, NOT_VALID}};
     int j=0;
     u_int16_t indice_costo;
     u_int16_t indice_distanza;
