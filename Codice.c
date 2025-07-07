@@ -408,6 +408,7 @@ void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE
     int indice_coda=0;
     int coord_terra[1][2];
     int coord_aria[1][2];
+    int j=0;
     u_int16_t indice_costo;
     u_int16_t indice_distanza;
     u_int16_t aggiornato_terra;
@@ -518,7 +519,7 @@ void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE
                 aggiornato_air++;
             }
         }
-        if (aggiornato_air==NOT_VALID && aggiornato_terra==NOT_VALID)
+        if (aggiornato_air==NOT_VALID && aggiornato_terra==NOT_VALID && j>=MAX_COST)
         {
             fprintf(output, "%d\n", NOT_VALID_TRAVEL);
             free(coda[0]);
@@ -562,6 +563,7 @@ void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE
         x1=coda[0][indice_coda];
         y1=coda[1][indice_coda];
         indice_coda++;
+        j++;
     }
     for (int i = 0; i < indice_coda-1; i++)     //incoda anche l'ultimo che non deve essere contato per cui indice_coda-1
     {
