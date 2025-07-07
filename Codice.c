@@ -416,7 +416,7 @@ void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE
     x2=dim_mappa.dimx-x2-1;
     if (mappa==NULL)        //check se mappa è stata creata
     {
-        fprintf(output, "%s", FALSO);
+        fprintf(output, "%s\n", FALSO);
         return;
     }
     if (x1>=dim_mappa.dimx || x1<0 || x2>=dim_mappa.dimx || x2<0 || y1>=dim_mappa.dimy || y1<0 || y2>=dim_mappa.dimy || y2<0 || mappa[x1][y1].costo==0)   //check se sono nei limiti mappa
@@ -520,7 +520,7 @@ void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE
         }
         if (aggiornato_air==NOT_VALID && aggiornato_terra==NOT_VALID)
         {
-            fprintf(output, "%d", NOT_VALID_TRAVEL);
+            fprintf(output, "%d\n", NOT_VALID_TRAVEL);
             free(coda[0]);
             free(coda[1]);
             free(coda);
