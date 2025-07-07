@@ -22,7 +22,6 @@ Consegna:   Movhex è una compagnia di autotrasporti che dispone di una flotta d
 //librerie
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <stdint.h>
 #include <math.h>
 
