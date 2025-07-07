@@ -36,7 +36,7 @@ Consegna:   Movhex è una compagnia di autotrasporti che dispone di una flotta d
 #define AFFERMATIVO "OK"
 #define FALSO "KO"
 #define NOT_VALID_COST 0
-#define LUNGHEZZA_STR_COMANDO_MAX 16
+#define LUNGHEZZA_STR_COMANDO_MAX 30
 #define MAX_ROTTE_AR (u_int16_t)5
 #define NOT_VALID (u_int16_t)-2
 #define NOT_VALID_TRAVEL -1
@@ -50,9 +50,9 @@ Consegna:   Movhex è una compagnia di autotrasporti che dispone di una flotta d
 //strutture
 typedef struct rottaar
 {
-    u_int16_t x;
-    u_int16_t y;
-    u_int16_t costo;
+    int x;
+    int y;
+    int costo;
 }rottaar_t;
 
 struct generale_comandi
@@ -70,7 +70,7 @@ struct dimensioni_mappa
     int dimy;     //dim colonne
 }dim_mappa;
 
-u_int8_t coordinate[COLLEGAMENTI][2];
+int coordinate[COLLEGAMENTI][2];
 
 typedef struct esagono
 {
@@ -208,7 +208,6 @@ void comando_init(esagono_t **mappa, FILE *output){
                 #endif
             }
         }
-        
     }
     fprintf(output, "%s", AFFERMATIVO);
     #ifdef DEBUG
@@ -220,7 +219,8 @@ void comando_init(esagono_t **mappa, FILE *output){
         }
         
     }
-    #endif    
+    #endif
+    return;   
 }
 
 
@@ -294,7 +294,6 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FIL
     #endif
     //aggiornamento costo
     i=0;
-    j=2;
     while (i<indice_coda)
     {
         dist_esagoni=dist_esag(x, y, coda[i][0], coda[i][1]);
