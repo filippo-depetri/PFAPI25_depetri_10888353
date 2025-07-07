@@ -114,8 +114,8 @@ int main(){
         sc=fscanf(f_in, "%s", comando);
         if(comando[0]==INIT){
                 libera_mappa(mappa);
-                sc=fscanf(f_in, "%d", &dim_mappa.dimy);
                 sc=fscanf(f_in, "%d", &dim_mappa.dimx);
+                sc=fscanf(f_in, "%d", &dim_mappa.dimy);
                 mappa=alloca_mappa();
                 comando_init(mappa, f_out);
                 #ifdef DEBUG
