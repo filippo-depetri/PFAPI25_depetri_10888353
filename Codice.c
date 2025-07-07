@@ -208,7 +208,7 @@ void comando_init(esagono_t **mappa, FILE *output){
             }
         }
     }
-    fprintf(output, "%s", AFFERMATIVO);
+    fprintf(output, "%s\n", AFFERMATIVO);
     #ifdef DEBUG
     for (int i = dim_mappa.dimx-1; i >= 0; i--)
     {
@@ -236,12 +236,12 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FIL
     x=dim_mappa.dimx-x-1;
     if (mappa==NULL)        //check se mappa è stata creata
     {
-        fprintf(output, "%s", FALSO);
+        fprintf(output, "%s\n", FALSO);
         return;
     }
     if (x>=dim_mappa.dimx || x<0 || y>=dim_mappa.dimy || y<0 || raggio==0 || v<-10 || v>10)   //check se sono nei limiti mappa o se raggio=0 o se v non è compreso tra -10 e 10
     {
-        fprintf(output, "%s", FALSO);
+        fprintf(output, "%s\n", FALSO);
         return;
     }
     //dimensioni della coda di coordinate al massimo
@@ -300,7 +300,7 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FIL
         aggiorna_costo(mappa, coda[i][0], coda[i][1], v, raggio, dist_esagoni);
         i++;
     }
-    fprintf(output, "%s", AFFERMATIVO);
+    fprintf(output, "%s\n", AFFERMATIVO);
     #ifdef DEBUG
     for (i = 0; i < indice_coda; i++)
     {
@@ -326,12 +326,12 @@ void comando_air_route(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *
     x2=dim_mappa.dimx-x2-1;
     if (mappa==NULL)        //check se mappa è stata creata
     {
-        fprintf(output, "%s", FALSO);
+        fprintf(output, "%s\n", FALSO);
         return;
     }
     if (x1>=dim_mappa.dimx || x1<0 || x2>=dim_mappa.dimx || x2<0 || y1>=dim_mappa.dimy || y1<0 || y2>=dim_mappa.dimy || y2<0)   //check se sono nei limiti mappa
     {
-        fprintf(output, "%s", FALSO);
+        fprintf(output, "%s\n", FALSO);
         return;
     }
     while (mappa[x1][y1].rotta_ar[rotte].costo!=NOT_VALID)
@@ -351,7 +351,7 @@ void comando_air_route(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *
                 mappa[x1][y1].rotta_ar[i].x=NOT_VALID;
                 mappa[x1][y1].rotta_ar[i].y=NOT_VALID;
                 cancellazione++;
-                fprintf(output, "%s", AFFERMATIVO);
+                fprintf(output, "%s\n", AFFERMATIVO);
                 return;
             }
         }
@@ -381,7 +381,7 @@ void comando_air_route(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *
             mappa[x1][y1].rotta_ar[rotte].costo=mediapercosto;       //creo rotta aerea
             mappa[x1][y1].rotta_ar[rotte].x=x2;
             mappa[x1][y1].rotta_ar[rotte].y=y2;
-            fprintf(output, "%s", AFFERMATIVO);
+            fprintf(output, "%s\n", AFFERMATIVO);
             #ifdef DEBUG
             fprintf(output, "%d %d %d %d", x1, y1, x2, y2);
             fprintf(output, "%d", rotte);
@@ -390,7 +390,7 @@ void comando_air_route(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *
         }
     }
     else {
-        fprintf(output, "%s", FALSO);
+        fprintf(output, "%s\n", FALSO);
         return;
     }
     
@@ -421,12 +421,12 @@ void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE
     }
     if (x1>=dim_mappa.dimx || x1<0 || x2>=dim_mappa.dimx || x2<0 || y1>=dim_mappa.dimy || y1<0 || y2>=dim_mappa.dimy || y2<0 || mappa[x1][y1].costo==0)   //check se sono nei limiti mappa
     {
-        fprintf(output, "%d", NOT_VALID_TRAVEL);
+        fprintf(output, "%d\n", NOT_VALID_TRAVEL);
         return;
     }
     if(x1==x2 && y1==y2)
     {
-        fprintf(output, "%d", NOT_VALID_COST);
+        fprintf(output, "%d\n", NOT_VALID_COST);
         return;
     }
     coda=malloc(2*sizeof(int *));
@@ -567,7 +567,7 @@ void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE
     {
         costo+=mappa[coda[0][i]][coda[1][i]].costo;
     }
-    fprintf(output, "%d", costo);
+    fprintf(output, "%d\n", costo);
     //libero memoria
     free(coda[0]);
     free(coda[1]);
