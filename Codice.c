@@ -338,7 +338,7 @@ void comando_air_route(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *
     {
         rotte++;
     }
-    if (mappa[x1][y1].costo!=NOT_VALID_COST || mappa[x2][y2].costo!=NOT_VALID_COST)
+    if (mappa[x1][y1].costo!=NOT_VALID_COST)
     {
         for(int i=0; i <MAX_ROTTE_AR; i++){
             if (mappa[x1][y1].rotta_ar[i].x==x2 && mappa[x1][y1].rotta_ar[i].y==y2) 
@@ -455,18 +455,21 @@ void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE
         indice_distanza=NOT_VALID;
         for (int i = 0; i < COLLEGAMENTI; i++)      //collegamenti terra
         {
-            if (coordinate[i][0]>=0 && coordinate[i][0]<dim_mappa.dimx && coordinate[i][1]>=0 && coordinate[i][1]<dim_mappa.dimy && (mappa[coordinate[i][0]][coordinate[i][1]].costo!=0 || (mappa[coordinate[i][0]][coordinate[i][1]].costo==0 && (coordinate[i][0]==x2 && coordinate[i][1]==y2))))       //check se sono nei boundary e intransitabilità sennò non analizzo
+            if (coordinate[i][0]>=0 && coordinate[i][0]<dim_mappa.dimx && coordinate[i][1]>=0 && coordinate[i][1]<dim_mappa.dimy)       //check se sono nei boundary sennò non analizzo
             {
-                if (mappa[coordinate[i][0]][coordinate[i][1]].costo<mincost_terra)        //verifico il minimo costo
+                if (mappa[coordinate[i][0]][coordinate[i][1]].costo!=0 || (mappa[coordinate[i][0]][coordinate[i][1]].costo==0 && (coordinate[i][0]==x2 && coordinate[i][1]==y2)))
                 {
-                    mincost_terra=mappa[coordinate[i][0]][coordinate[i][1]].costo;
-                    indice_costo=i;
-                }
-                dist=dist_esag(coordinate[i][0], coordinate[i][1], x2, y2);
-                if (dist<mindist_terra)                   //verifico la minima distanza
-                {
-                    mindist_terra=dist;
-                    indice_distanza=i;
+                    if (mappa[coordinate[i][0]][coordinate[i][1]].costo<mincost_terra)        //verifico il minimo costo
+                    {
+                        mincost_terra=mappa[coordinate[i][0]][coordinate[i][1]].costo;
+                        indice_costo=i;
+                    }
+                    dist=dist_esag(coordinate[i][0], coordinate[i][1], x2, y2);
+                    if (dist<mindist_terra)                   //verifico la minima distanza
+                    {
+                        mindist_terra=dist;
+                        indice_distanza=i;
+                    }
                 }
             }
         }
@@ -487,20 +490,20 @@ void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE
         }
         indice_costo=NOT_VALID;
         indice_distanza=NOT_VALID;
-        for (int i = 0; i < MAX_ROTTE_AR; i++)      //collegamenti aria
+        for (int k = 0; k < MAX_ROTTE_AR; k++)      //collegamenti aria
         {
-            if (mappa[x1][y1].rotta_ar[i].costo!=NOT_VALID && (mappa[mappa[x1][y1].rotta_ar[i].x][mappa[x1][y1].rotta_ar[i].y].costo!=0 || (mappa[mappa[x1][y1].rotta_ar[i].x][mappa[x1][y1].rotta_ar[i].y].costo==0 && mappa[x1][y1].rotta_ar[i].x==x2 && mappa[x1][y1].rotta_ar[i].y==y2)))
+            if (mappa[x1][y1].rotta_ar[k].costo!=NOT_VALID && (mappa[mappa[x1][y1].rotta_ar[k].x][mappa[x1][y1].rotta_ar[k].y].costo!=0 || (mappa[mappa[x1][y1].rotta_ar[k].x][mappa[x1][y1].rotta_ar[k].y].costo==0 && mappa[x1][y1].rotta_ar[k].x==x2 && mappa[x1][y1].rotta_ar[k].y==y2)))
             {
-                dist=dist_esag(mappa[x1][y1].rotta_ar[i].x, mappa[x1][y1].rotta_ar[i].y, x2, y2);
+                dist=dist_esag(mappa[x1][y1].rotta_ar[k].x, mappa[x1][y1].rotta_ar[k].y, x2, y2);
                 if (dist<mindist_air)
                 {
                     mindist_air=dist;
-                    indice_distanza=i;
+                    indice_distanza=k;
                 }
-                if (mappa[x1][y1].rotta_ar[i].costo<mincost_air)
+                if (mappa[x1][y1].rotta_ar[k].costo<mincost_air)
                 {
-                    mincost_air=mappa[x1][y1].rotta_ar[i].costo;
-                    indice_costo=i;
+                    mincost_air=mappa[x1][y1].rotta_ar[k].costo;
+                    indice_costo=k;
                 }
             }
         }
@@ -531,32 +534,50 @@ void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE
         {
             coda[0][indice_coda]=coord_terra[0][0];
             coda[1][indice_coda]=coord_terra[0][1];
+            #ifdef DEBUG
+            fprintf(output, "%d, %d\n", coda[0][indice_coda], coda[1][indice_coda]);
+            #endif
         }
         else{
             if (aggiornato_air!=NOT_VALID && aggiornato_terra==NOT_VALID)
             {
                 coda[0][indice_coda]=coord_aria[0][0];
                 coda[1][indice_coda]=coord_aria[0][1];
+                #ifdef DEBUG
+                fprintf(output, "%d, %d\n", coda[0][indice_coda], coda[1][indice_coda]);
+                #endif
             }
             else{
                 if (mindist_air<mindist_terra && mincost_air<mincost_terra)
                 {
                     coda[0][indice_coda]=coord_aria[0][0];
                     coda[1][indice_coda]=coord_aria[0][1];
+                    #ifdef DEBUG
+                    fprintf(output, "%d, %d\n", coda[0][indice_coda], coda[1][indice_coda]);
+                    #endif
                 }
                 if (mindist_terra<mindist_air && mincost_terra<mincost_air)
                 {
                     coda[0][indice_coda]=coord_terra[0][0];
                     coda[1][indice_coda]=coord_terra[0][1];
+                    #ifdef DEBUG
+                    fprintf(output, "%d, %d\n", coda[0][indice_coda], coda[1][indice_coda]);
+                    #endif
                 }
                 if (mindist_air<mindist_terra)
                 {
                     coda[0][indice_coda]=coord_aria[0][0];
                     coda[1][indice_coda]=coord_aria[0][1];
+                    #ifdef DEBUG
+                    fprintf(output, "%d, %d\n", coda[0][indice_coda], coda[1][indice_coda]);
+                    #endif
                 }
                 else{
                     coda[0][indice_coda]=coord_terra[0][0];
                     coda[1][indice_coda]=coord_terra[0][1];
+                    #ifdef DEBUG
+                    fprintf(output, "%d, %d\n", coda[0][indice_coda], coda[1][indice_coda]);
+                    #endif
                 }
             }
         }
