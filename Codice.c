@@ -484,6 +484,8 @@ void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE
                 aggiornato_air++;
             }
         }
+        indice_costo=NOT_VALID;
+        indice_distanza=NOT_VALID;
         nodi_adiacenti(x1, y1);
         for (int i = 0; i < COLLEGAMENTI; i++)      //collegamenti terra
         {
@@ -513,15 +515,13 @@ void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE
                 coord_terra[0][1]=coordinate[indice_distanza][1];
                 aggiornato_terra++;
             }
-            if (aggiornato_terra==NOT_VALID)
+            else
             {
                 coord_terra[0][0]=coordinate[indice_distanza][0];
                 coord_terra[0][1]=coordinate[indice_distanza][1];
                 aggiornato_terra++;
             }
         }
-        indice_costo=NOT_VALID;
-        indice_distanza=NOT_VALID;
         if ((aggiornato_air==NOT_VALID && aggiornato_terra==NOT_VALID) || j>=MAX_COST)
         {
             fprintf(output, "%d\n", NOT_VALID_TRAVEL);
