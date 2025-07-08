@@ -443,8 +443,7 @@ void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE
             coda[1]=realloc(coda[1], (max_coda+MAX_ALLOCATED)*sizeof(int));
             max_coda+=MAX_ALLOCATED;
         }
-        
-        nodi_adiacenti(x1, y1);
+        //inizializzazione variabili per ogni ciclo di operazione
         mincost_terra=MAX_COST;
         mindist_terra=dim_mappa.dimx*dim_mappa.dimy;
         mincost_air=MAX_COST;
@@ -453,6 +452,39 @@ void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE
         aggiornato_terra=NOT_VALID;
         indice_costo=NOT_VALID;
         indice_distanza=NOT_VALID;
+        for (int k = 0; k < MAX_ROTTE_AR; k++)      //collegamenti aria
+        {
+            if (mappa[x1][y1].rotta_ar[k].costo!=NOT_VALID && (mappa[mappa[x1][y1].rotta_ar[k].x][mappa[x1][y1].rotta_ar[k].y].costo!=0 || (mappa[mappa[x1][y1].rotta_ar[k].x][mappa[x1][y1].rotta_ar[k].y].costo==0 && mappa[x1][y1].rotta_ar[k].x==x2 && mappa[x1][y1].rotta_ar[k].y==y2)))
+            {
+                dist=dist_esag(mappa[x1][y1].rotta_ar[k].x, mappa[x1][y1].rotta_ar[k].y, x2, y2);
+                if (dist<mindist_air)
+                {
+                    mindist_air=dist;
+                    indice_distanza=k;
+                }
+                if (mappa[x1][y1].rotta_ar[k].costo<mincost_air)
+                {
+                    mincost_air=mappa[x1][y1].rotta_ar[k].costo;
+                    indice_costo=k;
+                }
+            }
+        }
+        if (indice_costo!=NOT_VALID && indice_distanza!=NOT_VALID)
+        {
+            if (indice_costo==indice_distanza)
+            {
+                coord_aria[0][0]=mappa[x1][y1].rotta_ar[indice_distanza].x;
+                coord_aria[0][1]=mappa[x1][y1].rotta_ar[indice_distanza].y;
+                aggiornato_air++;
+            }
+            else
+            {
+                coord_aria[0][0]=mappa[x1][y1].rotta_ar[indice_distanza].x;
+                coord_aria[0][1]=mappa[x1][y1].rotta_ar[indice_distanza].y;
+                aggiornato_air++;
+            }
+        }
+        nodi_adiacenti(x1, y1);
         for (int i = 0; i < COLLEGAMENTI; i++)      //collegamenti terra
         {
             if (coordinate[i][0]>=0 && coordinate[i][0]<dim_mappa.dimx && coordinate[i][1]>=0 && coordinate[i][1]<dim_mappa.dimy)       //check se sono nei boundary sennò non analizzo
@@ -490,38 +522,6 @@ void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE
         }
         indice_costo=NOT_VALID;
         indice_distanza=NOT_VALID;
-        for (int k = 0; k < MAX_ROTTE_AR; k++)      //collegamenti aria
-        {
-            if (mappa[x1][y1].rotta_ar[k].costo!=NOT_VALID && (mappa[mappa[x1][y1].rotta_ar[k].x][mappa[x1][y1].rotta_ar[k].y].costo!=0 || (mappa[mappa[x1][y1].rotta_ar[k].x][mappa[x1][y1].rotta_ar[k].y].costo==0 && mappa[x1][y1].rotta_ar[k].x==x2 && mappa[x1][y1].rotta_ar[k].y==y2)))
-            {
-                dist=dist_esag(mappa[x1][y1].rotta_ar[k].x, mappa[x1][y1].rotta_ar[k].y, x2, y2);
-                if (dist<mindist_air)
-                {
-                    mindist_air=dist;
-                    indice_distanza=k;
-                }
-                if (mappa[x1][y1].rotta_ar[k].costo<mincost_air)
-                {
-                    mincost_air=mappa[x1][y1].rotta_ar[k].costo;
-                    indice_costo=k;
-                }
-            }
-        }
-        if (indice_costo!=NOT_VALID && indice_distanza!=NOT_VALID)
-        {
-            if (indice_costo==indice_distanza)
-            {
-                coord_aria[0][0]=mappa[x1][y1].rotta_ar[indice_distanza].x;
-                coord_aria[0][1]=mappa[x1][y1].rotta_ar[indice_distanza].y;
-                aggiornato_air++;
-            }
-            if (aggiornato_air==NOT_VALID)
-            {
-                coord_aria[0][0]=mappa[x1][y1].rotta_ar[indice_distanza].x;
-                coord_aria[0][1]=mappa[x1][y1].rotta_ar[indice_distanza].y;
-                aggiornato_air++;
-            }
-        }
         if ((aggiornato_air==NOT_VALID && aggiornato_terra==NOT_VALID) || j>=MAX_COST)
         {
             fprintf(output, "%d\n", NOT_VALID_TRAVEL);
