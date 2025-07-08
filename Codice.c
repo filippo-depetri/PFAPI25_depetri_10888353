@@ -114,8 +114,8 @@ int main(){
         sc=fscanf(f_in, "%s", comando);
         if(comando[0]==INIT){
                 libera_mappa(mappa);
-                sc=fscanf(f_in, "%d", &dim_mappa.dimx);
                 sc=fscanf(f_in, "%d", &dim_mappa.dimy);
+                sc=fscanf(f_in, "%d", &dim_mappa.dimx);
                 mappa=alloca_mappa();
                 comando_init(mappa, f_out);
                 #ifdef DEBUG
@@ -139,7 +139,7 @@ int main(){
                         sc=fscanf(f_in, "%d", &gen_comandi.colx);
                         sc=fscanf(f_in, "%d", &gen_comandi.rigy);
                         sc=fscanf(f_in, "%d", &gen_comandi.coly);
-                        comando_air_route(mappa, gen_comandi.rigx, gen_comandi.colx,gen_comandi.rigy, gen_comandi.coly, f_out);
+                        comando_air_route(mappa, gen_comandi.rigx, gen_comandi.colx, gen_comandi.rigy, gen_comandi.coly, f_out);
                         #ifdef DEBUG
                         printf("AIR_ROUTE\n");
                         #endif
@@ -149,7 +149,7 @@ int main(){
                         sc=fscanf(f_in, "%d", &gen_comandi.colx);
                         sc=fscanf(f_in, "%d", &gen_comandi.rigy);
                         sc=fscanf(f_in, "%d", &gen_comandi.coly);
-                        comando_travel_cost(mappa, gen_comandi.rigx, gen_comandi.colx,gen_comandi.rigy, gen_comandi.coly, f_out);
+                        comando_travel_cost(mappa, gen_comandi.rigx, gen_comandi.colx, gen_comandi.rigy, gen_comandi.coly, f_out);
                         #ifdef DEBUG
                         printf("TRAVEL\n");
                         #endif
