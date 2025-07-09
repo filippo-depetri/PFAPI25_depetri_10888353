@@ -74,7 +74,7 @@ struct dimensioni_mappa
 void comando_init(u_int16_t **esagoni, FILE *output);
 void comando_change_cost(map *mappa, int x, int y, int v, int raggio, FILE *output);
 void comando_air_route(map *mappa, int x1, int y1, int x2, int y2, FILE *output);
-//void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *output);
+void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *output);
 void alloca_mappa();
 void libera_mappa(map *mappa);
 float max (float n1, float n2);
@@ -142,7 +142,7 @@ int main(){
                         sc=fscanf(f_in, "%d", &gen_comandi.rigx);
                         sc=fscanf(f_in, "%d", &gen_comandi.coly);
                         sc=fscanf(f_in, "%d", &gen_comandi.rigy);
-                        //comando_travel_cost(&mappa, gen_comandi.rigx, gen_comandi.colx, gen_comandi.rigy, gen_comandi.coly, f_out);
+                        comando_travel_cost(&mappa, gen_comandi.rigx, gen_comandi.colx, gen_comandi.rigy, gen_comandi.coly, f_out);
                         #ifdef DEBUG
                         printf("TRAVEL\n");
                         #endif
@@ -399,7 +399,9 @@ void comando_air_route(map* mappa, int x1, int y1, int x2, int y2, FILE *output)
     
 }
 
-/*void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *output){
+void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *output){
+    return;
+    /*
     int costo=0;
     int mincost_terra;
     int mindist_terra;
@@ -599,8 +601,8 @@ void comando_air_route(map* mappa, int x1, int y1, int x2, int y2, FILE *output)
     free(coda[1]);
     free(coda);
     return;
-}
     */
+}
 
 float max(float n1, float n2){
     if (n1>n2)
