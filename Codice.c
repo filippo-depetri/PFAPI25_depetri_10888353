@@ -509,9 +509,6 @@ void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, int 
         if ((aggiornato_air==NOT_VALID && aggiornato_terra==NOT_VALID) || j>=MAX_COST)
         {
             fprintf(output, "%d\n", NOT_VALID_TRAVEL);
-            free(coda[0]);
-            free(coda[1]);
-            free(coda);
             return;
         }
         if (aggiornato_air==NOT_VALID && aggiornato_terra!=NOT_VALID)
