@@ -316,7 +316,7 @@ void comando_air_route(map* mappa, int x1, int y1, int x2, int y2, FILE *output)
         }
         for (int i = 0; i < MAX_ALLOCATED; i++)
         {
-            for (int j = 0; i < MAX_ROTTE_AR; i++)
+            for (int j = 0; i < MAX_ROTTE_AR; j++)
             {
                 mappa->rotte_aeree[i][j]=NOT_VALID;
             }
@@ -602,11 +602,14 @@ void aggiorna_costo(map *mappa, int xloc, int yloc, int v, int raggio, int dist_
         prog=100;
     }
     mappa->esagoni[xloc*dim_mappa.dimx+yloc][0]=prog;
-    for (int i = 0; i < MAX_ALLOCATED; i++)
+    if (mappa->rotte_aeree!=NULL)
     {
-        if (mappa->rotte_aeree[i][0]==xloc && mappa->rotte_aeree[i][1]==yloc)
+        for (int i = 0; i < MAX_ALLOCATED; i++)
         {
-            mappa->rotte_aeree[i][4]=prog;
+            if (mappa->rotte_aeree[i][0]==xloc && mappa->rotte_aeree[i][1]==yloc)
+            {
+                mappa->rotte_aeree[i][4]=prog;
+            }
         }
     }
 }
