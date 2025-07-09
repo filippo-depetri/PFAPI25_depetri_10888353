@@ -204,8 +204,8 @@ void comando_init(esagono_t *mappa, int *cache, FILE *output){
     }
     for (int i = 0; i < dim_mappa.dimx*dim_mappa.dimy; i++)
     {
-        cache[i*dim_mappa.dimy]=NOT_VALID;
-        cache[i*dim_mappa.dimy+1]=NOT_VALID;  
+        cache[i*2]=NOT_VALID;
+        cache[i*2+1]=NOT_VALID;  
     }
     fprintf(output, "%s\n", AFFERMATIVO);
     #ifdef DEBUG
@@ -250,7 +250,7 @@ void comando_change_cost(esagono_t *mappa, int x, int y, int v, int raggio, int 
     xloc=x;
     yloc=y;
     //incodamento nodi adiacenti
-    while (indice_coda<dim_mappa.dimx*dim_mappa.dimy)
+    while (indice_coda<2*dim_mappa.dimx*dim_mappa.dimy)
     {
         nodi_adiacenti(xloc, yloc);
         for (i = 0; i < COLLEGAMENTI; i++)
@@ -259,8 +259,8 @@ void comando_change_cost(esagono_t *mappa, int x, int y, int v, int raggio, int 
             {
                 if (mappa[coordinate[i][0]*dim_mappa.dimy + coordinate[i][1]].already_visited==BIANCO)
                 {
-                    coda[indice_coda*dim_mappa.dimy]=coordinate[i][0];
-                    coda[indice_coda*dim_mappa.dimy+1]=coordinate[i][1];
+                    coda[indice_coda*2]=coordinate[i][0];
+                    coda[indice_coda*2+1]=coordinate[i][1];
                     mappa[coordinate[i][0]*dim_mappa.dimy + coordinate[i][1]].already_visited=GRIGIO;
                     #ifdef DEBUG
                     fprintf(output, "%d %d %d\n", coordinate[i][0], coordinate[i][1], indice_coda);
@@ -275,8 +275,8 @@ void comando_change_cost(esagono_t *mappa, int x, int y, int v, int raggio, int 
         if (j==indice_coda){
             break;
         }
-        xloc=coda[j*dim_mappa.dimy];
-        yloc=coda[j*dim_mappa.dimy+1];
+        xloc=coda[j*2];
+        yloc=coda[j*2+1];
         j++;
     }
     #ifdef DEBUG
@@ -286,22 +286,22 @@ void comando_change_cost(esagono_t *mappa, int x, int y, int v, int raggio, int 
     i=0;
     while (i<indice_coda)
     {
-        dist_esagoni=dist_esag(x, y, coda[i*dim_mappa.dimy], coda[i*dim_mappa.dimy+1]);
-        aggiorna_costo(mappa, coda[i*dim_mappa.dimy], coda[i*dim_mappa.dimy+1], v, raggio, dist_esagoni);
+        dist_esagoni=dist_esag(x, y, coda[i*2], coda[i*2+1]);
+        aggiorna_costo(mappa, coda[i*2], coda[i*2+1], v, raggio, dist_esagoni);
         i++;
     }
     fprintf(output, "%s\n", AFFERMATIVO);
     #ifdef DEBUG
     for (i = 0; i < indice_coda; i++)
     {
-        fprintf(output, "%d\n", mappa[coda[i*dim_mappa.dimy]*dim_mappa.dimy+ coda[i*dim_mappa.dimy+1]].costo);
+        fprintf(output, "%d\n", mappa[coda[i*2]*dim_mappa.dimy+ coda[i*2+1]].costo);
     }
     #endif
     //reset dell'already visited e cache
     for(i = 0; i<indice_coda; i++){
-        mappa[coda[i*dim_mappa.dimy]*dim_mappa.dimy + coda[i*dim_mappa.dimy+1]].already_visited=BIANCO;
-        coda[i*dim_mappa.dimy]=NOT_VALID;
-        coda[i*dim_mappa.dimy+1]=NOT_VALID;
+        mappa[coda[i*2]*dim_mappa.dimy + coda[i*2+1]].already_visited=BIANCO;
+        coda[i*2]=NOT_VALID;
+        coda[i*2+1]=NOT_VALID;
     }
     mappa[x*dim_mappa.dimy+y].already_visited=BIANCO;
     return;
@@ -325,7 +325,7 @@ void comando_air_route(esagono_t *mappa, int x1, int y1, int x2, int y2, FILE *o
         fprintf(output, "%s\n", FALSO);
         return;
     }
-    while (mappa[x1*dim_mappa.dimy + y1].rotta_ar[rotte].costo!=NOT_VALID)
+    while (mappa[x1*dim_mappa.dimy + y1].rotta_ar[rotte].costo!=NOT_VALID && rotte < MAX_ROTTE_AR)
     {
         rotte++;
     }
@@ -508,51 +508,51 @@ void comando_travel_cost(esagono_t *mappa, int x1, int y1, int x2, int y2, int *
         }
         if (aggiornato_air==NOT_VALID && aggiornato_terra!=NOT_VALID)
         {
-            coda[indice_coda*dim_mappa.dimy]=coord_terra[0][0];
-            coda[indice_coda*dim_mappa.dimy+1]=coord_terra[0][1];
+            coda[indice_coda*2]=coord_terra[0][0];
+            coda[indice_coda*2+1]=coord_terra[0][1];
         }
         else{
             if (aggiornato_air!=NOT_VALID && aggiornato_terra==NOT_VALID)
             {
-                coda[indice_coda*dim_mappa.dimy]=coord_aria[0][0];
-                coda[indice_coda*dim_mappa.dimy+1]=coord_aria[0][1];
+                coda[indice_coda*2]=coord_aria[0][0];
+                coda[indice_coda*2+1]=coord_aria[0][1];
             }
             else{
                 if (mindist_air<mindist_terra && mincost_air<mincost_terra)
                 {
-                    coda[indice_coda*dim_mappa.dimy]=coord_aria[0][0];
-                    coda[indice_coda*dim_mappa.dimy+1]=coord_aria[0][1];
+                    coda[indice_coda*2]=coord_aria[0][0];
+                    coda[indice_coda*2+1]=coord_aria[0][1];
                 }
                 if (mindist_terra<mindist_air && mincost_terra<mincost_air)
                 {
-                    coda[indice_coda*dim_mappa.dimy]=coord_terra[0][0];
-                    coda[indice_coda*dim_mappa.dimy+1]=coord_terra[0][1];
+                    coda[indice_coda*2]=coord_terra[0][0];
+                    coda[indice_coda*2+1]=coord_terra[0][1];
                 }
                 if (mindist_air<mindist_terra)
                 {
-                    coda[indice_coda*dim_mappa.dimy]=coord_aria[0][0];
-                    coda[indice_coda*dim_mappa.dimy+1]=coord_aria[0][1];
+                    coda[indice_coda*2]=coord_aria[0][0];
+                    coda[indice_coda*2+1]=coord_aria[0][1];
                 }
                 else{
-                    coda[indice_coda*dim_mappa.dimy]=coord_terra[0][0];
-                    coda[indice_coda*dim_mappa.dimy+1]=coord_terra[0][1];
+                    coda[indice_coda*2]=coord_terra[0][0];
+                    coda[indice_coda*2+1]=coord_terra[0][1];
                 }
             }
         }
-        x1=coda[indice_coda*dim_mappa.dimy];
-        y1=coda[indice_coda*dim_mappa.dimy+1];
+        x1=coda[indice_coda*2];
+        y1=coda[indice_coda*2+1];
         indice_coda++;
         j++;
     }
     for (int i = 0; i < indice_coda-1; i++)     //incoda anche l'ultimo che non deve essere contato per cui indice_coda-1
     {
-        costo+=mappa[coda[i*dim_mappa.dimy]*dim_mappa.dimy + coda[i*dim_mappa.dimy+1]].costo;
+        costo+=mappa[coda[i*2]*dim_mappa.dimy + coda[i*2+1]].costo;
     }
     //reset cache
         for (int i = 0; i < indice_coda; i++)     //incoda anche l'ultimo che non deve essere contato per cui indice_coda-1
     {
-        coda[i*dim_mappa.dimy]=NOT_VALID;
-        coda[i*dim_mappa.dimy+1]=NOT_VALID;
+        coda[i*2]=NOT_VALID;
+        coda[i*2+1]=NOT_VALID;
     }
     fprintf(output, "%d\n", costo);
     return;
