@@ -43,7 +43,7 @@ Consegna:   Movhex è una compagnia di autotrasporti che dispone di una flotta d
 #define BIANCO 9
 #define COLLEGAMENTI 6
 #define MAX_COST 100000
-#define MAX_ALLOCATED 5000
+#define MAX_ALLOCATED dim_mappa.dimx*dim_mappa.dimy
 
 
 //strutture
@@ -79,16 +79,16 @@ typedef struct esagono
 }esagono_t;
 
 void comando_init(esagono_t **mappa, FILE *output);
-void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FILE *output);
+void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, int **coda, FILE *output);
 void comando_air_route(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *output);
-void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *output);
+void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, int **coda, FILE *output);
 esagono_t **alloca_mappa();
 void libera_mappa(esagono_t **mappa);
 float max (float n1, float n2);
 void aggiorna_costo(esagono_t **mappa, int xloc, int yloc, int v, int raggio, int dist_esagoni);
 void nodi_adiacenti(int x, int y);
-int **alloca_coda(int dim_coda);
-void libera_coda(int **coda, int dim_coda);
+int **alloca_coda();
+void libera_coda(int **coda);
 int dist_esag(int startX, int startY, int arrX, int arrY);
 
 int main(){
@@ -100,6 +100,7 @@ int main(){
         f_in=stdin;
         f_out=stdout;
         esagono_t **mappa=NULL;
+        int **cache=NULL;
     //fine variabili gestione comandi
     #ifdef DEBUGTEST
     int ssc;
@@ -118,6 +119,7 @@ int main(){
                 sc=fscanf(f_in, "%d", &dim_mappa.dimx);
                 mappa=alloca_mappa();
                 comando_init(mappa, f_out);
+                cache=alloca_coda();
                 #ifdef DEBUG
                 printf("INIT\n");
                 #endif
@@ -128,7 +130,7 @@ int main(){
                 sc=fscanf(f_in, "%d", &gen_comandi.rigx);
                 sc=fscanf(f_in, "%d", &gen_comandi.v);
                 sc=fscanf(f_in, "%d", &gen_comandi.raggio);
-                comando_change_cost(mappa, gen_comandi.rigx, gen_comandi.colx, gen_comandi.v, gen_comandi.raggio, f_out);
+                comando_change_cost(mappa, gen_comandi.rigx, gen_comandi.colx, gen_comandi.v, gen_comandi.raggio, cache, f_out);
                 #ifdef DEBUG
                 printf("CHANGE_COST\n");
                 #endif
@@ -149,7 +151,7 @@ int main(){
                         sc=fscanf(f_in, "%d", &gen_comandi.rigx);
                         sc=fscanf(f_in, "%d", &gen_comandi.coly);
                         sc=fscanf(f_in, "%d", &gen_comandi.rigy);
-                        comando_travel_cost(mappa, gen_comandi.rigx, gen_comandi.colx, gen_comandi.rigy, gen_comandi.coly, f_out);
+                        comando_travel_cost(mappa, gen_comandi.rigx, gen_comandi.colx, gen_comandi.rigy, gen_comandi.coly, cache, f_out);
                         #ifdef DEBUG
                         printf("TRAVEL\n");
                         #endif
@@ -159,6 +161,7 @@ int main(){
     }while(sc!=EOF);
     fclose(f_in);
     fclose(f_out);
+    libera_coda(cache);
     libera_mappa(mappa);
     return 0;
 }
@@ -224,14 +227,13 @@ void comando_init(esagono_t **mappa, FILE *output){
 
 
 //comando change cost
-void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FILE *output){
+void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, int **coda, FILE *output){
     int dist_esagoni=0;
     int xloc;
     int yloc;
     int dim_coda=0;
     int indice_coda=0;
     int j=0;
-    int **coda=NULL;
     int i=0;
     x=dim_mappa.dimx-x-1;
     if (mappa==NULL)        //check se mappa è stata creata
@@ -244,13 +246,6 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FIL
         fprintf(output, "%s\n", FALSO);
         return;
     }
-    //dimensioni della coda di coordinate al massimo
-    for (i = 1; i <= raggio; i++)
-    {
-        dim_coda+=COLLEGAMENTI*i;
-    }
-    //creazione coda di coordinate
-    coda=alloca_coda(dim_coda);
     //aggiornamento nodo sorgente
     aggiorna_costo(mappa, x, y, v, raggio, dist_esagoni);
     #ifdef DEBUG
@@ -307,12 +302,13 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FIL
         fprintf(output, "%d\n", mappa[coda[i][0]][coda[i][1]].costo);
     }
     #endif
-    //reset dell'already visited
+    //reset dell'already visited e cache
     for(i = 0; i<indice_coda; i++){
         mappa[coda[i][0]][coda[i][1]].already_visited=BIANCO;
+        coda[i][0]=NOT_VALID;
+        coda[i][1]=NOT_VALID;
     }
     mappa[x][y].already_visited=BIANCO;
-    libera_coda(coda, dim_coda);
     return;
 }
 
@@ -396,14 +392,12 @@ void comando_air_route(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *
     
 }
 
-void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *output){
+void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, int **coda, FILE *output){
     int costo=0;
     int mincost_terra;
     int mindist_terra;
     int mincost_air;
     int mindist_air;
-    int **coda=NULL;
-    int max_coda=MAX_ALLOCATED;
     int dist=0;
     int indice_coda=0;
     int coord_terra[1][2]={{NOT_VALID, NOT_VALID}};
@@ -430,19 +424,9 @@ void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE
         fprintf(output, "%d\n", NOT_VALID_COST);
         return;
     }
-    coda=malloc(2*sizeof(int *));
-    coda[0]=coda[1]=NULL;
-    coda[0]=malloc(max_coda*sizeof(int));     //metodo allocazione a step, prima allocazione a 20 blocchi
-    coda[1]=malloc(max_coda*sizeof(int));
     costo+=mappa[x1][y1].costo;
     while (x1!=x2 || y1!=y2)
     {
-        if (indice_coda>=max_coda)
-        {
-            coda[0]=realloc(coda[0], (max_coda+MAX_ALLOCATED)*sizeof(int));
-            coda[1]=realloc(coda[1], (max_coda+MAX_ALLOCATED)*sizeof(int));
-            max_coda+=MAX_ALLOCATED;
-        }
         //inizializzazione variabili per ogni ciclo di operazione
         mincost_terra=MAX_COST;
         mindist_terra=dim_mappa.dimx*dim_mappa.dimy;
@@ -590,11 +574,13 @@ void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE
     {
         costo+=mappa[coda[0][i]][coda[1][i]].costo;
     }
+    //reset cache
+        for (int i = 0; i < indice_coda; i++)     //incoda anche l'ultimo che non deve essere contato per cui indice_coda-1
+    {
+        coda[i][0]=NOT_VALID;
+        coda[i][1]=NOT_VALID;
+    }
     fprintf(output, "%d\n", costo);
-    //libero memoria
-    free(coda[0]);
-    free(coda[1]);
-    free(coda);
     return;
 }
 
@@ -658,22 +644,28 @@ void nodi_adiacenti(int x, int y){
         coordinate[5][1]=y-1;
     }
 }
-int **alloca_coda(int dim_coda){
+int **alloca_coda(){
         int **coda;
-        coda=malloc(dim_coda*sizeof(int *));
-        for (int i = 0; i < dim_coda; i++)
+        int i;
+        coda=malloc(MAX_ALLOCATED*sizeof(int *));
+        for (i = 0; i < MAX_ALLOCATED; i++)
         {
             coda[i]=malloc(2*sizeof(int));
         }
+        for (i = 0; i < MAX_ALLOCATED; i++)
+        {
+            coda[i][0]=NOT_VALID;
+            coda[i][1]=NOT_VALID;
+        }
         return(coda);
 }
-void libera_coda(int **coda, int dim_coda){
+void libera_coda(int **coda){
     if (coda==NULL)
     {
         return;
     }
     else{
-        for (int i = 0; i < dim_coda; i++)
+        for (int i = 0; i < MAX_ALLOCATED; i++)
         {
             free(coda[i]);
         }
