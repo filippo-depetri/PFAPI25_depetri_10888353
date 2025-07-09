@@ -50,7 +50,7 @@ typedef struct rottaar
 {
     int x;
     int y;
-    int costo;
+    u_int16_t costo;
 }rottaar_t;
 
 struct generale_comandi
@@ -72,9 +72,10 @@ int coordinate[COLLEGAMENTI][2];
 
 typedef struct esagono
 {
-    int costo;
+    u_int16_t costo;
     rottaar_t rotta_ar[MAX_ROTTE_AR];
     u_int8_t already_visited;
+    u_int8_t rotte_entranti;
 }esagono_t;
 
 void comando_init(esagono_t *mappa, int *cache, FILE *output);
@@ -89,6 +90,7 @@ void nodi_adiacenti(int x, int y);
 int *alloca_coda();
 void libera_coda(int *coda);
 int dist_esag(int startX, int startY, int arrX, int arrY);
+int verifica_nodi(esagono_t *mappa, int x, int y);
 
 int main(){
     //PREPARATIVI
@@ -196,6 +198,7 @@ void comando_init(esagono_t *mappa, int *cache, FILE *output){
                 mappa[i*dim_mappa.dimy+j].rotta_ar[k].costo=NOT_VALID;       //inizializzo vettori rotte aeree
                 mappa[i*dim_mappa.dimy+j].rotta_ar[k].x=NOT_VALID;
                 mappa[i*dim_mappa.dimy+j].rotta_ar[k].y=NOT_VALID;
+                mappa[i*dim_mappa.dimy+j].rotte_entranti=NOT_VALID_COST;
                 #ifdef DEBUG
                 fprintf(output, "%d", mappa[i*dim_mappa.dimy+j].rotta_ar[k].costo);
                 #endif
@@ -325,66 +328,60 @@ void comando_air_route(esagono_t *mappa, int x1, int y1, int x2, int y2, FILE *o
         fprintf(output, "%s\n", FALSO);
         return;
     }
-    while (mappa[x1*dim_mappa.dimy + y1].rotta_ar[rotte].costo!=NOT_VALID && rotte < MAX_ROTTE_AR)
-    {
-        rotte++;
-    }
-    if (mappa[x1*dim_mappa.dimy + y1].costo!=NOT_VALID_COST)
-    {
-        for(int i=0; i <MAX_ROTTE_AR; i++){
-            if (mappa[x1*dim_mappa.dimy + y1].rotta_ar[i].x==x2 && mappa[x1*dim_mappa.dimy + y1].rotta_ar[i].y==y2) 
-            {
-                #ifdef DEBUG
-                fprintf(output, "%d %d %d %d", x1, y1, x2, y2);
-                #endif
-
-                mappa[x1*dim_mappa.dimy + y1].rotta_ar[i].costo=NOT_VALID;       //cancello rotta aerea
-                mappa[x1*dim_mappa.dimy + y1].rotta_ar[i].x=NOT_VALID;
-                mappa[x1*dim_mappa.dimy + y1].rotta_ar[i].y=NOT_VALID;
-                cancellazione++;
-                fprintf(output, "%s\n", AFFERMATIVO);
-                return;
-            }
-        }
-        if (cancellazione==0)
+    for(int i=0; i <MAX_ROTTE_AR; i++){
+        if (mappa[x1*dim_mappa.dimy + y1].rotta_ar[i].x==x2 && mappa[x1*dim_mappa.dimy + y1].rotta_ar[i].y==y2) 
         {
-            if (rotte>=MAX_ROTTE_AR)
-            {
-                fprintf(output, "%s", FALSO);
-                return;
-            }
-            for (int j = 0; j < MAX_ROTTE_AR; j++)          //calcolo costo rotta aerea
-            {
-                if (mappa[x1*dim_mappa.dimy + y1].rotta_ar[j].costo!=NOT_VALID)
-                {
-                    count++;
-                    mediapercosto+=mappa[x1*dim_mappa.dimy + y1].rotta_ar[j].costo;
-                }
-        
-            }
-            mediapercosto+=mappa[x1*dim_mappa.dimy + y1].costo;
-            mediapercosto=floor(mediapercosto/(float)count);
-
-            #ifdef DEBUG
-            fprintf(output, "%f", mediapercosto);
-            #endif
-
-            mappa[x1*dim_mappa.dimy + y1].rotta_ar[rotte].costo=mediapercosto;       //creo rotta aerea
-            mappa[x1*dim_mappa.dimy + y1].rotta_ar[rotte].x=x2;
-            mappa[x1*dim_mappa.dimy + y1].rotta_ar[rotte].y=y2;
-            fprintf(output, "%s\n", AFFERMATIVO);
             #ifdef DEBUG
             fprintf(output, "%d %d %d %d", x1, y1, x2, y2);
-            fprintf(output, "%d", rotte);
             #endif
+
+            mappa[x1*dim_mappa.dimy + y1].rotta_ar[i].costo=NOT_VALID;       //cancello rotta aerea
+            mappa[x1*dim_mappa.dimy + y1].rotta_ar[i].x=NOT_VALID;
+            mappa[x1*dim_mappa.dimy + y1].rotta_ar[i].y=NOT_VALID;
+            mappa[x2*dim_mappa.dimy + y2].rotte_entranti--;
+            cancellazione++;
+            fprintf(output, "%s\n", AFFERMATIVO);
             return;
         }
     }
-    else {
-        fprintf(output, "%s\n", FALSO);
+    if (cancellazione==0)
+    {
+        while (mappa[x1*dim_mappa.dimy + y1].rotta_ar[rotte].costo!=NOT_VALID && rotte < MAX_ROTTE_AR)
+        {
+        rotte++;
+        }
+        if (rotte>=MAX_ROTTE_AR)
+        {
+            fprintf(output, "%s", FALSO);
+            return;
+        }
+        for (int j = 0; j < MAX_ROTTE_AR; j++)          //calcolo costo rotta aerea
+        {
+            if (mappa[x1*dim_mappa.dimy + y1].rotta_ar[j].costo!=NOT_VALID)
+            {
+                count++;
+                mediapercosto+=mappa[x1*dim_mappa.dimy + y1].rotta_ar[j].costo;
+            }
+    
+        }
+        mediapercosto+=mappa[x1*dim_mappa.dimy + y1].costo;
+        mediapercosto=floor(mediapercosto/(float)count);
+
+        #ifdef DEBUG
+        fprintf(output, "%f", mediapercosto);
+        #endif
+
+        mappa[x1*dim_mappa.dimy + y1].rotta_ar[rotte].costo=mediapercosto;       //creo rotta aerea
+        mappa[x1*dim_mappa.dimy + y1].rotta_ar[rotte].x=x2;
+        mappa[x1*dim_mappa.dimy + y1].rotta_ar[rotte].y=y2;
+        mappa[x2*dim_mappa.dimy + y2].rotte_entranti++;
+        fprintf(output, "%s\n", AFFERMATIVO);
+        #ifdef DEBUG
+        fprintf(output, "%d %d %d %d", x1, y1, x2, y2);
+        fprintf(output, "%d", rotte);
+        #endif
         return;
     }
-    
 }
 
 void comando_travel_cost(esagono_t *mappa, int x1, int y1, int x2, int y2, int *coda, FILE *output){
@@ -393,6 +390,8 @@ void comando_travel_cost(esagono_t *mappa, int x1, int y1, int x2, int y2, int *
     int coord_terra[2];
     int coord_air[2];
     int i;
+    int diffterra[2]={MAX_COST, MAX_COST};
+    int diffair[2]={MAX_COST, MAX_COST};
     x1=dim_mappa.dimx-x1-1;
     x2=dim_mappa.dimx-x2-1;
     if (mappa==NULL)        //check se mappa è stata creata
@@ -410,15 +409,39 @@ void comando_travel_cost(esagono_t *mappa, int x1, int y1, int x2, int y2, int *
         fprintf(output, "%d\n", NOT_VALID_COST);
         return;
     }
+    //check se irraggiungibile sia via terra sia via aria
+    if (verifica_nodi(mappa, x2, y2)==0 && mappa[x2*dim_mappa.dimy + y2].rotte_entranti==0)
+    {
+        fprintf(output, "%d\n", NOT_VALID_TRAVEL);
+        return;
+    }
     costo+=mappa[x1*dim_mappa.dimy + y1].costo;
     while (x1!=x2 || y1!=y2)
     {
-        coord_terra=migliori_coordinate_terra(x1, y1, x2, y2);
-        coord_air=migliori_coordinate_aria(x1, y1, x2, y2)
-        
-        
-
-
+        migliori_coordinate_terra(mappa, coord_terra, x1, y1, x2, y2);
+        migliori_coordinate_aria(mappa, coord_air, x1, y1, x2, y2);
+        if (coord_terra[0]!=NOT_VALID && coord_terra[1]!=NOT_VALID)
+        {
+            diffterra[0]=abs(coord_terra[0]-x2);
+            diffterra[1]=abs(coord_terra[1]-y2);
+        }
+        if (coord_air[0]!=NOT_VALID && coord_air[1]!=NOT_VALID)
+        {
+            diffair[0]=abs(coord_air[0]-x2);
+            diffair[1]=abs(coord_air[1]-y2);
+        }
+        if (diffair<diffterra)
+        {
+            coda[i*2]=coord_air[0];
+            coda[i*2+1]=coord_air[1];
+        }
+        else
+        {
+            coda[i*2]=coord_terra[0];
+            coda[i*2+1]=coord_terra[1];
+        }
+        x1=coda[i*2];
+        y1=coda[i*2+1];
     }
     for (int i = 0; i < indice_coda-1; i++)     //incoda anche l'ultimo che non deve essere contato per cui indice_coda-1
     {
@@ -617,4 +640,187 @@ int dist_esag(int startX, int startY, int arrX, int arrY){
         dist++;
     }
     return dist;
+}
+int verifica_nodi(esagono_t *mappa, int x, int y){
+    nodi_adiacenti(x, y);
+    int i=0;
+    while(i<COLLEGAMENTI)
+    {
+        if (coordinate[i][0]>=0 && coordinate[i][0]<dim_mappa.dimx && coordinate[i][1]>=0 && coordinate[i][1]<dim_mappa.dimy)
+        {
+            if (mappa[coordinate[i][0]*dim_mappa.dimy + coordinate[i][1]].costo!=0)
+            {
+                return 1;
+            }
+        }
+        i++;
+    }
+    return 0;
+}
+void migliori_coordinate_terra(esagono_t *mappa, int def[2], int x1, int y1, int x2, int y2){
+    def[0]=NOT_VALID;
+    def[1]=NOT_VALID;
+    int i;
+    int minor_costo=MAX_COST;
+    int diffX=abs(x2-x1);
+    int diffY=abs(y2-y1);
+    int distanze[2];
+    nodi_adiacenti(x1, y1);
+    while (i<COLLEGAMENTI)
+    {
+        if (coordinate[i][0]>=0 && coordinate[i][0]<dim_mappa.dimx && coordinate[i][1]>=0 && coordinate[i][1]<dim_mappa.dimy)
+        {
+            if (mappa[coordinate[i][0]*dim_mappa.dimy + coordinate[i][1]].costo!=0)
+            {
+                calc_dist(distanze, coordinate[i][0], coordinate[i][1], x2, y2);
+                if (mappa[coordinate[i][0]*dim_mappa.dimy + coordinate[i][1]].costo<minor_costo && (distanze[0]<diffX || distanze[1]<diffY))
+                {
+                    minor_costo=mappa[coordinate[i][0]*dim_mappa.dimy + coordinate[i][1]].costo;
+                    diffX=distanze[0];
+                    diffY=distanze[1];
+                    def[0]=coordinate[i][0];
+                    def[1]=coordinate[i][1];
+                }
+            }
+        }
+        i++;
+    }
+}
+void calc_dist(int distanze[2], int startX, int startY, int arrX, int arrY){
+    if (startX==arrX)
+        {
+            distanze[0]=abs(arrX-startX);
+            distanze[1]=abs(arrY-startY);
+            return;
+        }
+        if(startY==arrY)
+        {
+            distanze[0]=abs(arrX-startX);
+            distanze[1]=abs(arrY-startY);
+            return;
+        }
+        if (startX%2==0)
+        {
+            if (startX>arrX)
+            {
+                if (startY>arrY)
+                {
+                    startX=startX-1;
+                    startY=startY-1;
+                }
+                else{
+                    if (startY<arrY)
+                    {
+                        startX=startX-1;
+                    }
+                    
+                }
+                
+            }
+            else{
+                if (startX<arrX)
+                {
+                    if (startY>arrY)
+                    {
+                        startX=startX+1;
+                        startY=startY-1;
+                    }
+                    else{
+                        if(startY<arrY)
+                        {
+                            startX=startX+1;
+                        }
+                    
+                    }
+                }
+                
+            }
+            
+        }
+    else{
+        if (startX>arrX)
+        {
+            if (startY>arrY)
+            {
+                startX=startX-1;
+            }
+            else{
+                if (startY<arrY)
+                {
+                    startX=startX-1;
+                    startY=startY+1;
+                }
+                
+            }
+            
+        }
+        else{
+            if (startX<arrX)
+            {
+                if (startY>arrY)
+                {
+                    startX=startX+1;
+                }
+                else{
+                    if(startY<arrY)
+                    {
+                        startX=startX+1;
+                        startY=startY+1;
+                    }
+                
+                }
+            }
+            
+        }
+    }
+    if (startX<0)
+    {
+        startX=0;
+    }
+    if (startX>=dim_mappa.dimx)
+    {
+        startX=dim_mappa.dimx-1;
+    }
+    if (startY<0)
+    {
+        startY=0;
+    }
+    if (startY>=dim_mappa.dimy)
+    {
+        startY=dim_mappa.dimy-1;
+    }
+    distanze[0]=startX;
+    distanze[1]=startY;
+}
+void migliori_coordinate_aria(esagono_t *mappa, int def[2], int x1, int y1, int x2, int y2){
+    def[0]=NOT_VALID;
+    def[1]=NOT_VALID;
+    int minor_costo=MAX_COST;
+    int diffX=abs(x2-x1);
+    int diffY=abs(y2-y1);
+    int distanze[2];
+    for (int i = 0; i < MAX_ROTTE_AR; i++)
+    {
+        if (mappa[x1*dim_mappa.dimy + y1].rotta_ar[i].costo!=NOT_VALID)
+        {
+            if (mappa[x1*dim_mappa.dimy + y1].rotta_ar[i].costo!=0)
+            {
+                if (verifica_nodi(mappa, mappa[x1*dim_mappa.dimy + y1].rotta_ar[i].x, mappa[x1*dim_mappa.dimy + y1].rotta_ar[i].y)!=0)
+                {
+                    calc_dist(distanze, mappa[x1*dim_mappa.dimy + y1].rotta_ar[i].x, mappa[x1*dim_mappa.dimy + y1].rotta_ar[i].y, x2, y2);
+                    if (mappa[x1*dim_mappa.dimy + y1].rotta_ar[i].costo<minor_costo && (distanze[0]<diffX || distanze[1]<diffY))
+                    {
+                        minor_costo=mappa[x1*dim_mappa.dimy + y1].rotta_ar[i].costo;
+                        diffX=distanze[0];
+                        diffY=distanze[1];
+                        def[0]=mappa[x1*dim_mappa.dimy + y1].rotta_ar[i].x;
+                        def[1]=mappa[x1*dim_mappa.dimy + y1].rotta_ar[i].y;
+                    }
+                }
+                
+            }
+        }
+        
+    }
+    
 }
