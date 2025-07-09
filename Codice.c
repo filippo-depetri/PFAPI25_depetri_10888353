@@ -185,7 +185,7 @@ void libera_mappa(esagono_t *mappa){
 
 //comando init: costo di ogni esagono inizializzato a 1 (ottimizzabile)
 void comando_init(esagono_t *mappa, int *cache, FILE *output){
-    for (int i = dim_mappa.dimx-1; i >= 0; i--)
+    for (int i = 0; i<dim_mappa.dimx; i++)
     {
         for (int j = 0; j < dim_mappa.dimy; j++)
         {
@@ -204,12 +204,12 @@ void comando_init(esagono_t *mappa, int *cache, FILE *output){
     }
     for (int i = 0; i < dim_mappa.dimx*dim_mappa.dimy; i++)
     {
-        cache[i*dim_mappa.dimy+0]=NOT_VALID;
+        cache[i*dim_mappa.dimy]=NOT_VALID;
         cache[i*dim_mappa.dimy+1]=NOT_VALID;  
     }
     fprintf(output, "%s\n", AFFERMATIVO);
     #ifdef DEBUG
-    for (int i = dim_mappa.dimx-1; i >= 0; i--)
+    for (int i = 0; i < dim_mappa.dimx; i++)
     {
         for (int j = 0; j < dim_mappa.dimy; j++)
         {
