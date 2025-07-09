@@ -303,6 +303,11 @@ void comando_change_cost(map *mappa, int x, int y, int v, int raggio, FILE *outp
         mappa->esagoni[coda[i][0]*dim_mappa.dimy+coda[i][1]][1]=BIANCO;
     }
     mappa->esagoni[x*dim_mappa.dimy + y][1]=BIANCO;
+    for (i = 0; i < dim_coda; i++)
+    {
+        free(coda[i]);
+    }
+    free(coda);
     return;
 }
 
