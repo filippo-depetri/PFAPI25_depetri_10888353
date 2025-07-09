@@ -191,7 +191,7 @@ void libera_mappa(esagono_t **mappa){
 
 //comando init: costo di ogni esagono inizializzato a 1 (ottimizzabile)
 void comando_init(esagono_t **mappa, FILE *output){
-    for (int i = dim_mappa.dimx-1; i >= 0; i--)
+    for (int i = 0; i <dim_mappa.dimx; i++)
     {
         for (int j = 0; j < dim_mappa.dimy; j++)
         {
