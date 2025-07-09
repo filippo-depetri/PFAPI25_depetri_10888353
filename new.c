@@ -369,7 +369,7 @@ void comando_air_route(map* mappa, int x1, int y1, int x2, int y2, FILE *output)
         }
         if (rotte>=MAX_ROTTE_AR)
         {
-            fprintf(output, "%s", FALSO);
+            fprintf(output, "%s\n", FALSO);
             return;
         }
         mediapercosto+=mappa->esagoni[x1*dim_mappa.dimx + y1][0];
