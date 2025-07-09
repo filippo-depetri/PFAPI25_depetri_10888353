@@ -78,7 +78,7 @@ typedef struct esagono
     u_int8_t already_visited;
 }esagono_t;
 
-void comando_init(esagono_t **mappa, FILE *output);
+void comando_init(esagono_t **mappa, int **cache, FILE *output);
 void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, int **coda, FILE *output);
 void comando_air_route(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *output);
 void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, int **coda, FILE *output);
@@ -118,8 +118,8 @@ int main(){
                 sc=fscanf(f_in, "%d", &dim_mappa.dimy);
                 sc=fscanf(f_in, "%d", &dim_mappa.dimx);
                 mappa=alloca_mappa();
-                comando_init(mappa, f_out);
                 cache=alloca_coda();
+                comando_init(mappa, cache, f_out);
                 #ifdef DEBUG
                 printf("INIT\n");
                 #endif
@@ -193,7 +193,7 @@ void libera_mappa(esagono_t **mappa){
 
 
 //comando init: costo di ogni esagono inizializzato a 1 (ottimizzabile)
-void comando_init(esagono_t **mappa, FILE *output){
+void comando_init(esagono_t **mappa, int **cache, FILE *output){
     for (int i = dim_mappa.dimx-1; i >= 0; i--)
     {
         for (int j = 0; j < dim_mappa.dimy; j++)
@@ -210,6 +210,11 @@ void comando_init(esagono_t **mappa, FILE *output){
                 #endif
             }
         }
+    }
+    for (int i = 0; i < MAX_ALLOCATED; i++)
+    {
+        cache[i][0]=NOT_VALID;
+        cache[i][1]=NOT_VALID;  
     }
     fprintf(output, "%s\n", AFFERMATIVO);
     #ifdef DEBUG
@@ -648,11 +653,6 @@ int **alloca_coda(){
         for (i = 0; i < MAX_ALLOCATED; i++)
         {
             coda[i]=malloc(2*sizeof(int));
-        }
-        for (i = 0; i < MAX_ALLOCATED; i++)
-        {
-            coda[i][0]=NOT_VALID;
-            coda[i][1]=NOT_VALID;
         }
         return(coda);
 }
