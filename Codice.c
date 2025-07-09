@@ -425,16 +425,16 @@ void comando_travel_cost(esagono_t *mappa, int x1, int y1, int x2, int y2, int *
     {
         migliori_coordinate_terra(mappa, coord_terra, x1, y1, x2, y2);
         migliori_coordinate_aria(mappa, coord_air, x1, y1, x2, y2);
-        if (coord_terra[0]!=NOT_VALID && coord_terra[1]!=NOT_VALID)
-        {
-            diffterra[0]=abs(coord_terra[0]-x2);
-            diffterra[1]=abs(coord_terra[1]-y2);
+        if (coord_terra[0]==NOT_VALID && coord_air[0]==NOT_VALID) {
+            fprintf(output, "%d\n", NOT_VALID_TRAVEL);
+            return;
         }
-        if (coord_air[0]!=NOT_VALID && coord_air[1]!=NOT_VALID)
-        {
-            diffair[0]=abs(coord_air[0]-x2);
-            diffair[1]=abs(coord_air[1]-y2);
-        }
+        
+        diffterra[0]=abs(coord_terra[0]-x2);
+        diffterra[1]=abs(coord_terra[1]-y2);
+        diffair[0]=abs(coord_air[0]-x2);
+        diffair[1]=abs(coord_air[1]-y2);
+
         if (diffair[0]<diffterra[0] && diffair[1]<diffterra[1])
         {
             coda[i*2]=coord_air[0];
@@ -447,7 +447,7 @@ void comando_travel_cost(esagono_t *mappa, int x1, int y1, int x2, int y2, int *
         }
         x1=coda[i*2];
         y1=coda[i*2+1];
-        i++;
+        indice_coda++;
     }
     for (int i = 0; i < indice_coda-1; i++)     //incoda anche l'ultimo che non deve essere contato per cui indice_coda-1
     {
