@@ -236,7 +236,6 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, int
     int dist_esagoni=0;
     int xloc;
     int yloc;
-    int dim_coda=0;
     int indice_coda=0;
     int j=0;
     int i=0;
@@ -260,7 +259,7 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, int
     xloc=x;
     yloc=y;
     //incodamento nodi adiacenti
-    while (indice_coda<dim_coda)
+    while (indice_coda<MAX_ALLOCATED)
     {
         nodi_adiacenti(xloc, yloc);
         for (i = 0; i < COLLEGAMENTI; i++)
