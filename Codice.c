@@ -620,7 +620,6 @@ void nodi_adiacenti(int x, int y){
 }
 int *alloca_coda(){
         int *coda;
-        int i;
         coda=malloc((2*dim_mappa.dimx*dim_mappa.dimy)*sizeof(int));
         return(coda);
 }
