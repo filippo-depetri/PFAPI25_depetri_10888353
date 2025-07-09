@@ -91,6 +91,11 @@ int *alloca_coda();
 void libera_coda(int *coda);
 int dist_esag(int startX, int startY, int arrX, int arrY);
 int verifica_nodi(esagono_t *mappa, int x, int y);
+void migliori_coordinate_terra(esagono_t *mappa, int def[2], int x1, int y1, int x2, int y2);
+void calc_dist(int distanze[2], int startX, int startY, int arrX, int arrY);
+void migliori_coordinate_aria(esagono_t *mappa, int def[2], int x1, int y1, int x2, int y2);
+
+
 
 int main(){
     //PREPARATIVI
@@ -430,7 +435,7 @@ void comando_travel_cost(esagono_t *mappa, int x1, int y1, int x2, int y2, int *
             diffair[0]=abs(coord_air[0]-x2);
             diffair[1]=abs(coord_air[1]-y2);
         }
-        if (diffair<diffterra)
+        if (diffair[0]<diffterra[0] && diffair[1]<diffterra[1])
         {
             coda[i*2]=coord_air[0];
             coda[i*2+1]=coord_air[1];
@@ -442,6 +447,7 @@ void comando_travel_cost(esagono_t *mappa, int x1, int y1, int x2, int y2, int *
         }
         x1=coda[i*2];
         y1=coda[i*2+1];
+        i++;
     }
     for (int i = 0; i < indice_coda-1; i++)     //incoda anche l'ultimo che non deve essere contato per cui indice_coda-1
     {
