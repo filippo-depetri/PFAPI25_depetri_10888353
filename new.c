@@ -176,6 +176,17 @@ void libera_mappa(map* mappa){
         }
         free(mappa->esagoni);
     }
+    if (mappa->rotte_aeree==NULL)
+    {
+        return;
+    }
+    else{
+        for (int i = 0; i < MAX_ALLOCATED; i++)
+        {
+            free(mappa->rotte_aeree[i]);
+        }
+        free(mappa->rotte_aeree);
+    }
 }
 
 
@@ -311,7 +322,7 @@ void comando_air_route(map* mappa, int x1, int y1, int x2, int y2, FILE *output)
     if (mappa->rotte_aeree==NULL)
     {
         mappa->rotte_aeree=malloc(MAX_ALLOCATED*sizeof(int *));
-        for (int i = 0; i < MAX_ROTTE_AR; i++)
+        for (int i = 0; i < MAX_ALLOCATED; i++)
         {
             mappa->rotte_aeree[i]=malloc(MAX_ROTTE_AR*sizeof(int));
         }
