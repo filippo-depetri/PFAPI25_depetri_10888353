@@ -316,7 +316,7 @@ void comando_air_route(map* mappa, int x1, int y1, int x2, int y2, FILE *output)
         }
         for (int i = 0; i < MAX_ALLOCATED; i++)
         {
-            for (int j = 0; i < MAX_ROTTE_AR; j++)
+            for (int j = 0; j < MAX_ROTTE_AR; j++)
             {
                 mappa->rotte_aeree[i][j]=NOT_VALID;
             }
