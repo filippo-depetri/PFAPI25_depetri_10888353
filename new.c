@@ -247,7 +247,7 @@ void comando_change_cost(map *mappa, int x, int y, int v, int raggio, FILE *outp
     #ifdef DEBUG
     fprintf(output, "%d\n %d\n", mappa[x][y].costo, dist_esagoni);
     #endif
-    mappa->esagoni[xloc*dim_mappa.dimx+yloc][1]=GRIGIO;
+    mappa->esagoni[xloc*dim_mappa.dimy+yloc][1]=GRIGIO;
     xloc=x;
     yloc=y;
     //incodamento nodi adiacenti
@@ -258,11 +258,11 @@ void comando_change_cost(map *mappa, int x, int y, int v, int raggio, FILE *outp
         {
             if (coordinate[i][0]>=0 && coordinate[i][0]<dim_mappa.dimx && coordinate[i][1]>=0 && coordinate[i][1]<dim_mappa.dimy)
             {
-                if (mappa->esagoni[coordinate[i][0]*dim_mappa.dimx + coordinate[i][1]][1]==BIANCO)
+                if (mappa->esagoni[coordinate[i][0]*dim_mappa.dimy + coordinate[i][1]][1]==BIANCO)
                 {
                     coda[indice_coda][0]=coordinate[i][0];
                     coda[indice_coda][1]=coordinate[i][1];
-                    mappa->esagoni[coordinate[i][0]*dim_mappa.dimx + coordinate[i][1]][1]=GRIGIO;
+                    mappa->esagoni[coordinate[i][0]*dim_mappa.dimy + coordinate[i][1]][1]=GRIGIO;
                     #ifdef DEBUG
                     fprintf(output, "%d %d %d\n", coordinate[i][0], coordinate[i][1], indice_coda);
                     #endif
@@ -300,9 +300,9 @@ void comando_change_cost(map *mappa, int x, int y, int v, int raggio, FILE *outp
     #endif
     //reset dell'already visited
     for(i = 0; i<indice_coda; i++){
-        mappa->esagoni[coda[i][0]*dim_mappa.dimx+coda[i][1]][1]=BIANCO;
+        mappa->esagoni[coda[i][0]*dim_mappa.dimy+coda[i][1]][1]=BIANCO;
     }
-    mappa->esagoni[x*dim_mappa.dimx + y][1]=BIANCO;
+    mappa->esagoni[x*dim_mappa.dimy + y][1]=BIANCO;
     return;
 }
 
@@ -372,7 +372,7 @@ void comando_air_route(map* mappa, int x1, int y1, int x2, int y2, FILE *output)
             fprintf(output, "%s\n", FALSO);
             return;
         }
-        mediapercosto+=mappa->esagoni[x1*dim_mappa.dimx + y1][0];
+        mediapercosto+=mappa->esagoni[x1*dim_mappa.dimy + y1][0];
         mediapercosto=floor(mediapercosto/(float)(rotte+1));
 
         #ifdef DEBUG
@@ -608,7 +608,7 @@ float max(float n1, float n2){
 }
 void aggiorna_costo(map *mappa, int xloc, int yloc, int v, int raggio, int dist_esagoni){
     int prog=0;
-    prog=mappa->esagoni[xloc*dim_mappa.dimx+yloc][0]+floor((float)v*max(0.0f,(raggio-dist_esagoni)/(float)raggio));
+    prog=mappa->esagoni[xloc*dim_mappa.dimy+yloc][0]+floor((float)v*max(0.0f,(raggio-dist_esagoni)/(float)raggio));
     if (prog<0)
     {
         prog=0;
@@ -617,7 +617,7 @@ void aggiorna_costo(map *mappa, int xloc, int yloc, int v, int raggio, int dist_
     {
         prog=100;
     }
-    mappa->esagoni[xloc*dim_mappa.dimx+yloc][0]=prog;
+    mappa->esagoni[xloc*dim_mappa.dimy+yloc][0]=prog;
     if (mappa->rotte_aeree!=NULL)
     {
         for (int i = 0; i < MAX_ALLOCATED; i++)
