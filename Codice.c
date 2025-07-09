@@ -258,7 +258,7 @@ void comando_change_cost(esagono_t *mappa, int x, int y, int v, int raggio, int 
     xloc=x;
     yloc=y;
     //incodamento nodi adiacenti
-    while (indice_coda<2*dim_mappa.dimx*dim_mappa.dimy)
+    while (indice_coda<dim_mappa.dimx*dim_mappa.dimy)
     {
         nodi_adiacenti(xloc, yloc);
         for (i = 0; i < COLLEGAMENTI; i++)
@@ -425,10 +425,6 @@ void comando_travel_cost(esagono_t *mappa, int x1, int y1, int x2, int y2, int *
     {
         migliori_coordinate_terra(mappa, coord_terra, x1, y1, x2, y2);
         migliori_coordinate_aria(mappa, coord_air, x1, y1, x2, y2);
-        if (coord_terra[0]==NOT_VALID && coord_air[0]==NOT_VALID) {
-            fprintf(output, "%d\n", NOT_VALID_TRAVEL);
-            return;
-        }
         
         diffterra[0]=abs(coord_terra[0]-x2);
         diffterra[1]=abs(coord_terra[1]-y2);
@@ -437,24 +433,27 @@ void comando_travel_cost(esagono_t *mappa, int x1, int y1, int x2, int y2, int *
 
         if (diffair[0]<diffterra[0] && diffair[1]<diffterra[1])
         {
-            coda[i*2]=coord_air[0];
-            coda[i*2+1]=coord_air[1];
+            coda[indice_coda*2]=coord_air[0];
+            coda[indice_coda*2+1]=coord_air[1];
+            x1=coda[indice_coda*2];
+            y1=coda[indice_coda*2+1];
+            indice_coda++;
         }
         else
         {
-            coda[i*2]=coord_terra[0];
-            coda[i*2+1]=coord_terra[1];
+            coda[indice_coda*2]=coord_terra[0];
+            coda[indice_coda*2+1]=coord_terra[1];
+            x1=coda[indice_coda*2];
+            y1=coda[indice_coda*2+1];
+            indice_coda++;
         }
-        x1=coda[i*2];
-        y1=coda[i*2+1];
-        indice_coda++;
     }
-    for (int i = 0; i < indice_coda-1; i++)     //incoda anche l'ultimo che non deve essere contato per cui indice_coda-1
+    for (i = 0; i < indice_coda-1; i++)     //incoda anche l'ultimo che non deve essere contato per cui indice_coda-1
     {
         costo+=mappa[coda[i*2]*dim_mappa.dimy + coda[i*2+1]].costo;
     }
     //reset cache
-        for (int i = 0; i < indice_coda; i++)     //incoda anche l'ultimo che non deve essere contato per cui indice_coda-1
+    for (i = 0; i < indice_coda; i++)     //incoda anche l'ultimo che non deve essere contato per cui indice_coda-1
     {
         coda[i*2]=NOT_VALID;
         coda[i*2+1]=NOT_VALID;
@@ -666,7 +665,7 @@ int verifica_nodi(esagono_t *mappa, int x, int y){
 void migliori_coordinate_terra(esagono_t *mappa, int def[2], int x1, int y1, int x2, int y2){
     def[0]=NOT_VALID;
     def[1]=NOT_VALID;
-    int i;
+    int i=0;
     int minor_costo=MAX_COST;
     int diffX=abs(x2-x1);
     int diffY=abs(y2-y1);
@@ -795,8 +794,8 @@ void calc_dist(int distanze[2], int startX, int startY, int arrX, int arrY){
     {
         startY=dim_mappa.dimy-1;
     }
-    distanze[0]=startX;
-    distanze[1]=startY;
+    distanze[0]=abs(arrX-startX);
+    distanze[1]=abs(arrY-startY);
 }
 void migliori_coordinate_aria(esagono_t *mappa, int def[2], int x1, int y1, int x2, int y2){
     def[0]=NOT_VALID;
