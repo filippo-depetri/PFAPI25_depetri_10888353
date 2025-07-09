@@ -74,7 +74,7 @@ struct dimensioni_mappa
 void comando_init(u_int16_t **esagoni, FILE *output);
 void comando_change_cost(map *mappa, int x, int y, int v, int raggio, FILE *output);
 void comando_air_route(map *mappa, int x1, int y1, int x2, int y2, FILE *output);
-void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *output);
+//void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *output);
 void alloca_mappa();
 void libera_mappa(map *mappa);
 float max (float n1, float n2);
@@ -142,7 +142,7 @@ int main(){
                         sc=fscanf(f_in, "%d", &gen_comandi.rigx);
                         sc=fscanf(f_in, "%d", &gen_comandi.coly);
                         sc=fscanf(f_in, "%d", &gen_comandi.rigy);
-                        comando_travel_cost(&mappa, gen_comandi.rigx, gen_comandi.colx, gen_comandi.rigy, gen_comandi.coly, f_out);
+                        //comando_travel_cost(&mappa, gen_comandi.rigx, gen_comandi.colx, gen_comandi.rigy, gen_comandi.coly, f_out);
                         #ifdef DEBUG
                         printf("TRAVEL\n");
                         #endif
@@ -300,6 +300,7 @@ void comando_air_route(map* mappa, int x1, int y1, int x2, int y2, FILE *output)
     u_int8_t cancellazione=0;
     float mediapercosto=0;
     u_int8_t rotte=0;
+    int indice_coda=0;
     x1=dim_mappa.dimx-x1-1;
     x2=dim_mappa.dimx-x2-1;
     if (mappa->esagoni==NULL)        //check se mappa è stata creata
@@ -350,6 +351,10 @@ void comando_air_route(map* mappa, int x1, int y1, int x2, int y2, FILE *output)
                 rotte++;
                 mediapercosto+=mappa->rotte_aeree[i][4];
             }
+            if (mappa->rotte_aeree[i][0]!=NOT_VALID)
+            {
+                indice_coda++;
+            }
         }
         if (rotte>=MAX_ROTTE_AR)
         {
@@ -363,11 +368,11 @@ void comando_air_route(map* mappa, int x1, int y1, int x2, int y2, FILE *output)
         fprintf(output, "%f", mediapercosto);
         #endif
         
-        mappa->rotte_aeree[rotte][0]=x1;       //creo rotta aerea
-        mappa->rotte_aeree[rotte][1]=y1;
-        mappa->rotte_aeree[rotte][2]=x2;
-        mappa->rotte_aeree[rotte][3]=y2;
-        mappa->rotte_aeree[rotte][4]=mediapercosto;
+        mappa->rotte_aeree[indice_coda][0]=x1;       //creo rotta aerea
+        mappa->rotte_aeree[indice_coda][1]=y1;
+        mappa->rotte_aeree[indice_coda][2]=x2;
+        mappa->rotte_aeree[indice_coda][3]=y2;
+        mappa->rotte_aeree[indice_coda][4]=mediapercosto;
         fprintf(output, "%s\n", AFFERMATIVO);
         #ifdef DEBUG
         fprintf(output, "%d %d %d %d", x1, y1, x2, y2);
