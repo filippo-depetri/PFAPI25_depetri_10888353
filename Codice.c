@@ -87,8 +87,6 @@ void libera_mappa(esagono_t **mappa);
 float max (float n1, float n2);
 void aggiorna_costo(esagono_t **mappa, int xloc, int yloc, int v, int raggio, int dist_esagoni);
 void nodi_adiacenti(int x, int y);
-int **alloca_coda(int dim_coda);
-void libera_coda(int **coda, int dim_coda);
 int dist_esag(int startX, int startY, int arrX, int arrY);
 
 int main(){
@@ -231,7 +229,6 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FIL
     int dim_coda=0;
     int indice_coda=0;
     int j=0;
-    int **coda=NULL;
     int i=0;
     x=dim_mappa.dimx-x-1;
     if (mappa==NULL)        //check se mappa è stata creata
@@ -250,7 +247,7 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FIL
         dim_coda+=COLLEGAMENTI*i;
     }
     //creazione coda di coordinate
-    coda=alloca_coda(dim_coda);
+    int coda[dim_coda][2];
     //aggiornamento nodo sorgente
     aggiorna_costo(mappa, x, y, v, raggio, dist_esagoni);
     #ifdef DEBUG
@@ -312,7 +309,6 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FIL
         mappa[coda[i][0]][coda[i][1]].already_visited=BIANCO;
     }
     mappa[x][y].already_visited=BIANCO;
-    libera_coda(coda, dim_coda);
     return;
 }
 
@@ -650,29 +646,6 @@ void nodi_adiacenti(int x, int y){
         coordinate[5][0]=x;
         coordinate[5][1]=y-1;
     }
-}
-int **alloca_coda(int dim_coda){
-        int **coda;
-        coda=malloc(dim_coda*sizeof(int *));
-        for (int i = 0; i < dim_coda; i++)
-        {
-            coda[i]=malloc(2*sizeof(int));
-        }
-        return(coda);
-}
-void libera_coda(int **coda, int dim_coda){
-    if (coda==NULL)
-    {
-        return;
-    }
-    else{
-        for (int i = 0; i < dim_coda; i++)
-        {
-            free(coda[i]);
-        }
-        free(coda);
-    }
-    
 }
 
 int dist_esag(int startX, int startY, int arrX, int arrY){
