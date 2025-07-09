@@ -247,7 +247,7 @@ void comando_change_cost(map *mappa, int x, int y, int v, int raggio, FILE *outp
     #ifdef DEBUG
     fprintf(output, "%d\n %d\n", mappa[x][y].costo, dist_esagoni);
     #endif
-    mappa->esagoni[xloc*dim_mappa.dimy+yloc][1]=GRIGIO;
+    mappa->esagoni[x*dim_mappa.dimy+y][1]=GRIGIO;
     xloc=x;
     yloc=y;
     //incodamento nodi adiacenti
