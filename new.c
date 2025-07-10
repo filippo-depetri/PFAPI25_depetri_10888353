@@ -44,6 +44,7 @@ Consegna:   Movhex è una compagnia di autotrasporti che dispone di una flotta d
 #define COLLEGAMENTI 6
 #define MAX_COST 100000
 #define MAX_ALLOCATED 100
+#define MAX_ITERACTION 100000
 
 
 //strutture
@@ -409,6 +410,7 @@ void comando_air_route(map* mappa, int x1, int y1, int x2, int y2, FILE *output)
 void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *output){
     int costo=0;
     int i;
+    int j=0;
     u_int8_t check1=0;
     u_int8_t check2=0;
     u_int16_t loc_cost;
@@ -437,20 +439,6 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
     {
         fprintf(output, "%d\n", NOT_VALID_COST);
         return;
-    }
-    //check se posso partire e arrivare in qualche modo
-    check1=verifica_nodi(mappa, x1, y1);
-    check2=verifica_nodi(mappa, x2, y2);
-    for (i = 0; i < MAX_ALLOCATED; i++)
-    {
-        if ((check1==1 || (mappa->rotte_aeree[i][0]==x1 && mappa->rotte_aeree[i][1]==y1)) && (check2==1 || (mappa->rotte_aeree[i][2]==x2 && mappa->rotte_aeree[i][3]==y2)))
-        {
-            break;
-        }
-        else{
-            fprintf(output, "%d\n", NOT_VALID_TRAVEL);
-            return; 
-        }
     }
     costo+=mappa->esagoni[x1*dim_mappa.dimy+y1][0];
     //calcolo percorso
@@ -530,6 +518,13 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
             x1=coord_terra[0];
             y1=coord_terra[1];
         }
+        j++;
+        if (j>=MAX_ITERACTION)
+        {
+            fprintf(output, "%d\n", NOT_VALID_TRAVEL);
+            return;
+        }
+        
     }
     costo-=mappa->esagoni[x2*dim_mappa.dimy+y2][0];
     fprintf(output, "%d\n", costo);
