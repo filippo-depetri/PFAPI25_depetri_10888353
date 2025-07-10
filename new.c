@@ -176,6 +176,7 @@ void libera_mappa(map* mappa){
         }
         free(mappa->esagoni);
     }
+    mappa->esagoni=NULL;
     if (mappa->rotte_aeree==NULL)
     {
         return;
@@ -187,6 +188,7 @@ void libera_mappa(map* mappa){
         }
         free(mappa->rotte_aeree);
     }
+    mappa->rotte_aeree=NULL;
 }
 
 
@@ -242,10 +244,13 @@ void comando_change_cost(map *mappa, int x, int y, int v, int raggio, FILE *outp
     {
         coda[i]=malloc(2*sizeof(int));
     }
+    #ifdef DEBUG
+    fprintf(output, "coda allocata\n");
+    #endif
     //aggiornamento nodo sorgente
     aggiorna_costo(mappa, x, y, v, raggio, dist_esagoni);
     #ifdef DEBUG
-    fprintf(output, "%d\n %d\n", mappa[x][y].costo, dist_esagoni);
+    fprintf(output, "%u\n %d\n", mappa->esagoni[x*dim_mappa.dimy +y][0], dist_esagoni);
     #endif
     mappa->esagoni[x*dim_mappa.dimy+y][1]=GRIGIO;
     xloc=x;
@@ -256,7 +261,7 @@ void comando_change_cost(map *mappa, int x, int y, int v, int raggio, FILE *outp
         nodi_adiacenti(xloc, yloc);
         for (i = 0; i < COLLEGAMENTI; i++)
         {
-            if (coordinate[i][0]>=0 && coordinate[i][0]<dim_mappa.dimx && coordinate[i][1]>=0 && coordinate[i][1]<dim_mappa.dimy)
+            if (coordinate[i][0]>=0 && coordinate[i][0]<dim_mappa.dimx && coordinate[i][1]>=0 && coordinate[i][1]<dim_mappa.dimy && indice_coda<dim_coda)
             {
                 if (mappa->esagoni[coordinate[i][0]*dim_mappa.dimy + coordinate[i][1]][1]==BIANCO)
                 {
@@ -295,7 +300,7 @@ void comando_change_cost(map *mappa, int x, int y, int v, int raggio, FILE *outp
     #ifdef DEBUG
     for (i = 0; i < indice_coda; i++)
     {
-        fprintf(output, "%d\n", mappa[coda[i][0]][coda[i][1]].costo);
+        fprintf(output, "%u\n", mappa->esagoni[coda[i][0]*dim_mappa.dimy+coda[i][1]][0]);
     }
     #endif
     //reset dell'already visited
@@ -635,6 +640,9 @@ void aggiorna_costo(map *mappa, int xloc, int yloc, int v, int raggio, int dist_
             }
         }
     }
+    #ifdef DEBUG
+    printf("costo modificato\n");
+    #endif
 }
 void nodi_adiacenti(int x, int y){
     if (x%2==0)
