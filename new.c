@@ -418,8 +418,8 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
     int mindist_terra;
     int mincost_air;
     int mindist_air;
-    int coord_terra[2];
-    int coord_aria[2];
+    int coord_terra[2]={NOT_VALID, NOT_VALID};
+    int coord_aria[2]={NOT_VALID, NOT_VALID};
     x1=dim_mappa.dimx-x1-1;
     x2=dim_mappa.dimx-x2-1;
     if (mappa==NULL)        //check se mappa è stata creata
