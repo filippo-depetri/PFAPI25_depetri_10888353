@@ -531,6 +531,7 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
             y1=coord_terra[1];
         }
     }
+    costo-=mappa->esagoni[x2*dim_mappa.dimy+y2][0];
     fprintf(output, "%d\n", costo);
     return;
 }
