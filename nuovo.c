@@ -407,6 +407,8 @@ void comando_air_route(map* mappa, int x1, int y1, int x2, int y2, FILE *output)
 
 void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *output){
     int costo_minimo=MAX_COST;
+    x1=dim_mappa.dimx-x1-1;
+    x2=dim_mappa.dimx-x2-1;
     if (mappa->esagoni==NULL)
     {
         fprintf(output, "%d\n", NOT_VALID_TRAVEL);
