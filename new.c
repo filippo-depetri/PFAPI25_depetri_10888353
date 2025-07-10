@@ -81,6 +81,8 @@ float max (float n1, float n2);
 void aggiorna_costo(map *mappa, int xloc, int yloc, int v, int raggio, int dist_esagoni);
 void nodi_adiacenti(int x, int y);
 int dist_esag(int startX, int startY, int arrX, int arrY);
+int verifica_nodi(map *mappa, int x, int y);
+int verifica_nodi_air(map *mappa, int x, int y, int arrX, int arrY);
 
 int main(){
     //PREPARATIVI
@@ -416,8 +418,8 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
     int mindist_terra;
     int mincost_air;
     int mindist_air;
-    int coord_terra[1][2]={{NOT_VALID, NOT_VALID}};
-    int coord_aria[1][2]={{NOT_VALID, NOT_VALID}};
+    int coord_terra[2];
+    int coord_aria[2];
     x1=dim_mappa.dimx-x1-1;
     x2=dim_mappa.dimx-x2-1;
     if (mappa==NULL)        //check se mappa è stata creata
@@ -468,48 +470,51 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
                 loc_cost=mappa->esagoni[coordinate[i][0]*dim_mappa.dimy+coordinate[i][1]][0];
                 if (loc_cost!=0 || (loc_cost==0 && coordinate[i][0]==x2 && coordinate[i][1]==y2))
                 {
-                    loc_dist=dist(coordinate[i][0], coordinate[i][1], x2, y2);
+                    loc_dist=dist_esag(coordinate[i][0], coordinate[i][1], x2, y2);
                     if (loc_cost<mincost_terra && loc_dist<mindist_terra)
                     {
                         mincost_terra=loc_cost;
                         mindist_terra=loc_dist;
-                        coord_terra[0][0]=coordinate[i][0];
-                        coord_terra[0][1]=coordinate[i][1];
+                        coord_terra[0]=coordinate[i][0];
+                        coord_terra[1]=coordinate[i][1];
                     }
                 }
             }
         }
         //aria
-        for (i = 0; i < MAX_ALLOCATED; i++)
+        if (mappa->rotte_aeree!=NULL)
         {
-            if (mappa->rotte_aeree[i][0]==x1 && mappa->rotte_aeree[i][1]==y1)
+            for (i = 0; i < MAX_ALLOCATED; i++)
             {
-                arrivi_ar[0]=mappa->rotte_aeree[i][2];
-                arrivi_ar[1]=mappa->rotte_aeree[i][3];
-                loc_cost=mappa->esagoni[arrivi_ar[0]*dim_mappa.dimy+arrivi_ar[1]][0];
-                if (loc_cost!=0 && (arrivi_ar[0]!=x2 || arrivi_ar[1]!=y2))
+                if (mappa->rotte_aeree[i][0]==x1 && mappa->rotte_aeree[i][1]==y1)
                 {
-                    if (verifica_nodi_air(mappa, arrivi_ar[0], arrivi_ar[1], x2, y2)==1)
+                    arrivi_ar[0]=mappa->rotte_aeree[i][2];
+                    arrivi_ar[1]=mappa->rotte_aeree[i][3];
+                    loc_cost=mappa->esagoni[arrivi_ar[0]*dim_mappa.dimy+arrivi_ar[1]][0];
+                    if (loc_cost!=0 && (arrivi_ar[0]!=x2 || arrivi_ar[1]!=y2))
+                    {
+                        if (verifica_nodi_air(mappa, arrivi_ar[0], arrivi_ar[1], x2, y2)==1)
+                        {
+                            loc_dist=dist_esag(arrivi_ar[0], arrivi_ar[1], x2, y2);
+                            if (loc_cost<mincost_air && loc_dist<mindist_air)
+                            {
+                            mincost_air=loc_cost;
+                            mindist_air=loc_dist;
+                            coord_aria[0]=arrivi_ar[0];
+                            coord_aria[1]=arrivi_ar[1];
+                            }
+                        }
+                    }
+                    if (loc_cost==0 && arrivi_ar[0]==x2 && arrivi_ar[1]==y2)
                     {
                         loc_dist=dist_esag(arrivi_ar[0], arrivi_ar[1], x2, y2);
                         if (loc_cost<mincost_air && loc_dist<mindist_air)
                         {
                         mincost_air=loc_cost;
                         mindist_air=loc_dist;
-                        coord_aria[0][0]=arrivi_ar[0];
-                        coord_aria[0][1]=arrivi_ar[1];
+                        coord_aria[0]=arrivi_ar[0];
+                        coord_aria[1]=arrivi_ar[1];
                         }
-                    }
-                }
-                if (loc_cost==0 && arrivi_ar[0]==x2 && arrivi_ar[1]==y2)
-                {
-                    loc_dist=dist_esag(arrivi_ar[0], arrivi_ar[1], x2, y2);
-                    if (loc_cost<mincost_air && loc_dist<mindist_air)
-                    {
-                    mincost_air=loc_cost;
-                    mindist_air=loc_dist;
-                    coord_aria[0][0]=arrivi_ar[0];
-                    coord_aria[0][1]=arrivi_ar[1];
                     }
                 }
             }
@@ -517,9 +522,13 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
         if (mindist_air<mindist_terra)
         {
             costo+=mincost_air;
+            x1=coord_aria[0];
+            y1=coord_aria[1];
         }
         else{
             costo+=mincost_terra;
+            x1=coord_terra[0];
+            y1=coord_terra[1];
         }
     }
     return;
