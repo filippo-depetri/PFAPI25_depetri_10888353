@@ -471,7 +471,7 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
                 if (loc_cost!=0 || (loc_cost==0 && coordinate[i][0]==x2 && coordinate[i][1]==y2))
                 {
                     loc_dist=dist_esag(coordinate[i][0], coordinate[i][1], x2, y2);
-                    if (loc_cost<mincost_terra && loc_dist<mindist_terra)
+                    if (loc_dist<mindist_terra)
                     {
                         mincost_terra=loc_cost;
                         mindist_terra=loc_dist;
@@ -496,19 +496,19 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
                         if (verifica_nodi_air(mappa, arrivi_ar[0], arrivi_ar[1], x2, y2)==1)
                         {
                             loc_dist=dist_esag(arrivi_ar[0], arrivi_ar[1], x2, y2);
-                            if (loc_cost<mincost_air && loc_dist<mindist_air)
+                            if (loc_dist<mindist_air)
                             {
-                            mincost_air=loc_cost;
-                            mindist_air=loc_dist;
-                            coord_aria[0]=arrivi_ar[0];
-                            coord_aria[1]=arrivi_ar[1];
+                                mincost_air=loc_cost;
+                                mindist_air=loc_dist;
+                                coord_aria[0]=arrivi_ar[0];
+                                coord_aria[1]=arrivi_ar[1];
                             }
                         }
                     }
                     if (loc_cost==0 && arrivi_ar[0]==x2 && arrivi_ar[1]==y2)
                     {
                         loc_dist=dist_esag(arrivi_ar[0], arrivi_ar[1], x2, y2);
-                        if (loc_cost<mincost_air && loc_dist<mindist_air)
+                        if (loc_dist<mindist_air)
                         {
                         mincost_air=loc_cost;
                         mindist_air=loc_dist;
