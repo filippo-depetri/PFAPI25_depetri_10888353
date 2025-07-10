@@ -405,24 +405,19 @@ void comando_air_route(map* mappa, int x1, int y1, int x2, int y2, FILE *output)
 }
 
 void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *output){
-    return;
-    /*
     int costo=0;
+    int i;
+    u_int8_t check1=0;
+    u_int8_t check2=0;
+    u_int16_t loc_cost;
+    int arrivi_ar[2];
+    int loc_dist=0;
     int mincost_terra;
     int mindist_terra;
     int mincost_air;
     int mindist_air;
-    int **coda=NULL;
-    int max_coda=MAX_ALLOCATED;
-    int dist=0;
-    int indice_coda=0;
     int coord_terra[1][2]={{NOT_VALID, NOT_VALID}};
     int coord_aria[1][2]={{NOT_VALID, NOT_VALID}};
-    int j=0;
-    u_int16_t indice_costo;
-    u_int16_t indice_distanza;
-    u_int16_t aggiornato_terra;
-    u_int16_t aggiornato_air;
     x1=dim_mappa.dimx-x1-1;
     x2=dim_mappa.dimx-x2-1;
     if (mappa==NULL)        //check se mappa è stata creata
@@ -430,183 +425,104 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
         fprintf(output, "%d\n", NOT_VALID_TRAVEL);
         return;
     }
-    if (x1>=dim_mappa.dimx || x1<0 || x2>=dim_mappa.dimx || x2<0 || y1>=dim_mappa.dimy || y1<0 || y2>=dim_mappa.dimy || y2<0 || mappa[x1][y1].costo==0)   //check se sono nei limiti mappa
+    if (x1>=dim_mappa.dimx || x1<0 || x2>=dim_mappa.dimx || x2<0 || y1>=dim_mappa.dimy || y1<0 || y2>=dim_mappa.dimy || y2<0 || mappa->esagoni[x1*dim_mappa.dimy+y1][0]==0)   //check se sono nei limiti mappa
     {
         fprintf(output, "%d\n", NOT_VALID_TRAVEL);
         return;
     }
+    //check se ho le coordinate =
     if(x1==x2 && y1==y2)
     {
         fprintf(output, "%d\n", NOT_VALID_COST);
         return;
     }
-    coda=malloc(2*sizeof(int *));
-    coda[0]=coda[1]=NULL;
-    coda[0]=malloc(max_coda*sizeof(int));     //metodo allocazione a step, prima allocazione a 20 blocchi
-    coda[1]=malloc(max_coda*sizeof(int));
-    costo+=mappa[x1][y1].costo;
+    //check se posso partire e arrivare in qualche modo
+    check1=verifica_nodi(mappa, x1, y1);
+    check2=verifica_nodi(mappa, x2, y2);
+    for (i = 0; i < MAX_ALLOCATED; i++)
+    {
+        if ((check1==1 || (mappa->rotte_aeree[i][0]==x1 && mappa->rotte_aeree[i][1]==y1)) && (check2==1 || (mappa->rotte_aeree[i][2]==x2 && mappa->rotte_aeree[i][3]==y2)))
+        {
+            break;
+        }
+        else{
+            fprintf(output, "%d\n", NOT_VALID_TRAVEL);
+            return; 
+        }
+    }
+    costo+=mappa->esagoni[x1*dim_mappa.dimy+y1][0];
+    //calcolo percorso
     while (x1!=x2 || y1!=y2)
     {
-        if (indice_coda>=max_coda)
-        {
-            coda[0]=realloc(coda[0], (max_coda+MAX_ALLOCATED)*sizeof(int));
-            coda[1]=realloc(coda[1], (max_coda+MAX_ALLOCATED)*sizeof(int));
-            max_coda+=MAX_ALLOCATED;
-        }
-        //inizializzazione variabili per ogni ciclo di operazione
+        //inizializzazione ciclo
         mincost_terra=MAX_COST;
         mindist_terra=dim_mappa.dimx*dim_mappa.dimy;
         mincost_air=MAX_COST;
         mindist_air=dim_mappa.dimx*dim_mappa.dimy;
-        aggiornato_air=NOT_VALID;
-        aggiornato_terra=NOT_VALID;
-        indice_costo=NOT_VALID;
-        indice_distanza=NOT_VALID;
-        for (int k = 0; k < MAX_ROTTE_AR; k++)      //collegamenti aria
-        {
-            if (mappa[x1][y1].rotta_ar[k].costo!=NOT_VALID && (mappa[mappa[x1][y1].rotta_ar[k].x][mappa[x1][y1].rotta_ar[k].y].costo!=0 || (mappa[mappa[x1][y1].rotta_ar[k].x][mappa[x1][y1].rotta_ar[k].y].costo==0 && mappa[x1][y1].rotta_ar[k].x==x2 && mappa[x1][y1].rotta_ar[k].y==y2)))
-            {
-                dist=dist_esag(mappa[x1][y1].rotta_ar[k].x, mappa[x1][y1].rotta_ar[k].y, x2, y2);
-                if (dist<mindist_air)
-                {
-                    mindist_air=dist;
-                    indice_distanza=k;
-                }
-                if (mappa[x1][y1].rotta_ar[k].costo<mincost_air)
-                {
-                    mincost_air=mappa[x1][y1].rotta_ar[k].costo;
-                    indice_costo=k;
-                }
-            }
-        }
-        if (indice_costo!=NOT_VALID && indice_distanza!=NOT_VALID)
-        {
-            if (indice_costo==indice_distanza)
-            {
-                coord_aria[0][0]=mappa[x1][y1].rotta_ar[indice_distanza].x;
-                coord_aria[0][1]=mappa[x1][y1].rotta_ar[indice_distanza].y;
-                aggiornato_air++;
-            }
-            else
-            {
-                coord_aria[0][0]=mappa[x1][y1].rotta_ar[indice_distanza].x;
-                coord_aria[0][1]=mappa[x1][y1].rotta_ar[indice_distanza].y;
-                aggiornato_air++;
-            }
-        }
-        indice_costo=NOT_VALID;
-        indice_distanza=NOT_VALID;
+        //terra
         nodi_adiacenti(x1, y1);
-        for (int i = 0; i < COLLEGAMENTI; i++)      //collegamenti terra
+        for (i = 0; i < COLLEGAMENTI; i++)
         {
-            if (coordinate[i][0]>=0 && coordinate[i][0]<dim_mappa.dimx && coordinate[i][1]>=0 && coordinate[i][1]<dim_mappa.dimy)       //check se sono nei boundary sennò non analizzo
+            if (coordinate[i][0]>=0 && coordinate[i][0]<dim_mappa.dimx && coordinate[i][1]>=0 && coordinate[i][1]<dim_mappa.dimy)
             {
-                if (mappa[coordinate[i][0]][coordinate[i][1]].costo!=0 || (mappa[coordinate[i][0]][coordinate[i][1]].costo==0 && (coordinate[i][0]==x2 && coordinate[i][1]==y2)))
+                loc_cost=mappa->esagoni[coordinate[i][0]*dim_mappa.dimy+coordinate[i][1]][0];
+                if (loc_cost!=0 || (loc_cost==0 && coordinate[i][0]==x2 && coordinate[i][1]==y2))
                 {
-                    if (mappa[coordinate[i][0]][coordinate[i][1]].costo<mincost_terra)        //verifico il minimo costo
+                    loc_dist=dist(coordinate[i][0], coordinate[i][1], x2, y2);
+                    if (loc_cost<mincost_terra && loc_dist<mindist_terra)
                     {
-                        mincost_terra=mappa[coordinate[i][0]][coordinate[i][1]].costo;
-                        indice_costo=i;
-                    }
-                    dist=dist_esag(coordinate[i][0], coordinate[i][1], x2, y2);
-                    if (dist<mindist_terra)                   //verifico la minima distanza
-                    {
-                        mindist_terra=dist;
-                        indice_distanza=i;
+                        mincost_terra=loc_cost;
+                        mindist_terra=loc_dist;
+                        coord_terra[0][0]=coordinate[i][0];
+                        coord_terra[0][1]=coordinate[i][1];
                     }
                 }
             }
         }
-        if (indice_costo!=NOT_VALID && indice_distanza!=NOT_VALID)
+        //aria
+        for (i = 0; i < MAX_ALLOCATED; i++)
         {
-            if (indice_costo==indice_distanza)
+            if (mappa->rotte_aeree[i][0]==x1 && mappa->rotte_aeree[i][1]==y1)
             {
-                coord_terra[0][0]=coordinate[indice_distanza][0];
-                coord_terra[0][1]=coordinate[indice_distanza][1];
-                aggiornato_terra++;
-            }
-            else
-            {
-                coord_terra[0][0]=coordinate[indice_distanza][0];
-                coord_terra[0][1]=coordinate[indice_distanza][1];
-                aggiornato_terra++;
+                arrivi_ar[0]=mappa->rotte_aeree[i][2];
+                arrivi_ar[1]=mappa->rotte_aeree[i][3];
+                loc_cost=mappa->esagoni[arrivi_ar[0]*dim_mappa.dimy+arrivi_ar[1]][0];
+                if (loc_cost!=0 && (arrivi_ar[0]!=x2 || arrivi_ar[1]!=y2))
+                {
+                    if (verifica_nodi_air(mappa, arrivi_ar[0], arrivi_ar[1], x2, y2)==1)
+                    {
+                        loc_dist=dist_esag(arrivi_ar[0], arrivi_ar[1], x2, y2);
+                        if (loc_cost<mincost_air && loc_dist<mindist_air)
+                        {
+                        mincost_air=loc_cost;
+                        mindist_air=loc_dist;
+                        coord_aria[0][0]=arrivi_ar[0];
+                        coord_aria[0][1]=arrivi_ar[1];
+                        }
+                    }
+                }
+                if (loc_cost==0 && arrivi_ar[0]==x2 && arrivi_ar[1]==y2)
+                {
+                    loc_dist=dist_esag(arrivi_ar[0], arrivi_ar[1], x2, y2);
+                    if (loc_cost<mincost_air && loc_dist<mindist_air)
+                    {
+                    mincost_air=loc_cost;
+                    mindist_air=loc_dist;
+                    coord_aria[0][0]=arrivi_ar[0];
+                    coord_aria[0][1]=arrivi_ar[1];
+                    }
+                }
             }
         }
-        if ((aggiornato_air==NOT_VALID && aggiornato_terra==NOT_VALID) || j>=MAX_COST)
+        if (mindist_air<mindist_terra)
         {
-            fprintf(output, "%d\n", NOT_VALID_TRAVEL);
-            free(coda[0]);
-            free(coda[1]);
-            free(coda);
-            return;
-        }
-        if (aggiornato_air==NOT_VALID && aggiornato_terra!=NOT_VALID)
-        {
-            coda[0][indice_coda]=coord_terra[0][0];
-            coda[1][indice_coda]=coord_terra[0][1];
-            #ifdef DEBUG
-            fprintf(output, "%d, %d\n", coda[0][indice_coda], coda[1][indice_coda]);
-            #endif
+            costo+=mincost_air;
         }
         else{
-            if (aggiornato_air!=NOT_VALID && aggiornato_terra==NOT_VALID)
-            {
-                coda[0][indice_coda]=coord_aria[0][0];
-                coda[1][indice_coda]=coord_aria[0][1];
-                #ifdef DEBUG
-                fprintf(output, "%d, %d\n", coda[0][indice_coda], coda[1][indice_coda]);
-                #endif
-            }
-            else{
-                if (mindist_air<mindist_terra && mincost_air<mincost_terra)
-                {
-                    coda[0][indice_coda]=coord_aria[0][0];
-                    coda[1][indice_coda]=coord_aria[0][1];
-                    #ifdef DEBUG
-                    fprintf(output, "%d, %d\n", coda[0][indice_coda], coda[1][indice_coda]);
-                    #endif
-                }
-                if (mindist_terra<mindist_air && mincost_terra<mincost_air)
-                {
-                    coda[0][indice_coda]=coord_terra[0][0];
-                    coda[1][indice_coda]=coord_terra[0][1];
-                    #ifdef DEBUG
-                    fprintf(output, "%d, %d\n", coda[0][indice_coda], coda[1][indice_coda]);
-                    #endif
-                }
-                if (mindist_air<mindist_terra)
-                {
-                    coda[0][indice_coda]=coord_aria[0][0];
-                    coda[1][indice_coda]=coord_aria[0][1];
-                    #ifdef DEBUG
-                    fprintf(output, "%d, %d\n", coda[0][indice_coda], coda[1][indice_coda]);
-                    #endif
-                }
-                else{
-                    coda[0][indice_coda]=coord_terra[0][0];
-                    coda[1][indice_coda]=coord_terra[0][1];
-                    #ifdef DEBUG
-                    fprintf(output, "%d, %d\n", coda[0][indice_coda], coda[1][indice_coda]);
-                    #endif
-                }
-            }
+            costo+=mincost_terra;
         }
-        x1=coda[0][indice_coda];
-        y1=coda[1][indice_coda];
-        indice_coda++;
-        j++;
     }
-    for (int i = 0; i < indice_coda-1; i++)     //incoda anche l'ultimo che non deve essere contato per cui indice_coda-1
-    {
-        costo+=mappa[coda[0][i]][coda[1][i]].costo;
-    }
-    fprintf(output, "%d\n", costo);
-    //libero memoria
-    free(coda[0]);
-    free(coda[1]);
-    free(coda);
     return;
-    */
 }
 
 float max(float n1, float n2){
@@ -783,4 +699,36 @@ int dist_esag(int startX, int startY, int arrX, int arrY){
         dist++;
     }
     return dist;
+}
+int verifica_nodi(map *mappa, int x, int y){
+    nodi_adiacenti(x, y);
+    int i=0;
+    while(i<COLLEGAMENTI)
+    {
+        if (coordinate[i][0]>=0 && coordinate[i][0]<dim_mappa.dimx && coordinate[i][1]>=0 && coordinate[i][1]<dim_mappa.dimy)
+        {
+            if (mappa->esagoni[coordinate[i][0]*dim_mappa.dimy + coordinate[i][1]][0]!=0)
+            {
+                return 1;
+            }
+        }
+        i++;
+    }
+    return 0;
+}
+int verifica_nodi_air(map *mappa, int x, int y, int arrX, int arrY){
+    nodi_adiacenti(x, y);
+    int i=0;
+    while(i<COLLEGAMENTI)
+    {
+        if (coordinate[i][0]>=0 && coordinate[i][0]<dim_mappa.dimx && coordinate[i][1]>=0 && coordinate[i][1]<dim_mappa.dimy)
+        {
+            if (mappa->esagoni[coordinate[i][0]*dim_mappa.dimy + coordinate[i][1]][0]!=0 || (mappa->esagoni[coordinate[i][0]*dim_mappa.dimy + coordinate[i][1]][0]==0 && coordinate[i][0]==arrX && coordinate[i][1]==arrY))
+            {
+                return 1;
+            }
+        }
+        i++;
+    }
+    return 0;
 }
