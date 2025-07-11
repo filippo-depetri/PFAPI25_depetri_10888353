@@ -153,14 +153,17 @@ int main(){
                         #endif
                     }
                     else{
-                        sc=fscanf(f_in, "%d", &gen_comandi.colx);
-                        sc=fscanf(f_in, "%d", &gen_comandi.rigx);
-                        sc=fscanf(f_in, "%d", &gen_comandi.coly);
-                        sc=fscanf(f_in, "%d", &gen_comandi.rigy);
-                        comando_travel_cost(&mappa, gen_comandi.rigx, gen_comandi.colx, gen_comandi.rigy, gen_comandi.coly, f_out);
-                        #ifdef DEBUG
-                        printf("TRAVEL\n");
-                        #endif
+                        if (comando[1]==COSTO_VIAGGIO)
+                        {
+                            sc=fscanf(f_in, "%d", &gen_comandi.colx);
+                            sc=fscanf(f_in, "%d", &gen_comandi.rigx);
+                            sc=fscanf(f_in, "%d", &gen_comandi.coly);
+                            sc=fscanf(f_in, "%d", &gen_comandi.rigy);
+                            comando_travel_cost(&mappa, gen_comandi.rigx, gen_comandi.colx, gen_comandi.rigy, gen_comandi.coly, f_out);
+                            #ifdef DEBUG
+                            printf("TRAVEL\n");
+                            #endif
+                        }
                     }
                 }
             }
