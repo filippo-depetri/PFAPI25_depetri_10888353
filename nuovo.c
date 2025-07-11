@@ -577,7 +577,7 @@ void swap(heap *nodo1, heap *nodo2){
     *nodo2=temp;
 }
 void push_heap(heap *nodo, int *size, int x, int y, int costo){
-    *size++;
+    *size=*size+1;
     int pos=*size;
     nodo[pos].costo_heap=costo;
     nodo[pos].x_heap=x;
