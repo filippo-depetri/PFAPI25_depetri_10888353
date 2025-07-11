@@ -47,10 +47,19 @@ Consegna:   Movhex è una compagnia di autotrasporti che dispone di una flotta d
 
 
 //strutture
+typedef struct heap{
+    int x_heap;
+    int y_heap;
+    u_int16_t costo_heap;
+}heap;
 typedef struct mappa
 {
     int **rotte_aeree;          //matrice in cui ci sono coord x y e costo rotta aerea
     u_int16_t **esagoni;        //matrice in cui sono presenti costi e flag already visited
+    //per djikstra
+    u_int16_t *costi;
+    u_int8_t *visitati;
+    heap *nodo;
 }map;
 
 int coordinate[COLLEGAMENTI][2];
@@ -80,8 +89,10 @@ float max (float n1, float n2);
 void aggiorna_costo(map *mappa, int xloc, int yloc, int v, int raggio, int dist_esagoni);
 void nodi_adiacenti(int x, int y);
 int dist_esag(int startX, int startY, int arrX, int arrY);
-int verifica_nodi(map *mappa, int x, int y);
-int verifica_nodi_air(map *mappa, int x, int y, int arrX, int arrY);
+heap pop_heap(heap *nodo, int *dim_heap);
+void min_heapify(heap *nodo, int value, int size);
+void swap(heap *nodo1, heap *nodo2);
+void push_heap(heap *nodo, int *size, int x, int y, int costo);
 
 int main(){
     //PREPARATIVI
@@ -94,6 +105,9 @@ int main(){
         map mappa;
         mappa.esagoni=NULL;
         mappa.rotte_aeree=NULL;
+        mappa.costi=NULL;
+        mappa.visitati=NULL;
+        mappa.nodo=NULL;
     //fine variabili gestione comandi
     #ifdef DEBUGTEST
     int ssc;
@@ -164,6 +178,9 @@ void alloca_mappa(map* mappa){
     {
         mappa->esagoni[i]=malloc(2*sizeof(u_int16_t));
     }
+    mappa->costi=malloc(dim_mappa.dimx*dim_mappa.dimy*sizeof(u_int16_t));
+    mappa->visitati=malloc(dim_mappa.dimx*dim_mappa.dimy*sizeof(u_int8_t));
+    mappa->nodo=malloc(dim_mappa.dimx+dim_mappa.dimy*sizeof(heap));
 }
 void libera_mappa(map* mappa){
     if (mappa->esagoni==NULL)
@@ -190,6 +207,30 @@ void libera_mappa(map* mappa){
         free(mappa->rotte_aeree);
     }
     mappa->rotte_aeree=NULL;
+    if (mappa->costi==NULL)
+    {
+        return;
+    }
+    else{
+        free(mappa->costi);
+    }
+    mappa->costi=NULL;
+    if (mappa->visitati==NULL)
+    {
+        return;
+    }
+    else{
+        free(mappa->visitati);
+    }
+    mappa->visitati=NULL;
+    if (mappa->nodo==NULL)
+    {
+        return;
+    }
+    else{
+        free(mappa->nodo);
+    }
+    mappa->nodo=NULL;
 }
 
 
@@ -199,6 +240,8 @@ void comando_init(map *mappa, FILE *output){
     {
         mappa->esagoni[i][0]=1;
         mappa->esagoni[i][1]=BIANCO;
+        mappa->costi[i]=MAX_COST;
+        mappa->visitati[i]=NOT_VALID_COST;
     }
     fprintf(output, "%s\n", AFFERMATIVO);
     #ifdef DEBUG
@@ -406,7 +449,14 @@ void comando_air_route(map* mappa, int x1, int y1, int x2, int y2, FILE *output)
 }
 
 void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *output){
-    int costo_minimo=MAX_COST;
+    int costo;
+    int i;
+    int partenza;
+    int dim_heap=0;
+    heap nodo_corrente;
+    int successivo;
+    int corrente;
+    int costo_precedente;
     x1=dim_mappa.dimx-x1-1;
     x2=dim_mappa.dimx-x2-1;
     if (mappa->esagoni==NULL)
@@ -424,83 +474,119 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
         fprintf(output, "%d\n", NOT_VALID_COST);
         return;
     }
-
-
-    
-    
+    //algoritmo di djikstra
+    partenza=x1*dim_mappa.dimy+y1;
+    mappa->costi[partenza]=0;
+    push_heap(mappa->nodo, &dim_heap, x1, y1, 0);
+    while (dim_heap>0)
+    {
+        nodo_corrente=pop_heap(mappa->nodo, &dim_heap);
+        mappa->visitati[nodo_corrente.x_heap*dim_mappa.dimy+nodo_corrente.y_heap]=1;
+        corrente=nodo_corrente.x_heap*dim_mappa.dimy+nodo_corrente.y_heap;
+        //se sono arrivato al nodo destinazione
+        if (nodo_corrente.x_heap==x2 && nodo_corrente.y_heap==y2)
+        {
+            break;
+        }
+        //cerco via terra
+        nodi_adiacenti(nodo_corrente.x_heap, nodo_corrente.y_heap);
+        for (i = 0; i < COLLEGAMENTI; i++)
+        {
+            if (coordinate[i][0]>=0 && coordinate[i][0]<dim_mappa.dimx && coordinate[i][1]>=0 && coordinate[i][1]<dim_mappa.dimy)
+            {
+                successivo=coordinate[i][0]*dim_mappa.dimy+coordinate[i][1];
+                costo_precedente=mappa->esagoni[corrente][0];
+                if (costo_precedente!=0)
+                {
+                    if (mappa->visitati[successivo]==0 && mappa->costi[corrente] + costo_precedente<mappa->costi[successivo])
+                    {
+                        mappa->costi[successivo]=mappa->costi[corrente] + costo_precedente;
+                        push_heap(mappa->nodo, &dim_heap, coordinate[i][0], coordinate[i][1], mappa->costi[successivo]);
+                    }
+                    
+                }
+                
+            }
+            
+        }
+        //cerco via aria
+        if (mappa->rotte_aeree!=NULL)
+        {
+            for (i = 0; i < MAX_ALLOCATED; i++)
+            {
+                if (mappa->rotte_aeree[i][0]==nodo_corrente.x_heap && mappa->rotte_aeree[i][1]==nodo_corrente.y_heap)
+                {
+                    successivo=mappa->rotte_aeree[i][2]*dim_mappa.dimy+mappa->rotte_aeree[i][3];
+                    costo_precedente=mappa->rotte_aeree[i][4];
+                        if (mappa->visitati[successivo]==0 && mappa->costi[corrente] + costo_precedente<mappa->costi[successivo])
+                        {
+                            mappa->costi[successivo]=mappa->costi[corrente] + costo_precedente;
+                            push_heap(mappa->nodo, &dim_heap, coordinate[i][0], coordinate[i][1], mappa->costi[successivo]);
+                        }
+                    }
+                    
+                }
+            }
+            
+        }
+        costo=mappa->costi[x2*dim_mappa.dimy+y2];
+        if (costo>=MAX_COST)
+        {
+            fprintf(output, "%d\n", NOT_VALID_TRAVEL);
+        }
+        else{
+            fprintf(output, "%d\n", costo);
+        }
+        for (i = partenza; i <= x2*dim_mappa.dimy+y2; i++)
+        {
+            mappa->costi[i]=MAX_COST;
+            mappa->visitati[i]=NOT_VALID_COST;
+        }
+        return;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+heap pop_heap(heap *nodo, int *dim_heap){
+    int size=*dim_heap;
+    heap min=nodo[0];
+    nodo[0]=nodo[size];
+    size--;
+    min_heapify(nodo, 1, size);
+    return min;
+}
+void min_heapify(heap *nodo, int value, int size){
+    int l=2*value;
+    int r=2*value;
+    int min;
+    if (l<=size && nodo[l].costo_heap<nodo[value].costo_heap)
+    {
+        min=l;
+    }
+    else min=value;
+    if (r<=size && nodo[r].costo_heap<nodo[min].costo_heap)
+    {
+        min=r;
+    }
+    if (min!=value)
+    {
+        swap(&nodo[value], &nodo[min]);
+        min_heapify(nodo, min, size);
+    }
+}
+void swap(heap *nodo1, heap *nodo2){
+    heap temp=*nodo1;
+    *nodo1=*nodo2;
+    *nodo2=temp;
+}
+void push_heap(heap *nodo, int *size, int x, int y, int costo){
+    int pos=*size++;
+    nodo[pos].costo_heap=costo;
+    nodo[pos].x_heap=x;
+    nodo[pos].y_heap=y;
+    while (pos>0 && nodo[(pos-1)/2].costo_heap>nodo[pos].costo_heap)
+    {
+        swap(&nodo[pos], &nodo[(pos-1)/2]);
+        pos=(pos-1)/2;
+    }
+}
 
 float max(float n1, float n2){
     if (n1>n2)
