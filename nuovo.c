@@ -508,7 +508,7 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
                     }
                     
                 }
-                
+                //doppio push heap? rivedere nella sua interezza l'algoritmo e i push sugli heap
             }
             
         }
