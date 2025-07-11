@@ -521,7 +521,7 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
                         if (mappa->visitati[successivo]==0 && mappa->costi[corrente] + costo_precedente<mappa->costi[successivo])
                         {
                             mappa->costi[successivo]=mappa->costi[corrente] + costo_precedente;
-                            push_heap(mappa->nodo, &dim_heap, coordinate[i][0], coordinate[i][1], mappa->costi[successivo]);
+                            push_heap(mappa->nodo, &dim_heap, mappa->rotte_aeree[i][2], mappa->rotte_aeree[i][3], mappa->costi[successivo]);
                         }
                     }
                     
@@ -537,7 +537,7 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
         else{
             fprintf(output, "%d\n", costo);
         }
-        for (i = partenza; i <= x2*dim_mappa.dimy+y2; i++)
+        for (i = 0; i < dim_mappa.dimx*dim_mappa.dimy; i++)
         {
             mappa->costi[i]=MAX_COST;
             mappa->visitati[i]=NOT_VALID_COST;
@@ -545,16 +545,15 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
         return;
 }
 heap pop_heap(heap *nodo, int *dim_heap){
-    int size=*dim_heap;
     heap min=nodo[0];
-    nodo[0]=nodo[size];
-    size--;
-    min_heapify(nodo, 1, size);
+    nodo[0]=nodo[*dim_heap-1];
+    *dim_heap=*dim_heap-1;
+    min_heapify(nodo, 0, *dim_heap-1);
     return min;
 }
 void min_heapify(heap *nodo, int value, int size){
-    int l=2*value;
-    int r=2*value;
+    int l=2*value+1;
+    int r=2*value+2;
     int min;
     if (l<=size && nodo[l].costo_heap<nodo[value].costo_heap)
     {
@@ -577,8 +576,8 @@ void swap(heap *nodo1, heap *nodo2){
     *nodo2=temp;
 }
 void push_heap(heap *nodo, int *size, int x, int y, int costo){
-    *size=*size+1;
     int pos=*size;
+    *size=*size+1;
     nodo[pos].costo_heap=costo;
     nodo[pos].x_heap=x;
     nodo[pos].y_heap=y;
