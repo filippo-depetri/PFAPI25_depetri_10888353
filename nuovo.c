@@ -183,7 +183,7 @@ void alloca_mappa(map* mappa){
     }
     mappa->costi=malloc(dim_mappa.dimx*dim_mappa.dimy*sizeof(u_int16_t));
     mappa->visitati=malloc(dim_mappa.dimx*dim_mappa.dimy*sizeof(u_int8_t));
-    mappa->nodo=malloc(dim_mappa.dimx+dim_mappa.dimy*sizeof(heap));
+    mappa->nodo=malloc(dim_mappa.dimx*dim_mappa.dimy*sizeof(heap));
 }
 void libera_mappa(map* mappa){
     if (mappa->esagoni==NULL)
