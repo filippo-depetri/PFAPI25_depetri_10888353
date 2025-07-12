@@ -484,8 +484,8 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
     while (dim_heap>0)
     {
         nodo_corrente=pop_heap(mappa->nodo, &dim_heap);
-        mappa->visitati[nodo_corrente.x_heap*dim_mappa.dimy+nodo_corrente.y_heap]=1;
         corrente=nodo_corrente.x_heap*dim_mappa.dimy+nodo_corrente.y_heap;
+        mappa->visitati[corrente]=1;
         //se sono arrivato al nodo destinazione
         if (nodo_corrente.x_heap==x2 && nodo_corrente.y_heap==y2)
         {
@@ -508,7 +508,6 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
                     }
                     
                 }
-                //doppio push heap? rivedere nella sua interezza l'algoritmo e i push sugli heap
             }
             
         }
