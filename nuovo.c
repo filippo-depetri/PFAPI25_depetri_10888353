@@ -520,17 +520,20 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
                 {
                     successivo=mappa->rotte_aeree[i][2]*dim_mappa.dimy+mappa->rotte_aeree[i][3];
                     costo_precedente=mappa->rotte_aeree[i][4];
+                    if (costo_precedente!=0)
+                    {
                         if (mappa->visitati[successivo]==0 && mappa->costi[corrente] + costo_precedente<mappa->costi[successivo])
                         {
                             mappa->costi[successivo]=mappa->costi[corrente] + costo_precedente;
                             push_heap(mappa->nodo, &dim_heap, mappa->rotte_aeree[i][2], mappa->rotte_aeree[i][3], mappa->costi[successivo]);
                         }
                     }
-                    
                 }
+                    
             }
-            
         }
+            
+    }
         costo=mappa->costi[x2*dim_mappa.dimy+y2];
         if (costo>=MAX_COST)
         {
