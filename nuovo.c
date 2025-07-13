@@ -53,12 +53,12 @@ typedef struct heap{
     u_int16_t costo_heap;
     u_int16_t costi;
     u_int8_t visitati;
-}heap;
+}heap;  //djikstra
 typedef struct mappa
 {
     int **rotte_aeree;          //matrice in cui ci sono coord x y e costo rotta aerea
     u_int16_t **esagoni;        //matrice in cui sono presenti costi e flag already visited
-}map;
+}map;   //in memory heap
 
 int coordinate[COLLEGAMENTI][2];
 
@@ -234,7 +234,7 @@ void comando_change_cost(map *mappa, int x, int y, int v, int raggio, FILE *outp
     int indice_coda=0;
     int j=0;
     int i=0;
-    int **coda=NULL;
+    int coda[dim_mappa.dimx*dim_mappa.dimy][2];
     x=dim_mappa.dimx-x-1;
     if (mappa==NULL)        //check se mappa è stata creata
     {
@@ -250,12 +250,6 @@ void comando_change_cost(map *mappa, int x, int y, int v, int raggio, FILE *outp
     for (i = 1; i <= raggio; i++)
     {
         dim_coda+=COLLEGAMENTI*i;
-    }
-    //creazione coda di coordinate
-    coda=malloc(dim_coda*sizeof(int *));
-    for (i = 0; i < dim_coda; i++)
-    {
-        coda[i]=malloc(2*sizeof(int));
     }
     #ifdef DEBUG
     fprintf(output, "coda allocata\n");
@@ -321,11 +315,6 @@ void comando_change_cost(map *mappa, int x, int y, int v, int raggio, FILE *outp
         mappa->esagoni[coda[i][0]*dim_mappa.dimy+coda[i][1]][1]=BIANCO;
     }
     mappa->esagoni[x*dim_mappa.dimy + y][1]=BIANCO;
-    for (i = 0; i < dim_coda; i++)
-    {
-        free(coda[i]);
-    }
-    free(coda);
     return;
 }
 
