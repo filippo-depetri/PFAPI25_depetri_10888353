@@ -88,10 +88,10 @@ float max (float n1, float n2);
 void aggiorna_costo(map *mappa, int xloc, int yloc, int v, int raggio, int dist_esagoni);
 void nodi_adiacenti(int x, int y);
 int dist_esag(int startX, int startY, int arrX, int arrY);
-heap pop_heap(heap *nodo, int *dim_heap);
-void min_heapify(heap *nodo, int value, int size);
+heap pop_heap(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int *dim_heap);
+void min_heapify(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int value, int size);
 void swap(heap *nodo1, heap *nodo2);
-void push_heap(heap *nodo, int *size, int x, int y, int costo);
+void push_heap(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int *size, int x, int y, int costo);
 
 int main(){
     //PREPARATIVI
