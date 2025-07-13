@@ -369,7 +369,7 @@ void comando_air_route(map* mappa, int x1, int y1, int x2, int y2, FILE *output)
     }
     if (cancellazione==0)
     {
-        for (int i = 0; i < MAX_ALLOCATED; i++)
+        for (int i = 0; i < mappa->dim_rotte; i++)
         {
             if (mappa->rotte_aeree[i][0]==x1 && mappa->rotte_aeree[i][1]==y1)
             {
@@ -479,7 +479,7 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
         //cerco via aria
         if (mappa->rotte_aeree!=NULL)
         {
-            for (i = 0; i < mappa->dim_rotte+1; i++)
+            for (i = 0; i < mappa->dim_rotte; i++)
             {
                 if (mappa->rotte_aeree[i][0]==nodo_corrente.x_heap && mappa->rotte_aeree[i][1]==nodo_corrente.y_heap)
                 {
@@ -581,7 +581,7 @@ void aggiorna_costo(map *mappa, int xloc, int yloc, int v, int raggio, int dist_
     mappa->esagoni[xloc*dim_mappa.dimy+yloc][0]=prog;
     if (mappa->rotte_aeree!=NULL)
     {
-        for (int i = 0; i < mappa->dim_rotte+1; i++)
+        for (int i = 0; i < mappa->dim_rotte; i++)
         {
             if (mappa->rotte_aeree[i][0]==xloc && mappa->rotte_aeree[i][1]==yloc)
             {
