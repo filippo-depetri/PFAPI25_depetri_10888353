@@ -363,7 +363,6 @@ void comando_air_route(map* mappa, int x1, int y1, int x2, int y2, FILE *output)
             #endif
             mappa->rotte_aeree[i][0]=mappa->rotte_aeree[i][1]=mappa->rotte_aeree[i][2]=mappa->rotte_aeree[i][3]=mappa->rotte_aeree[i][4]=NOT_VALID;       //cancello rotta aerea
             cancellazione++;
-            mappa->dim_rotte--;
             fprintf(output, "%s\n", AFFERMATIVO);
             return;
         }
