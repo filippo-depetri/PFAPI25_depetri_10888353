@@ -58,7 +58,7 @@ typedef struct mappa
 {
     int **rotte_aeree;          //matrice in cui ci sono coord x y e costo rotta aerea
     u_int16_t **esagoni;        //matrice in cui sono presenti costi e flag already visited
-    u_int8_t indice_rotte;
+    u_int8_t dim_rotte;
 }map;   //in memory heap
 
 int coordinate[COLLEGAMENTI][2];
@@ -346,7 +346,7 @@ void comando_air_route(map* mappa, int x1, int y1, int x2, int y2, FILE *output)
                 mappa->rotte_aeree[i][j]=NOT_VALID;
             }
         }
-        mappa->indice_rotte=0;
+        mappa->dim_rotte=0;
     }
     if (x1>=dim_mappa.dimx || x1<0 || x2>=dim_mappa.dimx || x2<0 || y1>=dim_mappa.dimy || y1<0 || y2>=dim_mappa.dimy || y2<0)   //check se sono nei limiti mappa
     {
@@ -354,7 +354,7 @@ void comando_air_route(map* mappa, int x1, int y1, int x2, int y2, FILE *output)
         return;
     }
     //cancellazione rotta aerea
-    for (int i = 0; i < MAX_ALLOCATED; i++)
+    for (int i = 0; i < mappa->dim_rotte; i++)
     {
         if (mappa->rotte_aeree[i][0]==x1 && mappa->rotte_aeree[i][1]==y1 && mappa->rotte_aeree[i][2]==x2 && mappa->rotte_aeree[i][3]==y2)
         {
@@ -363,7 +363,7 @@ void comando_air_route(map* mappa, int x1, int y1, int x2, int y2, FILE *output)
             #endif
             mappa->rotte_aeree[i][0]=mappa->rotte_aeree[i][1]=mappa->rotte_aeree[i][2]=mappa->rotte_aeree[i][3]=mappa->rotte_aeree[i][4]=NOT_VALID;       //cancello rotta aerea
             cancellazione++;
-            mappa->indice_rotte--;
+            mappa->dim_rotte--;
             fprintf(output, "%s\n", AFFERMATIVO);
             return;
         }
@@ -399,7 +399,7 @@ void comando_air_route(map* mappa, int x1, int y1, int x2, int y2, FILE *output)
         mappa->rotte_aeree[indice_coda][2]=x2;
         mappa->rotte_aeree[indice_coda][3]=y2;
         mappa->rotte_aeree[indice_coda][4]=mediapercosto;
-        mappa->indice_rotte++;
+        mappa->dim_rotte++;
         fprintf(output, "%s\n", AFFERMATIVO);
         #ifdef DEBUG
         fprintf(output, "%d %d %d %d", x1, y1, x2, y2);
@@ -480,7 +480,7 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
         //cerco via aria
         if (mappa->rotte_aeree!=NULL)
         {
-            for (i = 0; i < mappa->indice_rotte; i++)
+            for (i = 0; i < mappa->dim_rotte+1; i++)
             {
                 if (mappa->rotte_aeree[i][0]==nodo_corrente.x_heap && mappa->rotte_aeree[i][1]==nodo_corrente.y_heap)
                 {
@@ -582,7 +582,7 @@ void aggiorna_costo(map *mappa, int xloc, int yloc, int v, int raggio, int dist_
     mappa->esagoni[xloc*dim_mappa.dimy+yloc][0]=prog;
     if (mappa->rotte_aeree!=NULL)
     {
-        for (int i = 0; i < mappa->indice_rotte; i++)
+        for (int i = 0; i < mappa->dim_rotte+1; i++)
         {
             if (mappa->rotte_aeree[i][0]==xloc && mappa->rotte_aeree[i][1]==yloc)
             {
