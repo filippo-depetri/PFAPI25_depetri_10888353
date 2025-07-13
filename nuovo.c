@@ -59,7 +59,6 @@ typedef struct mappa
     //per djikstra
     u_int16_t *costi;
     u_int8_t *visitati;
-    heap *nodo;
 }map;
 
 int coordinate[COLLEGAMENTI][2];
@@ -107,7 +106,6 @@ int main(){
         mappa.rotte_aeree=NULL;
         mappa.costi=NULL;
         mappa.visitati=NULL;
-        mappa.nodo=NULL;
     //fine variabili gestione comandi
     #ifdef DEBUGTEST
     int ssc;
@@ -183,7 +181,6 @@ void alloca_mappa(map* mappa){
     }
     mappa->costi=malloc(dim_mappa.dimx*dim_mappa.dimy*sizeof(u_int16_t));
     mappa->visitati=malloc(dim_mappa.dimx*dim_mappa.dimy*sizeof(u_int8_t));
-    mappa->nodo=malloc(dim_mappa.dimx*dim_mappa.dimy*sizeof(heap));
 }
 void libera_mappa(map* mappa){
     if (mappa->esagoni==NULL)
@@ -226,14 +223,6 @@ void libera_mappa(map* mappa){
         free(mappa->visitati);
     }
     mappa->visitati=NULL;
-    if (mappa->nodo==NULL)
-    {
-        return;
-    }
-    else{
-        free(mappa->nodo);
-    }
-    mappa->nodo=NULL;
 }
 
 
@@ -452,6 +441,7 @@ void comando_air_route(map* mappa, int x1, int y1, int x2, int y2, FILE *output)
 }
 
 void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *output){
+    heap nodi[dim_mappa.dimx*dim_mappa.dimy];
     int costo;
     int i;
     int partenza;
@@ -480,10 +470,10 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
     //algoritmo di djikstra
     partenza=x1*dim_mappa.dimy+y1;
     mappa->costi[partenza]=0;
-    push_heap(mappa->nodo, &dim_heap, x1, y1, 0);
+    push_heap(nodi, &dim_heap, x1, y1, 0);
     while (dim_heap>0)
     {
-        nodo_corrente=pop_heap(mappa->nodo, &dim_heap);
+        nodo_corrente=pop_heap(nodi, &dim_heap);
         corrente=nodo_corrente.x_heap*dim_mappa.dimy+nodo_corrente.y_heap;
         mappa->visitati[corrente]=1;
         //se sono arrivato al nodo destinazione
@@ -504,7 +494,7 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
                     if (mappa->visitati[successivo]==0 && mappa->costi[corrente] + costo_precedente<mappa->costi[successivo])
                     {
                         mappa->costi[successivo]=mappa->costi[corrente] + costo_precedente;
-                        push_heap(mappa->nodo, &dim_heap, coordinate[i][0], coordinate[i][1], mappa->costi[successivo]);
+                        push_heap(nodi, &dim_heap, coordinate[i][0], coordinate[i][1], mappa->costi[successivo]);
                     }
                     
                 }
@@ -525,7 +515,7 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
                         if (mappa->visitati[successivo]==0 && mappa->costi[corrente] + costo_precedente<mappa->costi[successivo])
                         {
                             mappa->costi[successivo]=mappa->costi[corrente] + costo_precedente;
-                            push_heap(mappa->nodo, &dim_heap, mappa->rotte_aeree[i][2], mappa->rotte_aeree[i][3], mappa->costi[successivo]);
+                            push_heap(nodi, &dim_heap, mappa->rotte_aeree[i][2], mappa->rotte_aeree[i][3], mappa->costi[successivo]);
                         }
                     }
                 }
@@ -549,14 +539,14 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
         }
         return;
 }
-heap pop_heap(heap *nodo, int *dim_heap){
+heap pop_heap(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int *dim_heap){
     heap min=nodo[0];
     nodo[0]=nodo[*dim_heap-1];
     *dim_heap=*dim_heap-1;
     min_heapify(nodo, 0, *dim_heap-1);
     return min;
 }
-void min_heapify(heap *nodo, int value, int size){
+void min_heapify(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int value, int size){
     int l=2*value+1;
     int r=2*value+2;
     int min;
@@ -580,7 +570,7 @@ void swap(heap *nodo1, heap *nodo2){
     *nodo1=*nodo2;
     *nodo2=temp;
 }
-void push_heap(heap *nodo, int *size, int x, int y, int costo){
+void push_heap(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int *size, int x, int y, int costo){
     int pos=*size;
     *size=*size+1;
     nodo[pos].costo_heap=costo;
