@@ -508,7 +508,7 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
         else{
             fprintf(output, "%d\n", costo);
         }
-        for (i = partenza; i < x2*dim_mappa.dimy+y2; i++)
+        for (i = 0; i < dim_mappa.dimx*dim_mappa.dimy; i++)
         {
             nodi[i].costi=MAX_COST;
             nodi[i].visitati=NOT_VALID_COST;
