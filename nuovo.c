@@ -51,14 +51,13 @@ typedef struct heap{
     int x_heap;
     int y_heap;
     u_int16_t costo_heap;
+    u_int16_t costi;
+    u_int8_t visitati;
 }heap;
 typedef struct mappa
 {
     int **rotte_aeree;          //matrice in cui ci sono coord x y e costo rotta aerea
     u_int16_t **esagoni;        //matrice in cui sono presenti costi e flag already visited
-    //per djikstra
-    u_int16_t *costi;
-    u_int8_t *visitati;
 }map;
 
 int coordinate[COLLEGAMENTI][2];
@@ -104,8 +103,6 @@ int main(){
         map mappa;
         mappa.esagoni=NULL;
         mappa.rotte_aeree=NULL;
-        mappa.costi=NULL;
-        mappa.visitati=NULL;
     //fine variabili gestione comandi
     #ifdef DEBUGTEST
     int ssc;
@@ -179,8 +176,6 @@ void alloca_mappa(map* mappa){
     {
         mappa->esagoni[i]=malloc(2*sizeof(u_int16_t));
     }
-    mappa->costi=malloc(dim_mappa.dimx*dim_mappa.dimy*sizeof(u_int16_t));
-    mappa->visitati=malloc(dim_mappa.dimx*dim_mappa.dimy*sizeof(u_int8_t));
 }
 void libera_mappa(map* mappa){
     if (mappa->esagoni==NULL)
@@ -207,22 +202,6 @@ void libera_mappa(map* mappa){
         free(mappa->rotte_aeree);
     }
     mappa->rotte_aeree=NULL;
-    if (mappa->costi==NULL)
-    {
-        return;
-    }
-    else{
-        free(mappa->costi);
-    }
-    mappa->costi=NULL;
-    if (mappa->visitati==NULL)
-    {
-        return;
-    }
-    else{
-        free(mappa->visitati);
-    }
-    mappa->visitati=NULL;
 }
 
 
@@ -232,8 +211,6 @@ void comando_init(map *mappa, FILE *output){
     {
         mappa->esagoni[i][0]=1;
         mappa->esagoni[i][1]=BIANCO;
-        mappa->costi[i]=MAX_COST;
-        mappa->visitati[i]=NOT_VALID_COST;
     }
     fprintf(output, "%s\n", AFFERMATIVO);
     #ifdef DEBUG
@@ -467,15 +444,21 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
         fprintf(output, "%d\n", NOT_VALID_COST);
         return;
     }
+    for (i = 0; i < dim_mappa.dimx*dim_mappa.dimy; i++)
+    {
+        nodi[i].costi=MAX_COST;
+        nodi[i].visitati=0;
+    }
+    
     //algoritmo di djikstra
     partenza=x1*dim_mappa.dimy+y1;
-    mappa->costi[partenza]=0;
+    nodi[partenza].costi=0;
     push_heap(nodi, &dim_heap, x1, y1, 0);
     while (dim_heap>0)
     {
         nodo_corrente=pop_heap(nodi, &dim_heap);
         corrente=nodo_corrente.x_heap*dim_mappa.dimy+nodo_corrente.y_heap;
-        mappa->visitati[corrente]=1;
+        nodi[corrente].visitati=1;
         //se sono arrivato al nodo destinazione
         if (nodo_corrente.x_heap==x2 && nodo_corrente.y_heap==y2)
         {
@@ -491,10 +474,10 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
                 costo_precedente=mappa->esagoni[corrente][0];
                 if (costo_precedente!=0)
                 {
-                    if (mappa->visitati[successivo]==0 && mappa->costi[corrente] + costo_precedente<mappa->costi[successivo])
+                    if (nodi[successivo].visitati==0 && nodi[corrente].costi + costo_precedente<nodi[successivo].costi)
                     {
-                        mappa->costi[successivo]=mappa->costi[corrente] + costo_precedente;
-                        push_heap(nodi, &dim_heap, coordinate[i][0], coordinate[i][1], mappa->costi[successivo]);
+                        nodi[successivo].costi=nodi[corrente].costi + costo_precedente;
+                        push_heap(nodi, &dim_heap, coordinate[i][0], coordinate[i][1], nodi[successivo].costi);
                     }
                     
                 }
@@ -512,10 +495,10 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
                     costo_precedente=mappa->rotte_aeree[i][4];
                     if (costo_precedente!=0)
                     {
-                        if (mappa->visitati[successivo]==0 && mappa->costi[corrente] + costo_precedente<mappa->costi[successivo])
+                        if (nodi[successivo].visitati==0 && nodi[corrente].costi + costo_precedente<nodi[successivo].costi)
                         {
-                            mappa->costi[successivo]=mappa->costi[corrente] + costo_precedente;
-                            push_heap(nodi, &dim_heap, mappa->rotte_aeree[i][2], mappa->rotte_aeree[i][3], mappa->costi[successivo]);
+                            nodi[successivo].costi=nodi[corrente].costi + costo_precedente;
+                            push_heap(nodi, &dim_heap, mappa->rotte_aeree[i][2], mappa->rotte_aeree[i][3], nodi[successivo].costi);
                         }
                     }
                 }
@@ -524,7 +507,7 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
         }
             
     }
-        costo=mappa->costi[x2*dim_mappa.dimy+y2];
+        costo=nodi[x2*dim_mappa.dimy+y2].costi;
         if (costo>=MAX_COST)
         {
             fprintf(output, "%d\n", NOT_VALID_TRAVEL);
@@ -534,8 +517,8 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
         }
         for (i = 0; i < dim_mappa.dimx*dim_mappa.dimy; i++)
         {
-            mappa->costi[i]=MAX_COST;
-            mappa->visitati[i]=NOT_VALID_COST;
+            nodi[i].costi=MAX_COST;
+            nodi[i].visitati=NOT_VALID_COST;
         }
         return;
 }
