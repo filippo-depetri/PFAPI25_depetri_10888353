@@ -456,26 +456,6 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
         {
             break;
         }
-        //cerco via terra
-        nodi_adiacenti(nodo_corrente.x_heap, nodo_corrente.y_heap);
-        for (i = 0; i < COLLEGAMENTI; i++)
-        {
-            if (coordinate[i][0]>=0 && coordinate[i][0]<dim_mappa.dimx && coordinate[i][1]>=0 && coordinate[i][1]<dim_mappa.dimy)
-            {
-                successivo=coordinate[i][0]*dim_mappa.dimy+coordinate[i][1];
-                costo_corrente=mappa->esagoni[indice_corrente][0];
-                if (costo_corrente!=0)
-                {
-                    if (nodi[successivo].visitati==0 && nodi[indice_corrente].costi + costo_corrente<nodi[successivo].costi)
-                    {
-                        nodi[successivo].costi=nodi[indice_corrente].costi + costo_corrente;
-                        push_heap(nodi, &dim_heap, coordinate[i][0], coordinate[i][1], nodi[successivo].costi);
-                    }
-                    
-                }
-            }
-            
-        }
         //cerco via aria
         if (mappa->rotte_aeree!=NULL)
         {
@@ -496,6 +476,26 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
                 }
                     
             }
+        }
+        //cerco via terra
+        nodi_adiacenti(nodo_corrente.x_heap, nodo_corrente.y_heap);
+        for (i = 0; i < COLLEGAMENTI; i++)
+        {
+            if (coordinate[i][0]>=0 && coordinate[i][0]<dim_mappa.dimx && coordinate[i][1]>=0 && coordinate[i][1]<dim_mappa.dimy)
+            {
+                successivo=coordinate[i][0]*dim_mappa.dimy+coordinate[i][1];
+                costo_corrente=mappa->esagoni[indice_corrente][0];
+                if (costo_corrente!=0)
+                {
+                    if (nodi[successivo].visitati==0 && nodi[indice_corrente].costi + costo_corrente<nodi[successivo].costi)
+                    {
+                        nodi[successivo].costi=nodi[indice_corrente].costi + costo_corrente;
+                        push_heap(nodi, &dim_heap, coordinate[i][0], coordinate[i][1], nodi[successivo].costi);
+                    }
+                    
+                }
+            }
+            
         }
             
     }
