@@ -518,7 +518,7 @@ heap pop_heap(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int *dim_heap){
     heap min=nodo[0];
     nodo[0]=nodo[*dim_heap-1];
     *dim_heap=*dim_heap-1;
-    min_heapify(nodo, 0, *dim_heap-1);
+    min_heapify(nodo, 0, *dim_heap);
     return min;
 }
 void min_heapify(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int value, int size){
