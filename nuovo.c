@@ -40,6 +40,7 @@ Consegna:   Movhex è una compagnia di autotrasporti che dispone di una flotta d
 #define NOT_VALID (u_int16_t)-2
 #define NOT_VALID_TRAVEL -1
 #define GRIGIO 7
+#define NERO 8
 #define BIANCO 9
 #define COLLEGAMENTI 6
 #define MAX_COST 65535
@@ -465,9 +466,9 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
                 {
                     successivo=mappa->rotte_aeree[i][2]*dim_mappa.dimy+mappa->rotte_aeree[i][3];
                     costo_corrente=mappa->rotte_aeree[i][4];
-                    if (costo_corrente!=0)
+                    if (costo_corrente>0)
                     {
-                        if (nodi[successivo].visitati==0 && nodi[successivo].costi>nodi[indice_corrente].costi + costo_corrente)
+                        if (nodi[successivo].visitati==0 && nodi[successivo].costi>=nodi[indice_corrente].costi + costo_corrente)
                         {
                             nodi[successivo].costi=nodi[indice_corrente].costi + costo_corrente;
                             push_heap(nodi, &dim_heap, mappa->rotte_aeree[i][2], mappa->rotte_aeree[i][3], nodi[successivo].costi);
@@ -485,9 +486,9 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
             {
                 successivo=coordinate[i][0]*dim_mappa.dimy+coordinate[i][1];
                 costo_corrente=mappa->esagoni[indice_corrente][0];
-                if (costo_corrente!=0)
+                if (costo_corrente>0)
                 {
-                    if (nodi[successivo].visitati==0 && nodi[successivo].costi>nodi[indice_corrente].costi + costo_corrente)
+                    if (nodi[successivo].visitati==0 && nodi[successivo].costi>=nodi[indice_corrente].costi + costo_corrente)
                     {
                         nodi[successivo].costi=nodi[indice_corrente].costi + costo_corrente;
                         push_heap(nodi, &dim_heap, coordinate[i][0], coordinate[i][1], nodi[successivo].costi);
@@ -525,12 +526,12 @@ void min_heapify(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int value, int size){
     int l=2*value+1;
     int r=2*value+2;
     int min;
-    if (l<=size && nodo[l].costo_heap<nodo[value].costo_heap)
+    if (l<size && nodo[l].costo_heap<nodo[value].costo_heap)
     {
         min=l;
     }
     else min=value;
-    if (r<=size && nodo[r].costo_heap<nodo[min].costo_heap)
+    if (r<size && nodo[r].costo_heap<nodo[min].costo_heap)
     {
         min=r;
     }
