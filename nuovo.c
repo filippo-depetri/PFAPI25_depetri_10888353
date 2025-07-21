@@ -470,14 +470,14 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
                     {
                         if (nodi[successivo].visitati==2)
                         {
-                            if (nodi[successivo].costi>=nodi[indice_corrente].costi + costo_corrente)
+                            if (nodi[successivo].costi>nodi[indice_corrente].costi + costo_corrente)
                             {
                                 nodi[successivo].costi=nodi[indice_corrente].costi + costo_corrente;
                                 heap_decrease_key(nodi, &dim_heap);
                             }
                         }
                         else{
-                            if (nodi[successivo].visitati==0 && nodi[successivo].costi>=nodi[indice_corrente].costi + costo_corrente)
+                            if (nodi[successivo].visitati==0 && nodi[successivo].costi>nodi[indice_corrente].costi + costo_corrente)
                             {
                                 nodi[successivo].costi=nodi[indice_corrente].costi + costo_corrente;
                                 push_heap(nodi, &dim_heap, mappa->rotte_aeree[i][2], mappa->rotte_aeree[i][3], nodi[successivo].costi);
@@ -501,14 +501,14 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
                 {
                     if (nodi[successivo].visitati==2)
                     {
-                        if (nodi[successivo].costi>=nodi[indice_corrente].costi + costo_corrente)
+                        if (nodi[successivo].costi>nodi[indice_corrente].costi + costo_corrente)
                         {
                             nodi[successivo].costi=nodi[indice_corrente].costi + costo_corrente;
                             heap_decrease_key(nodi, &dim_heap);
                         }
                     }
                     else{
-                        if (nodi[successivo].visitati==0 && nodi[successivo].costi>=nodi[indice_corrente].costi + costo_corrente)
+                        if (nodi[successivo].visitati==0 && nodi[successivo].costi>nodi[indice_corrente].costi + costo_corrente)
                         {
                             nodi[successivo].costi=nodi[indice_corrente].costi + costo_corrente;
                             push_heap(nodi, &dim_heap, coordinate[i][0], coordinate[i][1], nodi[successivo].costi);
