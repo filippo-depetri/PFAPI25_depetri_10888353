@@ -92,6 +92,7 @@ heap pop_heap(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int *dim_heap);
 void min_heapify(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int value, int size);
 void swap(heap *nodo1, heap *nodo2);
 void push_heap(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int *size, int x, int y, int costo);
+void heap_decrease_key(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int *size);
 
 int main(){
     //PREPARATIVI
@@ -467,10 +468,21 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
                     costo_corrente=mappa->rotte_aeree[i][4];
                     if (costo_corrente>0)
                     {
-                        if (nodi[successivo].visitati==0 && nodi[successivo].costi>=nodi[indice_corrente].costi + costo_corrente)
+                        if (nodi[successivo].visitati==2)
                         {
-                            nodi[successivo].costi=nodi[indice_corrente].costi + costo_corrente;
-                            push_heap(nodi, &dim_heap, mappa->rotte_aeree[i][2], mappa->rotte_aeree[i][3], nodi[successivo].costi);
+                            if (nodi[successivo].costi>=nodi[indice_corrente].costi + costo_corrente)
+                            {
+                                nodi[successivo].costi=nodi[indice_corrente].costi + costo_corrente;
+                                heap_decrease_key(nodi, &dim_heap);
+                            }
+                        }
+                        else{
+                            if (nodi[successivo].visitati==0 && nodi[successivo].costi>=nodi[indice_corrente].costi + costo_corrente)
+                            {
+                                nodi[successivo].costi=nodi[indice_corrente].costi + costo_corrente;
+                                push_heap(nodi, &dim_heap, mappa->rotte_aeree[i][2], mappa->rotte_aeree[i][3], nodi[successivo].costi);
+                                nodi[successivo].visitati=2;
+                            }
                         }
                     }
                 }
@@ -487,12 +499,22 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
                 costo_corrente=mappa->esagoni[indice_corrente][0];
                 if (costo_corrente>0)
                 {
-                    if (nodi[successivo].visitati==0 && nodi[successivo].costi>=nodi[indice_corrente].costi + costo_corrente)
+                    if (nodi[successivo].visitati==2)
                     {
-                        nodi[successivo].costi=nodi[indice_corrente].costi + costo_corrente;
-                        push_heap(nodi, &dim_heap, coordinate[i][0], coordinate[i][1], nodi[successivo].costi);
+                        if (nodi[successivo].costi>=nodi[indice_corrente].costi + costo_corrente)
+                        {
+                            nodi[successivo].costi=nodi[indice_corrente].costi + costo_corrente;
+                            heap_decrease_key(nodi, &dim_heap);
+                        }
                     }
-                    
+                    else{
+                        if (nodi[successivo].visitati==0 && nodi[successivo].costi>=nodi[indice_corrente].costi + costo_corrente)
+                        {
+                            nodi[successivo].costi=nodi[indice_corrente].costi + costo_corrente;
+                            push_heap(nodi, &dim_heap, coordinate[i][0], coordinate[i][1], nodi[successivo].costi);
+                            nodi[successivo].visitati=2;
+                        }
+                    }
                 }
             }
             
@@ -546,11 +568,14 @@ void swap(heap *nodo1, heap *nodo2){
     *nodo2=temp;
 }
 void push_heap(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int *size, int x, int y, int costo){
-    int pos=*size;
+    nodo[*size].costo_heap=costo;
+    nodo[*size].x_heap=x;
+    nodo[*size].y_heap=y;
+    heap_decrease_key(nodo, size);
     *size=*size+1;
-    nodo[pos].costo_heap=costo;
-    nodo[pos].x_heap=x;
-    nodo[pos].y_heap=y;
+}
+void heap_decrease_key(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int *size){
+    int pos=*size;
     while (pos>0 && nodo[(pos-1)/2].costo_heap>nodo[pos].costo_heap)
     {
         swap(&nodo[pos], &nodo[(pos-1)/2]);
