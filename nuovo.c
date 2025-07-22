@@ -92,7 +92,6 @@ heap pop_heap(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int *dim_heap);
 void min_heapify(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int value, int size);
 void swap(heap *nodo1, heap *nodo2);
 void push_heap(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int *size, int x, int y, int costo);
-void heap_decrease_key(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int *size);
 
 int main(){
     //PREPARATIVI
@@ -546,14 +545,11 @@ void swap(heap *nodo1, heap *nodo2){
     *nodo2=temp;
 }
 void push_heap(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int *size, int x, int y, int costo){
-    nodo[*size].costo_heap=costo;
-    nodo[*size].x_heap=x;
-    nodo[*size].y_heap=y;
-    heap_decrease_key(nodo, size);
-    *size=*size+1;
-}
-void heap_decrease_key(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int *size){
     int pos=*size;
+    *size=*size+1;
+    nodo[pos].costo_heap=costo;
+    nodo[pos].x_heap=x;
+    nodo[pos].y_heap=y;
     while (pos>0 && nodo[(pos-1)/2].costo_heap>nodo[pos].costo_heap)
     {
         swap(&nodo[pos], &nodo[(pos-1)/2]);
