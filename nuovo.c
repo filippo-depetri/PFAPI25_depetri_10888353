@@ -465,7 +465,7 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
                 {
                     successivo=mappa->rotte_aeree[i][2]*dim_mappa.dimy+mappa->rotte_aeree[i][3];
                     costo_corrente=mappa->rotte_aeree[i][4];
-                    if (costo_corrente>0)
+                    if (costo_corrente>0 || (costo_corrente==0 && mappa->rotte_aeree[i][2]==x2 && mappa->rotte_aeree[i][3]==y2))
                     {
                         if (nodi[successivo].visitati==0 && nodi[indice_corrente].costi + costo_corrente<nodi[successivo].costi)
                         {
@@ -485,7 +485,7 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
             {
                 successivo=coordinate[i][0]*dim_mappa.dimy+coordinate[i][1];
                 costo_corrente=mappa->esagoni[indice_corrente][0];
-                if (costo_corrente>0)
+                if (costo_corrente>0 || (costo_corrente==0 && coordinate[i][0]==x2 && coordinate[i][1]==y2))
                 {
                     if (nodi[successivo].visitati==0 && nodi[indice_corrente].costi + costo_corrente<nodi[successivo].costi)
                     {
