@@ -555,6 +555,13 @@ void push_heap(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int *size, int x, int y
         swap(&nodo[pos], &nodo[(pos-1)/2]);
         pos=(pos-1)/2;
     }
+    #ifdef DEBUG
+    for (int i = 0; i < *size; i++)
+    {
+        printf("%d, %d\n", nodo[i].x_heap, nodo[i].y_heap);
+    }
+    #endif
+    
 }
 
 float max(float n1, float n2){
