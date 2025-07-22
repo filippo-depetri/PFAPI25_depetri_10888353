@@ -56,7 +56,7 @@ typedef struct heap{
 typedef struct mappa
 {
     int **rotte_aeree;          //matrice in cui ci sono coord x y e costo rotta aerea
-    u_int16_t **esagoni;        //matrice in cui sono presenti costi e flag already visited
+    u_int8_t **esagoni;        //matrice in cui sono presenti costi e flag already visited
     u_int8_t dim_rotte;
 }map;   //in memory heap
 
