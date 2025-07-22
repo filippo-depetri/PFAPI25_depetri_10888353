@@ -554,7 +554,7 @@ void push_heap(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int *size, int x, int y
     #ifdef DEBUG
     for (int i = 0; i < *size; i++)
     {
-        printf("%d, %d\n", nodo[i].x_heap, nodo[i].y_heap);
+        printf("%d, %d\n", dim_mappa.dimx-nodo[i].x_heap-1, nodo[i].y_heap);
     }
     #endif
     
