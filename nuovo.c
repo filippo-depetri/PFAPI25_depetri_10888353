@@ -218,8 +218,8 @@ void comando_init(map *mappa, FILE *output){
     for (int i = 0; i <dim_mappa.dimx*dim_mappa.dimy; i++)
     {
 
-        fprintf(output, "%d", esagoni[i][0]);
-        fprintf(output, "%d\n", esagoni[i][1]);
+        fprintf(output, "%d", mappa->esagoni[i][0]);
+        fprintf(output, "%d\n", mappa->esagoni[i][1]);
     }
     #endif
     return;   
