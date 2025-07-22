@@ -50,7 +50,6 @@ Consegna:   Movhex è una compagnia di autotrasporti che dispone di una flotta d
 typedef struct heap{
     int x_heap;
     int y_heap;
-    u_int16_t costo_heap;
     u_int16_t costi;
     u_int8_t visitati;
 }heap;  //djikstra
@@ -91,7 +90,7 @@ int dist_esag(int startX, int startY, int arrX, int arrY);
 heap pop_heap(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int *dim_heap);
 void min_heapify(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int value, int size);
 void swap(heap *nodo1, heap *nodo2);
-void push_heap(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int *size, int x, int y, int costo);
+void push_heap(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int *size, int x, int y);
 
 int main(){
     //PREPARATIVI
@@ -417,7 +416,6 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
     int dim_heap=0;
     heap nodo_corrente;
     int successivo;
-    int indice_corrente;
     int costo_corrente;
     x1=dim_mappa.dimx-x1-1;
     x2=dim_mappa.dimx-x2-1;
@@ -443,14 +441,11 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
     }
     
     //algoritmo di djikstra
-    partenza=x1*dim_mappa.dimy+y1;
-    nodi[partenza].costi=0;
-    push_heap(nodi, &dim_heap, x1, y1, 0);
+    nodi[0].costi=0;
+    push_heap(nodi, &dim_heap, x1, y1);
     while (dim_heap>0)
     {
         nodo_corrente=pop_heap(nodi, &dim_heap);
-        indice_corrente=nodo_corrente.x_heap*dim_mappa.dimy+nodo_corrente.y_heap;
-        nodi[indice_corrente].visitati=1;
         //se sono arrivato al nodo destinazione
         if (nodo_corrente.x_heap==x2 && nodo_corrente.y_heap==y2)
         {
@@ -463,14 +458,15 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
             {
                 if (mappa->rotte_aeree[i][0]==nodo_corrente.x_heap && mappa->rotte_aeree[i][1]==nodo_corrente.y_heap)
                 {
-                    successivo=mappa->rotte_aeree[i][2]*dim_mappa.dimy+mappa->rotte_aeree[i][3];
+                    successivo=dim_heap+1;
                     costo_corrente=mappa->rotte_aeree[i][4];
                     if (costo_corrente>0 || (costo_corrente==0 && mappa->rotte_aeree[i][2]==x2 && mappa->rotte_aeree[i][3]==y2))
                     {
-                        if (nodi[successivo].visitati==0 && nodi[indice_corrente].costi + costo_corrente<nodi[successivo].costi)
+                        if (nodi[successivo].visitati==0 && nodo_corrente.costi + costo_corrente<nodi[successivo].costi)
                         {
-                            nodi[successivo].costi=nodi[indice_corrente].costi + costo_corrente;
-                            push_heap(nodi, &dim_heap, mappa->rotte_aeree[i][2], mappa->rotte_aeree[i][3], nodi[successivo].costi);
+                            nodi[successivo].costi=nodo_corrente.costi + costo_corrente;
+                            push_heap(nodi, &dim_heap, mappa->rotte_aeree[i][2], mappa->rotte_aeree[i][3]);
+                            nodi[successivo].visitati=1;
                         }
                     }
                 }
@@ -483,14 +479,15 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
         {
             if (coordinate[i][0]>=0 && coordinate[i][0]<dim_mappa.dimx && coordinate[i][1]>=0 && coordinate[i][1]<dim_mappa.dimy)
             {
-                successivo=coordinate[i][0]*dim_mappa.dimy+coordinate[i][1];
-                costo_corrente=mappa->esagoni[indice_corrente][0];
+                successivo=dim_heap+1;
+                costo_corrente=mappa->esagoni[nodo_corrente.x_heap*dim_mappa.dimy+nodo_corrente.y_heap][0];
                 if (costo_corrente>0 || (costo_corrente==0 && coordinate[i][0]==x2 && coordinate[i][1]==y2))
                 {
-                    if (nodi[successivo].visitati==0 && nodi[indice_corrente].costi + costo_corrente<nodi[successivo].costi)
+                    if (nodi[successivo].visitati==0 && nodo_corrente.costi + costo_corrente<nodi[successivo].costi)
                     {
-                        nodi[successivo].costi=nodi[indice_corrente].costi + costo_corrente;
-                        push_heap(nodi, &dim_heap, coordinate[i][0], coordinate[i][1], nodi[successivo].costi);
+                        nodi[successivo].costi=nodo_corrente.costi + costo_corrente;
+                        push_heap(nodi, &dim_heap, coordinate[i][0], coordinate[i][1]);
+                        nodi[successivo].visitati=1;
                     }
                 }
             }
@@ -498,7 +495,7 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
         }
             
     }
-        costo=nodi[x2*dim_mappa.dimy+y2].costi;
+        costo=nodo_corrente.costi;
         if (costo>=MAX_COST)
         {
             fprintf(output, "%d\n", NOT_VALID_TRAVEL);
@@ -524,12 +521,12 @@ void min_heapify(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int value, int size){
     int l=2*value+1;
     int r=2*value+2;
     int min;
-    if (l<size && nodo[l].costo_heap<nodo[value].costo_heap)
+    if (l<size && nodo[l].costi<nodo[value].costi)
     {
         min=l;
     }
     else min=value;
-    if (r<size && nodo[r].costo_heap<nodo[min].costo_heap)
+    if (r<size && nodo[r].costi<nodo[min].costi)
     {
         min=r;
     }
@@ -544,13 +541,12 @@ void swap(heap *nodo1, heap *nodo2){
     *nodo1=*nodo2;
     *nodo2=temp;
 }
-void push_heap(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int *size, int x, int y, int costo){
+void push_heap(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int *size, int x, int y){
     int pos=*size;
     *size=*size+1;
-    nodo[pos].costo_heap=costo;
     nodo[pos].x_heap=x;
     nodo[pos].y_heap=y;
-    while (pos>0 && nodo[(pos-1)/2].costo_heap>nodo[pos].costo_heap)
+    while (pos>0 && nodo[(pos-1)/2].costi>nodo[pos].costi)
     {
         swap(&nodo[pos], &nodo[(pos-1)/2]);
         pos=(pos-1)/2;
