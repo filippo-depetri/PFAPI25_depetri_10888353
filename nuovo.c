@@ -91,7 +91,7 @@ void min_heapify(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int value, int size);
 void swap(heap *nodo1, heap *nodo2);
 void push_heap(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int *size, int x, int y, int costo);
 void heap_decrease_key(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int pos, int costo);
-int search_heap(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int x, int y);
+int search_heap(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int size, int x, int y);
 
 int main(){
     //PREPARATIVI
@@ -483,7 +483,7 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
                             if (visitati[successivo]==0 && costi[index] + costo_corrente<costi[successivo])
                             {
                                 costi[successivo]=costi[index] + costo_corrente;
-                                heap_decrease_key(nodi, search_heap(nodi, mappa->rotte_aeree[i][2], mappa->rotte_aeree[i][3]), costi[successivo]);
+                                heap_decrease_key(nodi, search_heap(nodi, dim_heap, mappa->rotte_aeree[i][2], mappa->rotte_aeree[i][3]), costi[successivo]);
                             }
                         }
                     }
@@ -514,7 +514,7 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
                         if (visitati[successivo]==0 && costi[index] + costo_corrente<costi[successivo])
                         {
                             costi[successivo]=costi[index] + costo_corrente;
-                            heap_decrease_key(nodi, search_heap(nodi, coordinate[i][0], coordinate[i][1]), costi[successivo]);
+                            heap_decrease_key(nodi, search_heap(nodi, dim_heap, coordinate[i][0], coordinate[i][1]), costi[successivo]);
                         }
                     }
                 }
@@ -588,8 +588,8 @@ void heap_decrease_key(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int pos, int co
         pos=(pos-1)/2;
     }
 }
-int search_heap(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int x, int y){
-    for (int i = 0; i < dim_mappa.dimx*dim_mappa.dimy; i++)
+int search_heap(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int size, int x, int y){
+    for (int i = 0; i < size; i++)
     {
         if (nodo[i].x_heap==x && nodo[i].y_heap==y)
         {
