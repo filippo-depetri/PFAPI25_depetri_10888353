@@ -477,7 +477,7 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
                                 push_heap(nodi, &dim_heap, mappa->rotte_aeree[i][2], mappa->rotte_aeree[i][3], costi[successivo]);
                             }
                         }
-                        if (costi[successivo<MAX_COST])
+                        if (costi[successivo]<MAX_COST)
                         {
                             if (visitati[successivo]==0 && costi[index] + costo_corrente<costi[successivo])
                             {
@@ -505,7 +505,7 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
                         if (visitati[successivo]==0 && costi[index] + costo_corrente<costi[successivo])
                         {
                             costi[successivo]=costi[index] + costo_corrente;
-                            push_heap(nodi, &dim_heap, mappa->rotte_aeree[i][2], mappa->rotte_aeree[i][3], costi[successivo]);
+                            push_heap(nodi, &dim_heap, coordinate[i][0], coordinate[i][1], costi[successivo]);
                         }
                     }
                     if (costi[successivo]<MAX_COST)
@@ -513,7 +513,7 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
                         if (visitati[successivo]==0 && costi[index] + costo_corrente<costi[successivo])
                         {
                             costi[successivo]=costi[index] + costo_corrente;
-                            heap_decrease_key(nodi, search_heap(nodi, mappa->rotte_aeree[i][2], mappa->rotte_aeree[i][3]), costi[successivo]);
+                            heap_decrease_key(nodi, search_heap(nodi, coordinate[i][0], coordinate[i][1]), costi[successivo]);
                         }
                     }
                 }
