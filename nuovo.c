@@ -474,13 +474,13 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
                             if (visitati[successivo]==0)
                             {
                                 costi[successivo]=costi[index] + costo_corrente;
-                                push_heap(nodi, &dim_heap, mappa->rotte_aeree[i][2], mappa->rotte_aeree[i][3], costo_corrente);
+                                push_heap(nodi, &dim_heap, mappa->rotte_aeree[i][2], mappa->rotte_aeree[i][3], costi[successivo]);
                                 visitati[successivo]=2;
                             }
                             if (visitati[successivo]==2)
                             {
                                 costi[successivo]=costi[index] + costo_corrente;
-                                heap_decrease_key(nodi, search_heap(nodi, mappa->rotte_aeree[i][2], mappa->rotte_aeree[i][3]), costo_corrente);
+                                heap_decrease_key(nodi, search_heap(nodi, mappa->rotte_aeree[i][2], mappa->rotte_aeree[i][3]), costi[successivo]);
                             }
                         }
                     }
@@ -503,7 +503,7 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
                         if (visitati[successivo]==0)
                         {
                             costi[successivo]=costi[index] + costo_corrente;
-                            push_heap(nodi, &dim_heap, coordinate[i][0], coordinate[i][1], costo_corrente);
+                            push_heap(nodi, &dim_heap, coordinate[i][0], coordinate[i][1], costi[successivo]);
                             visitati[successivo]=2;
                         }
                         if (visitati[successivo]==2)
@@ -571,6 +571,7 @@ void push_heap(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int *size, int x, int y
     {
         printf("%d, %d, %d\n", dim_mappa.dimx-nodo[i].x_heap-1, nodo[i].y_heap, nodo[i].costo_h);
     }
+    printf("\n");
     #endif
     
 }
@@ -590,6 +591,7 @@ int search_heap(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int x, int y){
             return i;
         }
     }
+    return -1;
 }
 
 float max(float n1, float n2){
