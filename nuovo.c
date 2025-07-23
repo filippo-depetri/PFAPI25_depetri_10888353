@@ -469,15 +469,17 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
                     costo_corrente=mappa->rotte_aeree[i][4];
                     if (costo_corrente>0 || (costo_corrente==0 && mappa->rotte_aeree[i][2]==x2 && mappa->rotte_aeree[i][3]==y2))
                     {
-                        if (costi[index] + costo_corrente<costi[successivo])
+                        if (costi[successivo]==MAX_COST)
                         {
-                            if (visitati[successivo]==0)
+                            if (visitati[successivo]==0 && costi[index] + costo_corrente<costi[successivo])
                             {
                                 costi[successivo]=costi[index] + costo_corrente;
                                 push_heap(nodi, &dim_heap, mappa->rotte_aeree[i][2], mappa->rotte_aeree[i][3], costi[successivo]);
-                                visitati[successivo]=2;
                             }
-                            if (visitati[successivo]==2)
+                        }
+                        if (costi[successivo<MAX_COST])
+                        {
+                            if (visitati[successivo]==0 && costi[index] + costo_corrente<costi[successivo])
                             {
                                 costi[successivo]=costi[index] + costo_corrente;
                                 heap_decrease_key(nodi, search_heap(nodi, mappa->rotte_aeree[i][2], mappa->rotte_aeree[i][3]), costi[successivo]);
@@ -498,18 +500,20 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
                 costo_corrente=mappa->esagoni[index][0];
                 if (costo_corrente>0 || (costo_corrente==0 && coordinate[i][0]==x2 && coordinate[i][1]==y2))
                 {
-                    if (costi[index] + costo_corrente<costi[successivo])
+                    if (costi[successivo]==MAX_COST)
                     {
-                        if (visitati[successivo]==0)
+                        if (visitati[successivo]==0 && costi[index] + costo_corrente<costi[successivo])
                         {
                             costi[successivo]=costi[index] + costo_corrente;
-                            push_heap(nodi, &dim_heap, coordinate[i][0], coordinate[i][1], costi[successivo]);
-                            visitati[successivo]=2;
+                            push_heap(nodi, &dim_heap, mappa->rotte_aeree[i][2], mappa->rotte_aeree[i][3], costi[successivo]);
                         }
-                        if (visitati[successivo]==2)
+                    }
+                    if (costi[successivo]<MAX_COST)
+                    {
+                        if (visitati[successivo]==0 && costi[index] + costo_corrente<costi[successivo])
                         {
                             costi[successivo]=costi[index] + costo_corrente;
-                            heap_decrease_key(nodi, search_heap(nodi, coordinate[i][0], coordinate[i][1]), costi[successivo]);
+                            heap_decrease_key(nodi, search_heap(nodi, mappa->rotte_aeree[i][2], mappa->rotte_aeree[i][3]), costi[successivo]);
                         }
                     }
                 }
