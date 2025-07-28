@@ -541,8 +541,7 @@ void min_heapify(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int value, int size){
     {
         min=l;
     }
-    else min=value;
-    if (r<size && nodo[r].costo_h<nodo[min].costo_h)
+    if (r<size && nodo[r].costo_h<nodo[value].costo_h)
     {
         min=r;
     }
