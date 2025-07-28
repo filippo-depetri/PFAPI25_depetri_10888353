@@ -413,7 +413,7 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
     heap nodi[dim_mappa.dimx*dim_mappa.dimy];
     u_int16_t costi[dim_mappa.dimx*dim_mappa.dimy];
     u_int8_t visitati[dim_mappa.dimx*dim_mappa.dimy];
-    int pos;
+    u_int8_t pos[dim_mappa.dimx*dim_mappa.dimy];
     int costo;
     int i;
     int partenza;
@@ -444,6 +444,7 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
     {
         costi[i]=MAX_COST;
         visitati[i]=0;
+        pos[i]=0;
     }
     
     //algoritmo di djikstra
@@ -455,6 +456,7 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
         nodo_corrente=pop_heap(nodi, &dim_heap);
         index=nodo_corrente.x_heap*dim_mappa.dimy+nodo_corrente.y_heap;
         visitati[index]=1;
+        pos[index]=0;
         //se sono arrivato al nodo destinazione
         if (nodo_corrente.x_heap==x2 && nodo_corrente.y_heap==y2)
         {
@@ -474,10 +476,10 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
                         if (visitati[successivo]==0 && costi[index] + costo_corrente<costi[successivo])
                         {
                             costi[successivo]=costi[index] + costo_corrente;
-                            pos=search_heap(nodi, dim_heap, mappa->rotte_aeree[i][2], mappa->rotte_aeree[i][3]);
-                            if (pos==-1)
+                            if (pos[mappa->rotte_aeree[i][2]*dim_mappa.dimy+mappa->rotte_aeree[i][3]]==0)
                             {
                                 push_heap(nodi, &dim_heap, mappa->rotte_aeree[i][2], mappa->rotte_aeree[i][3], costi[successivo]);
+                                pos[mappa->rotte_aeree[i][2]*dim_mappa.dimy+mappa->rotte_aeree[i][3]]=1;
                             }
                             else
                             {
@@ -501,10 +503,10 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
                     if (visitati[successivo]==0 && costi[index] + costo_corrente<costi[successivo])
                     {
                         costi[successivo]=costi[index] + costo_corrente;
-                        pos=search_heap(nodi, dim_heap, coordinate[i][0], coordinate[i][1]);
-                        if (pos==-1)
+                        if (pos[coordinate[i][0]*dim_mappa.dimy+coordinate[i][1]]==0)
                         {
                             push_heap(nodi, &dim_heap, coordinate[i][0], coordinate[i][1], costi[successivo]);
+                            pos[coordinate[i][0]*dim_mappa.dimy+coordinate[i][1]]=1;
                         }
                         else
                         {
