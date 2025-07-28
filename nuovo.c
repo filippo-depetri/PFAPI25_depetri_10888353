@@ -413,6 +413,7 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
     heap nodi[dim_mappa.dimx*dim_mappa.dimy];
     u_int16_t costi[dim_mappa.dimx*dim_mappa.dimy];
     u_int8_t visitati[dim_mappa.dimx*dim_mappa.dimy];
+    int pos;
     int costo;
     int i;
     int partenza;
@@ -470,25 +471,21 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
                     costo_corrente=mappa->rotte_aeree[i][4];
                     if (costo_corrente>0)
                     {
-                        if (costi[successivo]==MAX_COST)
+                        if (visitati[successivo]==0 && costi[index] + costo_corrente<costi[successivo])
                         {
-                            if (visitati[successivo]==0 && costi[index] + costo_corrente<costi[successivo])
+                            costi[successivo]=costi[index] + costo_corrente;
+                            pos=search_heap(nodi, dim_heap, mappa->rotte_aeree[i][2], mappa->rotte_aeree[i][3]);
+                            if (pos==-1)
                             {
-                                costi[successivo]=costi[index] + costo_corrente;
                                 push_heap(nodi, &dim_heap, mappa->rotte_aeree[i][2], mappa->rotte_aeree[i][3], costi[successivo]);
                             }
-                        }
-                        else
-                        {
-                            if (visitati[successivo]==0 && costi[index] + costo_corrente<costi[successivo])
+                            else
                             {
-                                costi[successivo]=costi[index] + costo_corrente;
-                                heap_decrease_key(nodi, search_heap(nodi, dim_heap, mappa->rotte_aeree[i][2], mappa->rotte_aeree[i][3]), costi[successivo]);
+                                heap_decrease_key(nodi, pos, costi[successivo]);
                             }
                         }
                     }
                 }
-                    
             }
         }
         //cerco via terra
@@ -501,20 +498,17 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
                 costo_corrente=mappa->esagoni[index][0];
                 if (costo_corrente>0)
                 {
-                    if (costi[successivo]==MAX_COST)
+                    if (visitati[successivo]==0 && costi[index] + costo_corrente<costi[successivo])
                     {
-                        if (visitati[successivo]==0 && costi[index] + costo_corrente<costi[successivo])
+                        costi[successivo]=costi[index] + costo_corrente;
+                        pos=search_heap(nodi, dim_heap, coordinate[i][0], coordinate[i][1]);
+                        if (pos==-1)
                         {
-                            costi[successivo]=costi[index] + costo_corrente;
                             push_heap(nodi, &dim_heap, coordinate[i][0], coordinate[i][1], costi[successivo]);
                         }
-                    }
-                    else
-                    {
-                        if (visitati[successivo]==0 && costi[index] + costo_corrente<costi[successivo])
+                        else
                         {
-                            costi[successivo]=costi[index] + costo_corrente;
-                            heap_decrease_key(nodi, search_heap(nodi, dim_heap, coordinate[i][0], coordinate[i][1]), costi[successivo]);
+                            heap_decrease_key(nodi, pos, costi[successivo]);
                         }
                     }
                 }
