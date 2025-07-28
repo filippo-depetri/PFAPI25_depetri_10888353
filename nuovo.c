@@ -91,7 +91,6 @@ void min_heapify(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int value, int size);
 void swap(heap *nodo1, heap *nodo2);
 void push_heap(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int *size, int x, int y, int costo, int pos[dim_mappa.dimx*dim_mappa.dimy]);
 void heap_decrease_key(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int pos, int costo, int pos_heap[dim_mappa.dimx*dim_mappa.dimy]);
-int search_heap(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int size, int x, int y);
 
 int main(){
     //PREPARATIVI
@@ -584,16 +583,6 @@ void heap_decrease_key(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int pos, int co
         pos_heap[nodo[(pos-1)/2].x_heap*dim_mappa.dimy+nodo[(pos-1)/2].y_heap]=pos;
         pos=(pos-1)/2;
     }
-}
-int search_heap(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int size, int x, int y){
-    for (int i = 0; i < size; i++)
-    {
-        if (nodo[i].x_heap==x && nodo[i].y_heap==y)
-        {
-            return i;
-        }
-    }
-    return -1;
 }
 
 float max(float n1, float n2){
