@@ -457,10 +457,10 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
         visitati[index]=1;
         pos[index]=-1;
         //se sono arrivato al nodo destinazione
-        /*if (nodo_corrente.x_heap==x2 && nodo_corrente.y_heap==y2)
+        if (nodo_corrente.x_heap==x2 && nodo_corrente.y_heap==y2)
         {
             break;
-        }*/
+        }
         //cerco via aria
         if (mappa->rotte_aeree!=NULL)
         {
