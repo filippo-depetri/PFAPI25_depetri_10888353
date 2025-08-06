@@ -410,18 +410,16 @@ void comando_air_route(map* mappa, int x1, int y1, int x2, int y2, FILE *output)
 }
 
 void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *output){
-    heap nodi[MAX_HEAP];
+    heap coda[MAX_HEAP];
     u_int16_t costi[dim_mappa.dimx*dim_mappa.dimy];
     u_int8_t visitati[dim_mappa.dimx*dim_mappa.dimy];
-    int pos[dim_mappa.dimx*dim_mappa.dimy];
-    int costo;
+    heap current;
     int i;
-    int partenza;
-    int dim_heap=0;
-    heap nodo_corrente;
-    int successivo;
-    int costo_corrente;
+    int costo;
+    int dim_coda=0;
     int index;
+    int successivo;
+    u_int16_t current_cost;
     x1=dim_mappa.dimx-x1-1;
     x2=dim_mappa.dimx-x2-1;
     if (mappa->esagoni==NULL)
@@ -444,88 +442,39 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
     {
         costi[i]=MAX_COST;
         visitati[i]=NOT_VALID_COST;
-        pos[i]=NOT_VALID_TRAVEL;
     }
     
     //algoritmo di djikstra
-    partenza=x1*dim_mappa.dimy+y1;
-    costi[partenza]=NOT_VALID_COST;
-    push_heap(nodi, &dim_heap, x1, y1, NOT_VALID_COST, pos);
-    while (dim_heap>0)
+    costi[x1*dim_mappa.dimy+y1]=NOT_VALID_COST;
+    coda[0].x_heap=x1;  //funzione push?
+    coda[0].y_heap=y1;
+    coda[0].costo_h=0;
+    dim_coda++;
+    while (dim_coda>0)
     {
-        nodo_corrente=pop_heap(nodi, &dim_heap, pos);
-        index=nodo_corrente.x_heap*dim_mappa.dimy+nodo_corrente.y_heap;
-        visitati[index]=VISITED;
-        pos[index]=NOT_VALID_TRAVEL;
-        //se sono arrivato al nodo destinazione
-        if (nodo_corrente.x_heap==x2 && nodo_corrente.y_heap==y2)
-        {
-            break;
-        }
-        //cerco via aria
-        if (mappa->rotte_aeree!=NULL)
-        {
-            for (i = 0; i < mappa->dim_rotte; i++)
-            {
-                if (mappa->rotte_aeree[i][0]==nodo_corrente.x_heap && mappa->rotte_aeree[i][1]==nodo_corrente.y_heap)
-                {
-                    successivo=mappa->rotte_aeree[i][2]*dim_mappa.dimy+mappa->rotte_aeree[i][3];
-                    costo_corrente=mappa->rotte_aeree[i][4];
-                    if (costo_corrente>NOT_VALID_COST)
-                    {
-                        if (visitati[successivo]==0 && costi[index] + costo_corrente<=costi[successivo])
-                        {
-                            costi[successivo]=costi[index] + costo_corrente;
-                            if (pos[mappa->rotte_aeree[i][2]*dim_mappa.dimy+mappa->rotte_aeree[i][3]]==-1)
-                            {
-                                push_heap(nodi, &dim_heap, mappa->rotte_aeree[i][2], mappa->rotte_aeree[i][3], costi[successivo], pos);
-                            }
-                            else
-                            {
-                                heap_decrease_key(nodi, pos[mappa->rotte_aeree[i][2]*dim_mappa.dimy+mappa->rotte_aeree[i][3]], costi[successivo], pos);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        //cerco via terra
-        nodi_adiacenti(nodo_corrente.x_heap, nodo_corrente.y_heap);
-        for (i = 0; i < COLLEGAMENTI; i++)
-        {
-            if (coordinate[i][0]>=0 && coordinate[i][0]<dim_mappa.dimx && coordinate[i][1]>=0 && coordinate[i][1]<dim_mappa.dimy)
-            {
-                successivo=coordinate[i][0]*dim_mappa.dimy+coordinate[i][1];
-                costo_corrente=mappa->esagoni[index][0];
-                if (costo_corrente>NOT_VALID_COST)
-                {
-                    if (visitati[successivo]==0 && costi[index] + costo_corrente<=costi[successivo])
-                    {
-                        costi[successivo]=costi[index] + costo_corrente;
-                        if (pos[coordinate[i][0]*dim_mappa.dimy+coordinate[i][1]]==-1)
-                        {
-                            push_heap(nodi, &dim_heap, coordinate[i][0], coordinate[i][1], costi[successivo], pos);
-                        }
-                        else
-                        {
-                            heap_decrease_key(nodi, pos[coordinate[i][0]*dim_mappa.dimy+coordinate[i][1]], costi[successivo], pos);
-                        }
-                    }
-                }
-            }
-            
-        }
-            
+        //implementare dijkstra con coda ad array no heap   
     }
-        costo=costi[x2*dim_mappa.dimy+y2];
-        if (costo>=MAX_COST)
-        {
-            fprintf(output, "%d\n", NOT_VALID_TRAVEL);
-        }
-        else{
-            fprintf(output, "%d\n", costo);
-        }
-        return;
+    
+
+
+
+
+
+
+
+
+
+
+
+    costo=costi[x2*dim_mappa.dimy+y2];
+    if (costo>=MAX_COST)
+    {
+        fprintf(output, "%d\n", NOT_VALID_TRAVEL);
+    }
+    else{
+        fprintf(output, "%d\n", costo);
+    }
+    return;
 }
 heap pop_heap(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int *dim_heap, int pos_heap[dim_mappa.dimx*dim_mappa.dimy]){
     heap min=nodo[0];
