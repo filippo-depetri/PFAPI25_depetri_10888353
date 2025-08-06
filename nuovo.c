@@ -413,7 +413,7 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
     heap nodi[MAX_HEAP];
     u_int16_t costi[dim_mappa.dimx*dim_mappa.dimy];
     u_int8_t visitati[dim_mappa.dimx*dim_mappa.dimy];
-    int pos[MAX_HEAP];
+    int pos[dim_mappa.dimx*dim_mappa.dimy];
     int costo;
     int i;
     int partenza;
