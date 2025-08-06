@@ -44,7 +44,7 @@ Consegna:   Movhex è una compagnia di autotrasporti che dispone di una flotta d
 #define COLLEGAMENTI 6
 #define MAX_COST 65535
 #define MAX_ALLOCATED 255
-#define MAX_HEAP 1000
+#define MAX_HEAP 10000
 
 
 //strutture
