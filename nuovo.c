@@ -171,10 +171,10 @@ int main(){
 
 //alloca mappa
 void alloca_mappa(map* mappa){
-    mappa->esagoni=malloc(dim_mappa.dimx*dim_mappa.dimy*sizeof(u_int16_t *));
+    mappa->esagoni=malloc(dim_mappa.dimx*dim_mappa.dimy*sizeof(u_int8_t *));
     for (int i = 0; i < dim_mappa.dimx*dim_mappa.dimy; i++)
     {
-        mappa->esagoni[i]=malloc(2*sizeof(u_int16_t));
+        mappa->esagoni[i]=malloc(2*sizeof(u_int8_t));
     }
 }
 void libera_mappa(map* mappa){
