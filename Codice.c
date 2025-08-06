@@ -31,28 +31,37 @@ Consegna:   Movhex è una compagnia di autotrasporti che dispone di una flotta d
 #define INIT 'i'
 #define CAMBIO_COSTO 'c'
 #define ROTTA_AEREA 'o'
-#define COSTO_VIAGGIO 't'
+#define COSTO_VIAGGIO 'r'
 #define AFFERMATIVO "OK"
 #define FALSO "KO"
 #define NOT_VALID_COST 0
 #define LUNGHEZZA_STR_COMANDO_MAX 30
-#define MAX_ROTTE_AR (u_int16_t)5
+#define MAX_ROTTE_AR 5
 #define NOT_VALID (u_int16_t)-2
 #define NOT_VALID_TRAVEL -1
 #define GRIGIO 7
 #define BIANCO 9
 #define COLLEGAMENTI 6
-#define MAX_COST 100000
-#define MAX_ALLOCATED 5000
+#define MAX_COST 65535
+#define MAX_ALLOCATED 255
+#define MAX_HEAP 10000      //possibile tirare giù?
+#define VISITED 1
 
 
 //strutture
-typedef struct rottaar
+typedef struct heap{
+    int x_heap;
+    int y_heap;
+    u_int8_t costo_h;
+}heap;  //djikstra
+typedef struct mappa
 {
-    int x;
-    int y;
-    int costo;
-}rottaar_t;
+    int **rotte_aeree;          //matrice in cui ci sono coord x y e costo rotta aerea
+    u_int8_t **esagoni;        //matrice in cui sono presenti costi e flag already visited
+    u_int8_t dim_rotte;
+}map;   //in memory heap
+
+int coordinate[COLLEGAMENTI][2];
 
 struct generale_comandi
 {
@@ -69,25 +78,21 @@ struct dimensioni_mappa
     int dimy;     //dim colonne
 }dim_mappa;
 
-int coordinate[COLLEGAMENTI][2];
-
-typedef struct esagono
-{
-    int costo;
-    rottaar_t rotta_ar[MAX_ROTTE_AR];
-    u_int8_t already_visited;
-}esagono_t;
-
-void comando_init(esagono_t **mappa, FILE *output);
-void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FILE *output);
-void comando_air_route(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *output);
-void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *output);
-esagono_t **alloca_mappa();
-void libera_mappa(esagono_t **mappa);
+void comando_init(map *mappa, FILE *output);
+void comando_change_cost(map *mappa, int x, int y, int v, int raggio, FILE *output);
+void comando_air_route(map *mappa, int x1, int y1, int x2, int y2, FILE *output);
+void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *output);
+void alloca_mappa();
+void libera_mappa(map *mappa);
 float max (float n1, float n2);
-void aggiorna_costo(esagono_t **mappa, int xloc, int yloc, int v, int raggio, int dist_esagoni);
+void aggiorna_costo(map *mappa, int xloc, int yloc, int v, int raggio, int dist_esagoni);
 void nodi_adiacenti(int x, int y);
 int dist_esag(int startX, int startY, int arrX, int arrY);
+heap pop_heap(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int *dim_heap, int pos_heap[dim_mappa.dimx*dim_mappa.dimy]);
+void min_heapify(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int value, int size, int pos_heap[dim_mappa.dimx*dim_mappa.dimy]);
+void swap(heap *nodo1, heap *nodo2);
+void push_heap(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int *size, int x, int y, int costo, int pos[dim_mappa.dimx*dim_mappa.dimy]);
+void heap_decrease_key(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int pos, int costo, int pos_heap[dim_mappa.dimx*dim_mappa.dimy]);
 
 int main(){
     //PREPARATIVI
@@ -97,7 +102,9 @@ int main(){
         FILE *f_in, *f_out;
         f_in=stdin;
         f_out=stdout;
-        esagono_t **mappa=NULL;
+        map mappa;
+        mappa.esagoni=NULL;
+        mappa.rotte_aeree=NULL;
     //fine variabili gestione comandi
     #ifdef DEBUGTEST
     int ssc;
@@ -111,11 +118,11 @@ int main(){
     do{
         sc=fscanf(f_in, "%s", comando);
         if(comando[0]==INIT){
-                libera_mappa(mappa);
+                libera_mappa(&mappa);
                 sc=fscanf(f_in, "%d", &dim_mappa.dimy);
                 sc=fscanf(f_in, "%d", &dim_mappa.dimx);
-                mappa=alloca_mappa();
-                comando_init(mappa, f_out);
+                alloca_mappa(&mappa);
+                comando_init(&mappa, f_out);
                 #ifdef DEBUG
                 printf("INIT\n");
                 #endif
@@ -126,7 +133,7 @@ int main(){
                 sc=fscanf(f_in, "%d", &gen_comandi.rigx);
                 sc=fscanf(f_in, "%d", &gen_comandi.v);
                 sc=fscanf(f_in, "%d", &gen_comandi.raggio);
-                comando_change_cost(mappa, gen_comandi.rigx, gen_comandi.colx, gen_comandi.v, gen_comandi.raggio, f_out);
+                comando_change_cost(&mappa, gen_comandi.rigx, gen_comandi.colx, gen_comandi.v, gen_comandi.raggio, f_out);
                 #ifdef DEBUG
                 printf("CHANGE_COST\n");
                 #endif
@@ -137,84 +144,83 @@ int main(){
                         sc=fscanf(f_in, "%d", &gen_comandi.rigx);
                         sc=fscanf(f_in, "%d", &gen_comandi.coly);
                         sc=fscanf(f_in, "%d", &gen_comandi.rigy);
-                        comando_air_route(mappa, gen_comandi.rigx, gen_comandi.colx, gen_comandi.rigy, gen_comandi.coly, f_out);
+                        comando_air_route(&mappa, gen_comandi.rigx, gen_comandi.colx, gen_comandi.rigy, gen_comandi.coly, f_out);
                         #ifdef DEBUG
                         printf("AIR_ROUTE\n");
                         #endif
                     }
                     else{
-                        sc=fscanf(f_in, "%d", &gen_comandi.colx);
-                        sc=fscanf(f_in, "%d", &gen_comandi.rigx);
-                        sc=fscanf(f_in, "%d", &gen_comandi.coly);
-                        sc=fscanf(f_in, "%d", &gen_comandi.rigy);
-                        comando_travel_cost(mappa, gen_comandi.rigx, gen_comandi.colx, gen_comandi.rigy, gen_comandi.coly, f_out);
-                        #ifdef DEBUG
-                        printf("TRAVEL\n");
-                        #endif
+                        if (comando[1]==COSTO_VIAGGIO)
+                        {
+                            sc=fscanf(f_in, "%d", &gen_comandi.colx);
+                            sc=fscanf(f_in, "%d", &gen_comandi.rigx);
+                            sc=fscanf(f_in, "%d", &gen_comandi.coly);
+                            sc=fscanf(f_in, "%d", &gen_comandi.rigy);
+                            comando_travel_cost(&mappa, gen_comandi.rigx, gen_comandi.colx, gen_comandi.rigy, gen_comandi.coly, f_out);
+                            #ifdef DEBUG
+                            printf("TRAVEL\n");
+                            #endif
+                        }
                     }
                 }
             }
     }while(sc!=EOF);
     fclose(f_in);
     fclose(f_out);
-    libera_mappa(mappa);
+    libera_mappa(&mappa);
     return 0;
 }
 
 //alloca mappa
-esagono_t **alloca_mappa(){
-        esagono_t **mappa;
-        mappa=malloc(dim_mappa.dimx*sizeof(esagono_t *));
-        for (int i = 0; i < dim_mappa.dimx; i++)
-        {
-            mappa[i]=malloc(dim_mappa.dimy*sizeof(esagono_t));
-        }
-        return(mappa);
+void alloca_mappa(map* mappa){
+    mappa->esagoni=malloc(dim_mappa.dimx*dim_mappa.dimy*sizeof(u_int8_t *));
+    for (int i = 0; i < dim_mappa.dimx*dim_mappa.dimy; i++)
+    {
+        mappa->esagoni[i]=malloc(2*sizeof(u_int8_t));
+    }
 }
-void libera_mappa(esagono_t **mappa){
-    if (mappa==NULL)
+void libera_mappa(map* mappa){
+    if (mappa->esagoni==NULL)
     {
         return;
     }
     else{
-        for (int i = 0; i < dim_mappa.dimx; i++)
+        for (int i = 0; i < dim_mappa.dimx*dim_mappa.dimy; i++)
         {
-            free(mappa[i]);
+            free(mappa->esagoni[i]);
         }
-        free(mappa);
+        free(mappa->esagoni);
     }
-    
+    mappa->esagoni=NULL;
+    if (mappa->rotte_aeree==NULL)
+    {
+        return;
+    }
+    else{
+        for (int i = 0; i < MAX_ALLOCATED; i++)
+        {
+            free(mappa->rotte_aeree[i]);
+        }
+        free(mappa->rotte_aeree);
+    }
+    mappa->rotte_aeree=NULL;
 }
 
 
 //comando init: costo di ogni esagono inizializzato a 1 (ottimizzabile)
-void comando_init(esagono_t **mappa, FILE *output){
-    for (int i = 0; i <dim_mappa.dimx; i++)
+void comando_init(map *mappa, FILE *output){
+    for (int i = 0; i <dim_mappa.dimx*dim_mappa.dimy; i++)
     {
-        for (int j = 0; j < dim_mappa.dimy; j++)
-        {
-            mappa[i][j].costo=1;
-            mappa[i][j].already_visited=BIANCO;
-            for (int k = 0; k < MAX_ROTTE_AR; k++)
-            {
-                mappa[i][j].rotta_ar[k].costo=NOT_VALID;       //inizializzo vettori rotte aeree
-                mappa[i][j].rotta_ar[k].x=NOT_VALID;
-                mappa[i][j].rotta_ar[k].y=NOT_VALID;
-                #ifdef DEBUG
-                fprintf(output, "%d", mappa[i][j].rotta_ar[k].costo);
-                #endif
-            }
-        }
+        mappa->esagoni[i][0]=1;
+        mappa->esagoni[i][1]=BIANCO;
     }
     fprintf(output, "%s\n", AFFERMATIVO);
     #ifdef DEBUG
-    for (int i = dim_mappa.dimx-1; i >= 0; i--)
+    for (int i = 0; i <dim_mappa.dimx*dim_mappa.dimy; i++)
     {
-        for (int j = 0; j < dim_mappa.dimy; j++)
-        {
-            fprintf(output, "%d", mappa[i][j].costo);
-        }
-        
+
+        fprintf(output, "%d", mappa->esagoni[i][0]);
+        fprintf(output, "%d\n", mappa->esagoni[i][1]);
     }
     #endif
     return;   
@@ -222,7 +228,7 @@ void comando_init(esagono_t **mappa, FILE *output){
 
 
 //comando change cost
-void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FILE *output){
+void comando_change_cost(map *mappa, int x, int y, int v, int raggio, FILE *output){
     int dist_esagoni=0;
     int xloc;
     int yloc;
@@ -230,6 +236,7 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FIL
     int indice_coda=0;
     int j=0;
     int i=0;
+    int coda[dim_mappa.dimx*dim_mappa.dimy][2];
     x=dim_mappa.dimx-x-1;
     if (mappa==NULL)        //check se mappa è stata creata
     {
@@ -246,14 +253,15 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FIL
     {
         dim_coda+=COLLEGAMENTI*i;
     }
-    //creazione coda di coordinate
-    int coda[dim_coda][2];
+    #ifdef DEBUG
+    fprintf(output, "coda allocata\n");
+    #endif
     //aggiornamento nodo sorgente
     aggiorna_costo(mappa, x, y, v, raggio, dist_esagoni);
     #ifdef DEBUG
-    fprintf(output, "%d\n %d\n", mappa[x][y].costo, dist_esagoni);
+    fprintf(output, "%u\n %d\n", mappa->esagoni[x*dim_mappa.dimy +y][0], dist_esagoni);
     #endif
-    mappa[x][y].already_visited=GRIGIO;
+    mappa->esagoni[x*dim_mappa.dimy+y][1]=GRIGIO;
     xloc=x;
     yloc=y;
     //incodamento nodi adiacenti
@@ -262,13 +270,13 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FIL
         nodi_adiacenti(xloc, yloc);
         for (i = 0; i < COLLEGAMENTI; i++)
         {
-            if (coordinate[i][0]>=0 && coordinate[i][0]<dim_mappa.dimx && coordinate[i][1]>=0 && coordinate[i][1]<dim_mappa.dimy)
+            if (coordinate[i][0]>=0 && coordinate[i][0]<dim_mappa.dimx && coordinate[i][1]>=0 && coordinate[i][1]<dim_mappa.dimy && indice_coda<dim_coda)
             {
-                if (mappa[coordinate[i][0]][coordinate[i][1]].already_visited==BIANCO)
+                if (mappa->esagoni[coordinate[i][0]*dim_mappa.dimy + coordinate[i][1]][1]==BIANCO)
                 {
                     coda[indice_coda][0]=coordinate[i][0];
                     coda[indice_coda][1]=coordinate[i][1];
-                    mappa[coordinate[i][0]][coordinate[i][1]].already_visited=GRIGIO;
+                    mappa->esagoni[coordinate[i][0]*dim_mappa.dimy + coordinate[i][1]][1]=GRIGIO;
                     #ifdef DEBUG
                     fprintf(output, "%d %d %d\n", coordinate[i][0], coordinate[i][1], indice_coda);
                     #endif
@@ -301,49 +309,60 @@ void comando_change_cost(esagono_t **mappa, int x, int y, int v, int raggio, FIL
     #ifdef DEBUG
     for (i = 0; i < indice_coda; i++)
     {
-        fprintf(output, "%d\n", mappa[coda[i][0]][coda[i][1]].costo);
+        fprintf(output, "%u\n", mappa->esagoni[coda[i][0]*dim_mappa.dimy+coda[i][1]][0]);
     }
     #endif
     //reset dell'already visited
     for(i = 0; i<indice_coda; i++){
-        mappa[coda[i][0]][coda[i][1]].already_visited=BIANCO;
+        mappa->esagoni[coda[i][0]*dim_mappa.dimy+coda[i][1]][1]=BIANCO;
     }
-    mappa[x][y].already_visited=BIANCO;
+    mappa->esagoni[x*dim_mappa.dimy + y][1]=BIANCO;
     return;
 }
 
 //comando air_route
-void comando_air_route(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *output){
+void comando_air_route(map* mappa, int x1, int y1, int x2, int y2, FILE *output){
     u_int8_t cancellazione=0;
     float mediapercosto=0;
-    u_int8_t count=1;
     u_int8_t rotte=0;
+    int indice_coda=0;
     x1=dim_mappa.dimx-x1-1;
     x2=dim_mappa.dimx-x2-1;
-    if (mappa==NULL)        //check se mappa è stata creata
+    if (mappa->esagoni==NULL)        //check se mappa è stata creata
     {
         fprintf(output, "%s\n", FALSO);
         return;
+    }
+    if (mappa->rotte_aeree==NULL)
+    {
+        mappa->rotte_aeree=malloc(MAX_ALLOCATED*sizeof(int *));
+        for (int i = 0; i < MAX_ALLOCATED; i++)
+        {
+            mappa->rotte_aeree[i]=malloc(MAX_ROTTE_AR*sizeof(int));
+        }
+        for (int i = 0; i < MAX_ALLOCATED; i++)
+        {
+            for (int j = 0; j < MAX_ROTTE_AR; j++)
+            {
+                mappa->rotte_aeree[i][j]=NOT_VALID;
+            }
+        }
+        mappa->dim_rotte=0;
     }
     if (x1>=dim_mappa.dimx || x1<0 || x2>=dim_mappa.dimx || x2<0 || y1>=dim_mappa.dimy || y1<0 || y2>=dim_mappa.dimy || y2<0)   //check se sono nei limiti mappa
     {
         fprintf(output, "%s\n", FALSO);
         return;
     }
-    while (mappa[x1][y1].rotta_ar[rotte].costo!=NOT_VALID && rotte<MAX_ROTTE_AR)
+    //cancellazione rotta aerea
+    for (int i = 0; i < mappa->dim_rotte; i++)
     {
-        rotte++;
-    }
-    for(int i=0; i <MAX_ROTTE_AR; i++){
-        if (mappa[x1][y1].rotta_ar[i].x==x2 && mappa[x1][y1].rotta_ar[i].y==y2) 
+        if (mappa->rotte_aeree[i][0]==x1 && mappa->rotte_aeree[i][1]==y1 && mappa->rotte_aeree[i][2]==x2 && mappa->rotte_aeree[i][3]==y2)
         {
             #ifdef DEBUG
             fprintf(output, "%d %d %d %d", x1, y1, x2, y2);
             #endif
-
-            mappa[x1][y1].rotta_ar[i].costo=NOT_VALID;       //cancello rotta aerea
-            mappa[x1][y1].rotta_ar[i].x=NOT_VALID;
-            mappa[x1][y1].rotta_ar[i].y=NOT_VALID;
+            mappa->rotte_aeree[i][0]=mappa->rotte_aeree[i][1]=mappa->rotte_aeree[i][2]=mappa->rotte_aeree[i][3]=mappa->rotte_aeree[i][4]=NOT_VALID;       //cancello rotta aerea
             cancellazione++;
             fprintf(output, "%s\n", AFFERMATIVO);
             return;
@@ -351,30 +370,36 @@ void comando_air_route(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *
     }
     if (cancellazione==0)
     {
+        for (int i = 0; i < mappa->dim_rotte; i++)
+        {
+            if (mappa->rotte_aeree[i][0]==x1 && mappa->rotte_aeree[i][1]==y1)
+            {
+                rotte++;
+                mediapercosto+=mappa->rotte_aeree[i][4];
+            }
+            if (mappa->rotte_aeree[i][0]!=NOT_VALID)
+            {
+                indice_coda++;
+            }
+        }
         if (rotte>=MAX_ROTTE_AR)
         {
-            fprintf(output, "%s", FALSO);
+            fprintf(output, "%s\n", FALSO);
             return;
         }
-        for (int j = 0; j < MAX_ROTTE_AR; j++)          //calcolo costo rotta aerea
-        {
-            if (mappa[x1][y1].rotta_ar[j].costo!=NOT_VALID)
-            {
-                count++;
-                mediapercosto+=mappa[x1][y1].rotta_ar[j].costo;
-            }
-    
-        }
-        mediapercosto+=mappa[x1][y1].costo;
-        mediapercosto=floor(mediapercosto/(float)count);
+        mediapercosto+=mappa->esagoni[x1*dim_mappa.dimy + y1][0];
+        mediapercosto=floor(mediapercosto/(float)(rotte+1));
 
         #ifdef DEBUG
         fprintf(output, "%f", mediapercosto);
         #endif
-
-        mappa[x1][y1].rotta_ar[rotte].costo=mediapercosto;       //creo rotta aerea
-        mappa[x1][y1].rotta_ar[rotte].x=x2;
-        mappa[x1][y1].rotta_ar[rotte].y=y2;
+        
+        mappa->rotte_aeree[indice_coda][0]=x1;       //creo rotta aerea
+        mappa->rotte_aeree[indice_coda][1]=y1;
+        mappa->rotte_aeree[indice_coda][2]=x2;
+        mappa->rotte_aeree[indice_coda][3]=y2;
+        mappa->rotte_aeree[indice_coda][4]=mediapercosto;
+        mappa->dim_rotte++;
         fprintf(output, "%s\n", AFFERMATIVO);
         #ifdef DEBUG
         fprintf(output, "%d %d %d %d", x1, y1, x2, y2);
@@ -382,209 +407,187 @@ void comando_air_route(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *
         #endif
         return;
     }
-    
 }
 
-void comando_travel_cost(esagono_t **mappa, int x1, int y1, int x2, int y2, FILE *output){
-    int costo=0;
-    int mincost_terra;
-    int mindist_terra;
-    int mincost_air;
-    int mindist_air;
-    int **coda=NULL;
-    int max_coda=MAX_ALLOCATED;
-    int dist=0;
-    int indice_coda=0;
-    int coord_terra[1][2]={{NOT_VALID, NOT_VALID}};
-    int coord_aria[1][2]={{NOT_VALID, NOT_VALID}};
-    int j=0;
-    u_int16_t indice_costo;
-    u_int16_t indice_distanza;
-    u_int16_t aggiornato_terra;
-    u_int16_t aggiornato_air;
+void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *output){
+    heap nodi[MAX_HEAP];
+    u_int16_t costi[dim_mappa.dimx*dim_mappa.dimy];
+    u_int8_t visitati[dim_mappa.dimx*dim_mappa.dimy];
+    int pos[dim_mappa.dimx*dim_mappa.dimy];
+    int costo;
+    int i;
+    int partenza;
+    int dim_heap=0;
+    heap nodo_corrente;
+    int successivo;
+    int costo_corrente;
+    int index;
     x1=dim_mappa.dimx-x1-1;
     x2=dim_mappa.dimx-x2-1;
-    if (mappa==NULL)        //check se mappa è stata creata
+    if (mappa->esagoni==NULL)
     {
         fprintf(output, "%d\n", NOT_VALID_TRAVEL);
         return;
     }
-    if (x1>=dim_mappa.dimx || x1<0 || x2>=dim_mappa.dimx || x2<0 || y1>=dim_mappa.dimy || y1<0 || y2>=dim_mappa.dimy || y2<0 || mappa[x1][y1].costo==0)   //check se sono nei limiti mappa
+    if (x1>=dim_mappa.dimx || x1<0 || x2>=dim_mappa.dimx || x2<0 || y1>=dim_mappa.dimy || y1<0 || y2>=dim_mappa.dimy || y2<0 || mappa->esagoni[x1*dim_mappa.dimy+y1][0]==0)   //check se sono nei limiti mappa
     {
         fprintf(output, "%d\n", NOT_VALID_TRAVEL);
         return;
     }
+    //check se ho le coordinate =
     if(x1==x2 && y1==y2)
     {
         fprintf(output, "%d\n", NOT_VALID_COST);
         return;
     }
-    coda=malloc(2*sizeof(int *));
-    coda[0]=coda[1]=NULL;
-    coda[0]=malloc(max_coda*sizeof(int));     //metodo allocazione a step, prima allocazione a 20 blocchi
-    coda[1]=malloc(max_coda*sizeof(int));
-    costo+=mappa[x1][y1].costo;
-    while (x1!=x2 || y1!=y2)
+    for (i = 0; i < dim_mappa.dimx*dim_mappa.dimy; i++)
     {
-        if (indice_coda>=max_coda)
+        costi[i]=MAX_COST;
+        visitati[i]=NOT_VALID_COST;
+        pos[i]=NOT_VALID_TRAVEL;
+    }
+    
+    //algoritmo di djikstra
+    partenza=x1*dim_mappa.dimy+y1;
+    costi[partenza]=NOT_VALID_COST;
+    push_heap(nodi, &dim_heap, x1, y1, NOT_VALID_COST, pos);
+    while (dim_heap>0)
+    {
+        nodo_corrente=pop_heap(nodi, &dim_heap, pos);
+        index=nodo_corrente.x_heap*dim_mappa.dimy+nodo_corrente.y_heap;
+        visitati[index]=VISITED;
+        pos[index]=NOT_VALID_TRAVEL;
+        //se sono arrivato al nodo destinazione
+        if (nodo_corrente.x_heap==x2 && nodo_corrente.y_heap==y2)
         {
-            coda[0]=realloc(coda[0], (max_coda+MAX_ALLOCATED)*sizeof(int));
-            coda[1]=realloc(coda[1], (max_coda+MAX_ALLOCATED)*sizeof(int));
-            max_coda+=MAX_ALLOCATED;
+            break;
         }
-        //inizializzazione variabili per ogni ciclo di operazione
-        mincost_terra=MAX_COST;
-        mindist_terra=dim_mappa.dimx*dim_mappa.dimy;
-        mincost_air=MAX_COST;
-        mindist_air=dim_mappa.dimx*dim_mappa.dimy;
-        aggiornato_air=NOT_VALID;
-        aggiornato_terra=NOT_VALID;
-        indice_costo=NOT_VALID;
-        indice_distanza=NOT_VALID;
-        for (int k = 0; k < MAX_ROTTE_AR; k++)      //collegamenti aria
+        //cerco via aria
+        if (mappa->rotte_aeree!=NULL)
         {
-            if (mappa[x1][y1].rotta_ar[k].costo!=NOT_VALID && (mappa[mappa[x1][y1].rotta_ar[k].x][mappa[x1][y1].rotta_ar[k].y].costo!=0 || (mappa[mappa[x1][y1].rotta_ar[k].x][mappa[x1][y1].rotta_ar[k].y].costo==0 && mappa[x1][y1].rotta_ar[k].x==x2 && mappa[x1][y1].rotta_ar[k].y==y2)))
+            for (i = 0; i < mappa->dim_rotte; i++)
             {
-                dist=dist_esag(mappa[x1][y1].rotta_ar[k].x, mappa[x1][y1].rotta_ar[k].y, x2, y2);
-                if (dist<mindist_air)
+                if (mappa->rotte_aeree[i][0]==nodo_corrente.x_heap && mappa->rotte_aeree[i][1]==nodo_corrente.y_heap)
                 {
-                    mindist_air=dist;
-                    indice_distanza=k;
-                }
-                if (mappa[x1][y1].rotta_ar[k].costo<mincost_air)
-                {
-                    mincost_air=mappa[x1][y1].rotta_ar[k].costo;
-                    indice_costo=k;
-                }
-            }
-        }
-        if (indice_costo!=NOT_VALID && indice_distanza!=NOT_VALID)
-        {
-            if (indice_costo==indice_distanza)
-            {
-                coord_aria[0][0]=mappa[x1][y1].rotta_ar[indice_distanza].x;
-                coord_aria[0][1]=mappa[x1][y1].rotta_ar[indice_distanza].y;
-                aggiornato_air++;
-            }
-            else
-            {
-                coord_aria[0][0]=mappa[x1][y1].rotta_ar[indice_distanza].x;
-                coord_aria[0][1]=mappa[x1][y1].rotta_ar[indice_distanza].y;
-                aggiornato_air++;
-            }
-        }
-        indice_costo=NOT_VALID;
-        indice_distanza=NOT_VALID;
-        nodi_adiacenti(x1, y1);
-        for (int i = 0; i < COLLEGAMENTI; i++)      //collegamenti terra
-        {
-            if (coordinate[i][0]>=0 && coordinate[i][0]<dim_mappa.dimx && coordinate[i][1]>=0 && coordinate[i][1]<dim_mappa.dimy)       //check se sono nei boundary sennò non analizzo
-            {
-                if (mappa[coordinate[i][0]][coordinate[i][1]].costo!=0 || (mappa[coordinate[i][0]][coordinate[i][1]].costo==0 && (coordinate[i][0]==x2 && coordinate[i][1]==y2)))
-                {
-                    if (mappa[coordinate[i][0]][coordinate[i][1]].costo<mincost_terra)        //verifico il minimo costo
+                    successivo=mappa->rotte_aeree[i][2]*dim_mappa.dimy+mappa->rotte_aeree[i][3];
+                    costo_corrente=mappa->rotte_aeree[i][4];
+                    if (costo_corrente>NOT_VALID_COST)
                     {
-                        mincost_terra=mappa[coordinate[i][0]][coordinate[i][1]].costo;
-                        indice_costo=i;
-                    }
-                    dist=dist_esag(coordinate[i][0], coordinate[i][1], x2, y2);
-                    if (dist<mindist_terra)                   //verifico la minima distanza
-                    {
-                        mindist_terra=dist;
-                        indice_distanza=i;
+                        if (visitati[successivo]==0 && costi[index] + costo_corrente<=costi[successivo])
+                        {
+                            costi[successivo]=costi[index] + costo_corrente;
+                            if (pos[mappa->rotte_aeree[i][2]*dim_mappa.dimy+mappa->rotte_aeree[i][3]]==-1)
+                            {
+                                push_heap(nodi, &dim_heap, mappa->rotte_aeree[i][2], mappa->rotte_aeree[i][3], costi[successivo], pos);
+                            }
+                            else
+                            {
+                                heap_decrease_key(nodi, pos[mappa->rotte_aeree[i][2]*dim_mappa.dimy+mappa->rotte_aeree[i][3]], costi[successivo], pos);
+                            }
+                        }
                     }
                 }
             }
         }
-        if (indice_costo!=NOT_VALID && indice_distanza!=NOT_VALID)
+        //cerco via terra
+        nodi_adiacenti(nodo_corrente.x_heap, nodo_corrente.y_heap);
+        for (i = 0; i < COLLEGAMENTI; i++)
         {
-            if (indice_costo==indice_distanza)
+            if (coordinate[i][0]>=0 && coordinate[i][0]<dim_mappa.dimx && coordinate[i][1]>=0 && coordinate[i][1]<dim_mappa.dimy)
             {
-                coord_terra[0][0]=coordinate[indice_distanza][0];
-                coord_terra[0][1]=coordinate[indice_distanza][1];
-                aggiornato_terra++;
+                successivo=coordinate[i][0]*dim_mappa.dimy+coordinate[i][1];
+                costo_corrente=mappa->esagoni[index][0];
+                if (costo_corrente>NOT_VALID_COST)
+                {
+                    if (visitati[successivo]==0 && costi[index] + costo_corrente<=costi[successivo])
+                    {
+                        costi[successivo]=costi[index] + costo_corrente;
+                        if (pos[coordinate[i][0]*dim_mappa.dimy+coordinate[i][1]]==-1)
+                        {
+                            push_heap(nodi, &dim_heap, coordinate[i][0], coordinate[i][1], costi[successivo], pos);
+                        }
+                        else
+                        {
+                            heap_decrease_key(nodi, pos[coordinate[i][0]*dim_mappa.dimy+coordinate[i][1]], costi[successivo], pos);
+                        }
+                    }
+                }
             }
-            else
-            {
-                coord_terra[0][0]=coordinate[indice_distanza][0];
-                coord_terra[0][1]=coordinate[indice_distanza][1];
-                aggiornato_terra++;
-            }
+            
         }
-        if ((aggiornato_air==NOT_VALID && aggiornato_terra==NOT_VALID) || j>=MAX_COST)
+            
+    }
+        costo=costi[x2*dim_mappa.dimy+y2];
+        if (costo>=MAX_COST)
         {
             fprintf(output, "%d\n", NOT_VALID_TRAVEL);
-            free(coda[0]);
-            free(coda[1]);
-            free(coda);
-            return;
-        }
-        if (aggiornato_air==NOT_VALID && aggiornato_terra!=NOT_VALID)
-        {
-            coda[0][indice_coda]=coord_terra[0][0];
-            coda[1][indice_coda]=coord_terra[0][1];
-            #ifdef DEBUG
-            fprintf(output, "%d, %d\n", coda[0][indice_coda], coda[1][indice_coda]);
-            #endif
         }
         else{
-            if (aggiornato_air!=NOT_VALID && aggiornato_terra==NOT_VALID)
-            {
-                coda[0][indice_coda]=coord_aria[0][0];
-                coda[1][indice_coda]=coord_aria[0][1];
-                #ifdef DEBUG
-                fprintf(output, "%d, %d\n", coda[0][indice_coda], coda[1][indice_coda]);
-                #endif
-            }
-            else{
-                if (mindist_air<mindist_terra && mincost_air<mincost_terra)
-                {
-                    coda[0][indice_coda]=coord_aria[0][0];
-                    coda[1][indice_coda]=coord_aria[0][1];
-                    #ifdef DEBUG
-                    fprintf(output, "%d, %d\n", coda[0][indice_coda], coda[1][indice_coda]);
-                    #endif
-                }
-                if (mindist_terra<mindist_air && mincost_terra<mincost_air)
-                {
-                    coda[0][indice_coda]=coord_terra[0][0];
-                    coda[1][indice_coda]=coord_terra[0][1];
-                    #ifdef DEBUG
-                    fprintf(output, "%d, %d\n", coda[0][indice_coda], coda[1][indice_coda]);
-                    #endif
-                }
-                if (mindist_air<mindist_terra)
-                {
-                    coda[0][indice_coda]=coord_aria[0][0];
-                    coda[1][indice_coda]=coord_aria[0][1];
-                    #ifdef DEBUG
-                    fprintf(output, "%d, %d\n", coda[0][indice_coda], coda[1][indice_coda]);
-                    #endif
-                }
-                else{
-                    coda[0][indice_coda]=coord_terra[0][0];
-                    coda[1][indice_coda]=coord_terra[0][1];
-                    #ifdef DEBUG
-                    fprintf(output, "%d, %d\n", coda[0][indice_coda], coda[1][indice_coda]);
-                    #endif
-                }
-            }
+            fprintf(output, "%d\n", costo);
         }
-        x1=coda[0][indice_coda];
-        y1=coda[1][indice_coda];
-        indice_coda++;
-        j++;
-    }
-    for (int i = 0; i < indice_coda-1; i++)     //incoda anche l'ultimo che non deve essere contato per cui indice_coda-1
+        return;
+}
+heap pop_heap(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int *dim_heap, int pos_heap[dim_mappa.dimx*dim_mappa.dimy]){
+    heap min=nodo[0];
+    nodo[0]=nodo[*dim_heap-1];
+    pos_heap[nodo[0].x_heap*dim_mappa.dimy+nodo[0].y_heap]=0;
+    *dim_heap=*dim_heap-1;
+    min_heapify(nodo, 0, *dim_heap, pos_heap);
+    return min;
+}
+void min_heapify(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int value, int size, int pos_heap[dim_mappa.dimx*dim_mappa.dimy]){
+    int l=2*value+1;
+    int r=2*value+2;
+    int min;
+    int temp;
+    if (l<size && nodo[l].costo_h<nodo[value].costo_h)
     {
-        costo+=mappa[coda[0][i]][coda[1][i]].costo;
+        min=l;
     }
-    fprintf(output, "%d\n", costo);
-    //libero memoria
-    free(coda[0]);
-    free(coda[1]);
-    free(coda);
-    return;
+    else min=value;
+    if (r<size && nodo[r].costo_h<nodo[min].costo_h)
+    {
+        min=r;
+    }
+    if (min!=value)
+    {
+        swap(&nodo[value], &nodo[min]);
+        temp=pos_heap[nodo[value].x_heap*dim_mappa.dimy+nodo[value].y_heap];
+        pos_heap[nodo[value].x_heap*dim_mappa.dimy+nodo[value].y_heap]=pos_heap[nodo[min].x_heap*dim_mappa.dimy+nodo[min].y_heap];
+        pos_heap[nodo[min].x_heap*dim_mappa.dimy+nodo[min].y_heap]=temp;
+        min_heapify(nodo, min, size, pos_heap);
+    }
+}
+void swap(heap *nodo1, heap *nodo2){
+    heap temp=*nodo1;
+    *nodo1=*nodo2;
+    *nodo2=temp;
+}
+void push_heap(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int *size, int x, int y, int costo, int pos_heap[dim_mappa.dimx*dim_mappa.dimy]){
+    int pos=*size;
+    *size=*size+1;
+    nodo[pos].x_heap=x;
+    nodo[pos].y_heap=y;
+    pos_heap[x*dim_mappa.dimy+y]=pos;
+    heap_decrease_key(nodo, pos, costo, pos_heap);
+    #ifdef DEBUG
+    for (int i = 0; i < *size; i++)
+    {
+        printf("%d, %d, %d\n", dim_mappa.dimx-nodo[i].x_heap-1, nodo[i].y_heap, nodo[i].costo_h);
+    }
+    printf("\n");
+    #endif
+    
+}
+void heap_decrease_key(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int pos, int costo, int pos_heap[dim_mappa.dimx*dim_mappa.dimy]){
+    nodo[pos].costo_h=costo;
+    while (pos>0 && nodo[(pos-1)/2].costo_h>nodo[pos].costo_h)
+    {
+        swap(&nodo[pos], &nodo[(pos-1)/2]);
+        pos_heap[nodo[pos].x_heap*dim_mappa.dimy+nodo[pos].y_heap]=(pos-1)/2;
+        pos_heap[nodo[(pos-1)/2].x_heap*dim_mappa.dimy+nodo[(pos-1)/2].y_heap]=pos;
+        pos=(pos-1)/2;
+    }
 }
 
 float max(float n1, float n2){
@@ -596,9 +599,9 @@ float max(float n1, float n2){
         return n2;
     }
 }
-void aggiorna_costo(esagono_t **mappa, int xloc, int yloc, int v, int raggio, int dist_esagoni){
+void aggiorna_costo(map *mappa, int xloc, int yloc, int v, int raggio, int dist_esagoni){
     int prog=0;
-    prog=mappa[xloc][yloc].costo+floor((float)v*max(0.0f,(raggio-dist_esagoni)/(float)raggio));
+    prog=mappa->esagoni[xloc*dim_mappa.dimy+yloc][0]+floorf((float)v*max(0.0f,(raggio-dist_esagoni)/(float)raggio));
     if (prog<0)
     {
         prog=0;
@@ -607,14 +610,20 @@ void aggiorna_costo(esagono_t **mappa, int xloc, int yloc, int v, int raggio, in
     {
         prog=100;
     }
-    mappa[xloc][yloc].costo=prog;
-    for (int i = 0; i < MAX_ROTTE_AR; i++)
+    mappa->esagoni[xloc*dim_mappa.dimy+yloc][0]=prog;
+    if (mappa->rotte_aeree!=NULL)
     {
-        if (mappa[xloc][yloc].rotta_ar[i].costo!=NOT_VALID)
+        for (int i = 0; i < mappa->dim_rotte; i++)
         {
-            mappa[xloc][yloc].rotta_ar[i].costo=prog;
+            if (mappa->rotte_aeree[i][0]==xloc && mappa->rotte_aeree[i][1]==yloc)
+            {
+                mappa->rotte_aeree[i][4]=prog;
+            }
         }
     }
+    #ifdef DEBUG
+    printf("costo modificato\n");
+    #endif
 }
 void nodi_adiacenti(int x, int y){
     if (x%2==0)
@@ -650,7 +659,12 @@ void nodi_adiacenti(int x, int y){
 
 int dist_esag(int startX, int startY, int arrX, int arrY){
     int dist=0;
-    while (startX!=arrX || startY!=arrY)
+    int z_cubiche_start=startY-(startX-(startX & 1))/2;
+    int y_cubiche_start=-startX-z_cubiche_start;
+    int z_cubiche_arr=arrY-(arrX-(arrX & 1))/2;
+    int y_cubiche_arr=-arrX-z_cubiche_arr;
+    dist=(abs(arrX-startX)+abs(y_cubiche_arr-y_cubiche_start)+abs(z_cubiche_arr-z_cubiche_start))/2;
+    /*while (startX!=arrX || startY!=arrY)
     {
         if (startX==arrX)
         {
@@ -753,6 +767,6 @@ int dist_esag(int startX, int startY, int arrX, int arrY){
             startY=dim_mappa.dimy-1;
         }
         dist++;
-    }
+    }*/
     return dist;
 }
