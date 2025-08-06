@@ -407,7 +407,6 @@ void comando_air_route(map* mappa, int x1, int y1, int x2, int y2, FILE *output)
         #endif
         return;
     }
-    
 }
 
 void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *output){
@@ -569,7 +568,6 @@ void push_heap(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int *size, int x, int y
     *size=*size+1;
     nodo[pos].x_heap=x;
     nodo[pos].y_heap=y;
-    nodo[pos].costo_h=costo;
     pos_heap[x*dim_mappa.dimy+y]=pos;
     heap_decrease_key(nodo, pos, costo, pos_heap);
     #ifdef DEBUG
