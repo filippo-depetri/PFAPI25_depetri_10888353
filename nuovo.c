@@ -45,6 +45,7 @@ Consegna:   Movhex è una compagnia di autotrasporti che dispone di una flotta d
 #define MAX_COST 65535
 #define MAX_ALLOCATED 255
 #define MAX_HEAP 10000      //possibile tirare giù?
+#define VISITED 1
 
 
 //strutture
@@ -413,7 +414,7 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
     heap nodi[MAX_HEAP];
     u_int16_t costi[dim_mappa.dimx*dim_mappa.dimy];
     u_int8_t visitati[dim_mappa.dimx*dim_mappa.dimy];
-    int pos[dim_mappa.dimx*dim_mappa.dimy];
+    int pos[MAX_HEAP];
     int costo;
     int i;
     int partenza;
@@ -443,8 +444,8 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
     for (i = 0; i < dim_mappa.dimx*dim_mappa.dimy; i++)
     {
         costi[i]=MAX_COST;
-        visitati[i]=0;
-        pos[i]=-1;
+        visitati[i]=NOT_VALID_COST;
+        pos[i]=NOT_VALID_TRAVEL;
     }
     
     //algoritmo di djikstra
@@ -455,8 +456,8 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
     {
         nodo_corrente=pop_heap(nodi, &dim_heap, pos);
         index=nodo_corrente.x_heap*dim_mappa.dimy+nodo_corrente.y_heap;
-        visitati[index]=1;
-        pos[index]=-1;
+        visitati[index]=VISITED;
+        pos[index]=NOT_VALID_TRAVEL;
         //se sono arrivato al nodo destinazione
         if (nodo_corrente.x_heap==x2 && nodo_corrente.y_heap==y2)
         {
@@ -471,7 +472,7 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
                 {
                     successivo=mappa->rotte_aeree[i][2]*dim_mappa.dimy+mappa->rotte_aeree[i][3];
                     costo_corrente=mappa->rotte_aeree[i][4];
-                    if (costo_corrente>0)
+                    if (costo_corrente>NOT_VALID_COST)
                     {
                         if (visitati[successivo]==0 && costi[index] + costo_corrente<=costi[successivo])
                         {
@@ -497,7 +498,7 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
             {
                 successivo=coordinate[i][0]*dim_mappa.dimy+coordinate[i][1];
                 costo_corrente=mappa->esagoni[index][0];
-                if (costo_corrente>0)
+                if (costo_corrente>NOT_VALID_COST)
                 {
                     if (visitati[successivo]==0 && costi[index] + costo_corrente<=costi[successivo])
                     {
