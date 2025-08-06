@@ -44,6 +44,7 @@ Consegna:   Movhex è una compagnia di autotrasporti che dispone di una flotta d
 #define COLLEGAMENTI 6
 #define MAX_COST 65535
 #define MAX_ALLOCATED 255
+#define MAX_HEAP 1000
 
 
 //strutture
@@ -409,7 +410,7 @@ void comando_air_route(map* mappa, int x1, int y1, int x2, int y2, FILE *output)
 }
 
 void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *output){
-    heap nodi[dim_mappa.dimx*dim_mappa.dimy];
+    heap nodi[MAX_HEAP];
     u_int16_t costi[dim_mappa.dimx*dim_mappa.dimy];
     u_int8_t visitati[dim_mappa.dimx*dim_mappa.dimy];
     int pos[dim_mappa.dimx*dim_mappa.dimy];
