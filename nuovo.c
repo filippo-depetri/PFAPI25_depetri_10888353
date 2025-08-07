@@ -471,19 +471,16 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
                 {
                     successivo=mappa->rotte_aeree[i][2]*dim_mappa.dimy+mappa->rotte_aeree[i][3];
                     costo_corrente=mappa->rotte_aeree[i][4];
-                    if (costo_corrente>NOT_VALID_COST)
+                    if (visitati[successivo]==0 && costi[index] + costo_corrente<=costi[successivo] && mappa->esagoni[successivo][0]!=0)
                     {
-                        if (visitati[successivo]==0 && costi[index] + costo_corrente<=costi[successivo])
+                        costi[successivo]=costi[index] + costo_corrente;
+                        if (pos[mappa->rotte_aeree[i][2]*dim_mappa.dimy+mappa->rotte_aeree[i][3]]==-1)
                         {
-                            costi[successivo]=costi[index] + costo_corrente;
-                            if (pos[mappa->rotte_aeree[i][2]*dim_mappa.dimy+mappa->rotte_aeree[i][3]]==-1)
-                            {
-                                push_heap(nodi, &dim_heap, mappa->rotte_aeree[i][2], mappa->rotte_aeree[i][3], costi[successivo], pos);
-                            }
-                            else
-                            {
-                                heap_decrease_key(nodi, pos[mappa->rotte_aeree[i][2]*dim_mappa.dimy+mappa->rotte_aeree[i][3]], costi[successivo], pos);
-                            }
+                            push_heap(nodi, &dim_heap, mappa->rotte_aeree[i][2], mappa->rotte_aeree[i][3], costi[successivo], pos);
+                        }
+                        else
+                        {
+                            heap_decrease_key(nodi, pos[mappa->rotte_aeree[i][2]*dim_mappa.dimy+mappa->rotte_aeree[i][3]], costi[successivo], pos);
                         }
                     }
                 }
@@ -497,19 +494,16 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
             {
                 successivo=coordinate[i][0]*dim_mappa.dimy+coordinate[i][1];
                 costo_corrente=mappa->esagoni[index][0];
-                if (costo_corrente>NOT_VALID_COST)
+                if (visitati[successivo]==0 && costi[index] + costo_corrente<=costi[successivo] && mappa->esagoni[successivo][0]!=0)
                 {
-                    if (visitati[successivo]==0 && costi[index] + costo_corrente<=costi[successivo])
+                    costi[successivo]=costi[index] + costo_corrente;
+                    if (pos[coordinate[i][0]*dim_mappa.dimy+coordinate[i][1]]==-1)
                     {
-                        costi[successivo]=costi[index] + costo_corrente;
-                        if (pos[coordinate[i][0]*dim_mappa.dimy+coordinate[i][1]]==-1)
-                        {
-                            push_heap(nodi, &dim_heap, coordinate[i][0], coordinate[i][1], costi[successivo], pos);
-                        }
-                        else
-                        {
-                            heap_decrease_key(nodi, pos[coordinate[i][0]*dim_mappa.dimy+coordinate[i][1]], costi[successivo], pos);
-                        }
+                        push_heap(nodi, &dim_heap, coordinate[i][0], coordinate[i][1], costi[successivo], pos);
+                    }
+                    else
+                    {
+                        heap_decrease_key(nodi, pos[coordinate[i][0]*dim_mappa.dimy+coordinate[i][1]], costi[successivo], pos);
                     }
                 }
             }

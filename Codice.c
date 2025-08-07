@@ -414,6 +414,7 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
     u_int16_t costi[dim_mappa.dimx*dim_mappa.dimy];
     u_int8_t visitati[dim_mappa.dimx*dim_mappa.dimy];
     heap current;
+    int pos [dim_mappa.dimx*dim_mappa.dimy];
     int i;
     int costo;
     int dim_coda=0;
@@ -452,7 +453,67 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
     dim_coda++;
     while (dim_coda>0)
     {
-        //implementare dijkstra con coda ad array no heap   
+        current=coda[0];
+        index=current.x_heap*dim_mappa.dimy+current.y_heap;
+        visitati[index]=1;
+        //cerco via aria
+        if (mappa->rotte_aeree!=NULL)
+        {
+            for (i = 0; i < mappa->dim_rotte; i++)
+            {
+                if (mappa->rotte_aeree[i][0]==current.x_heap && mappa->rotte_aeree[i][1]==current.y_heap)
+                {
+                    successivo=mappa->rotte_aeree[i][2]*dim_mappa.dimy+mappa->rotte_aeree[i][3];
+                    current_cost=mappa->rotte_aeree[i][4];
+                    if (current_cost>NOT_VALID_COST)
+                    {
+                        if (visitati[successivo]==0 && costi[successivo]>=costi[index]+current_cost)
+                        {
+                            costi[successivo]=costi[index] + current_cost;
+                            if (pos[mappa->rotte_aeree[i][2]*dim_mappa.dimy+mappa->rotte_aeree[i][3]]==-1)
+                            {
+                                coda[dim_coda].x_heap=mappa->rotte_aeree[i][2];
+                                coda[dim_coda].y_heap=mappa->rotte_aeree[i][3];
+                                coda[dim_coda].costo_h=costi[successivo];
+                                dim_coda++;
+                            }
+                            else
+                            {
+                                coda[pos[mappa->rotte_aeree[i][2]*dim_mappa.dimy+mappa->rotte_aeree[i][3]]].x_heap=mappa->rotte_aeree[i][2];
+                                coda[pos[mappa->rotte_aeree[i][2]*dim_mappa.dimy+mappa->rotte_aeree[i][3]]].y_heap=mappa->rotte_aeree[i][3];
+                                coda[pos[mappa->rotte_aeree[i][2]*dim_mappa.dimy+mappa->rotte_aeree[i][3]]].costo_h=costi[successivo];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        //cerco via terra
+        nodi_adiacenti(current.x_heap, current.y_heap);
+        for (i = 0; i < COLLEGAMENTI; i++)
+        {
+            if (coordinate[i][0]>=0 && coordinate[i][0]<dim_mappa.dimx && coordinate[i][1]>=0 && coordinate[i][1]<dim_mappa.dimy)
+            {
+                successivo=coordinate[i][0]*dim_mappa.dimy+coordinate[i][1];
+                current_cost=mappa->esagoni[index][0];
+                if (current_cost>NOT_VALID_COST)
+                {
+                    if (visitati[successivo]==0 && costi[index] + costo_corrente<=costi[successivo])
+                    {
+                        costi[successivo]=costi[index] + costo_corrente;
+                        if (pos[coordinate[i][0]*dim_mappa.dimy+coordinate[i][1]]==-1)
+                        {
+                            push_heap(nodi, &dim_heap, coordinate[i][0], coordinate[i][1], costi[successivo], pos);
+                        }
+                        else
+                        {
+                            heap_decrease_key(nodi, pos[coordinate[i][0]*dim_mappa.dimy+coordinate[i][1]], costi[successivo], pos);
+                        }
+                    }
+                }
+            }
+            
+        }   
     }
     
 
