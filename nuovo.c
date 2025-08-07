@@ -511,15 +511,15 @@ void comando_travel_cost(map *mappa, int x1, int y1, int x2, int y2, FILE *outpu
         }
             
     }
-        costo=costi[x2*dim_mappa.dimy+y2];
-        if (costo>=MAX_COST)
-        {
-            fprintf(output, "%d\n", NOT_VALID_TRAVEL);
-        }
-        else{
-            fprintf(output, "%d\n", costo);
-        }
-        return;
+    costo=costi[x2*dim_mappa.dimy+y2];
+    if (costo>=MAX_COST)
+    {
+        fprintf(output, "%d\n", NOT_VALID_TRAVEL);
+    }
+    else{
+        fprintf(output, "%d\n", costo);
+    }
+    return;
 }
 heap pop_heap(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int *dim_heap, int pos_heap[dim_mappa.dimx*dim_mappa.dimy]){
     heap min=nodo[0];
