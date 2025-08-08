@@ -27,7 +27,7 @@ Consegna:   Movhex è una compagnia di autotrasporti che dispone di una flotta d
 
 //define
 //#define DEBUGTEST
-//#define DEBUG
+#define DEBUG
 #define INIT 'i'
 #define CAMBIO_COSTO 'c'
 #define ROTTA_AEREA 'o'
@@ -309,7 +309,7 @@ void comando_change_cost(map *mappa, int x, int y, int v, int raggio, FILE *outp
     #ifdef DEBUG
     for (i = 0; i < indice_coda; i++)
     {
-        fprintf(output, "%u\n", mappa->esagoni[coda[i][0]*dim_mappa.dimy+coda[i][1]][0]);
+        fprintf(output, "%d %d %d\n", coda[i][0], coda[i][1], mappa->esagoni[coda[i][0]*dim_mappa.dimy+coda[i][1]][0]);
     }
     #endif
     //reset dell'already visited
