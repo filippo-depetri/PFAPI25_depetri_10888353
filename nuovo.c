@@ -81,14 +81,16 @@ struct dimensioni_mappa
     int dimy;     //dim colonne
 }dim_mappa;
 
-void comando_init(esagono_t *mappa, FILE *output);
-void comando_change_cost(esagono_t *mappa, int x, int y, int v, int raggio, FILE *output);
-void comando_air_route(esagono_t *mappa, int x1, int y1, int x2, int y2, FILE *output);
-void comando_travel_cost(esagono_t *mappa, int x1, int y1, int x2, int y2, FILE *output);
-void alloca_mappa(esagono_t *mappa);
-void libera_mappa(esagono_t *mappa);
+esagono_t *mappa;
+
+void comando_init(FILE *output);
+void comando_change_cost(int x, int y, int v, int raggio, FILE *output);
+void comando_air_route(int x1, int y1, int x2, int y2, FILE *output);
+void comando_travel_cost(int x1, int y1, int x2, int y2, FILE *output);
+void alloca_mappa();
+void libera_mappa();
 float max (float n1, float n2);
-void aggiorna_costo(esagono_t *mappa, int xloc, int yloc, int v, int raggio, int dist_esagoni);
+void aggiorna_costo(int xloc, int yloc, int v, int raggio, int dist_esagoni);
 void nodi_adiacenti(int x, int y);
 int dist_esag(int startX, int startY, int arrX, int arrY);
 heap pop_heap(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int *dim_heap, int pos_heap[dim_mappa.dimx*dim_mappa.dimy]);
@@ -105,7 +107,6 @@ int main(){
         FILE *f_in, *f_out;
         f_in=stdin;
         f_out=stdout;
-        esagono_t *mappa;
         mappa=NULL;
     //fine variabili gestione comandi
     #ifdef DEBUGTEST
@@ -120,11 +121,11 @@ int main(){
     do{
         sc=fscanf(f_in, "%s", comando);
         if(comando[0]==INIT){
-                libera_mappa(mappa);
+                libera_mappa();
                 sc=fscanf(f_in, "%d", &dim_mappa.dimy);
                 sc=fscanf(f_in, "%d", &dim_mappa.dimx);
-                alloca_mappa(mappa);
-                comando_init(mappa, f_out);
+                alloca_mappa();
+                comando_init(f_out);
                 #ifdef DEBUG
                 printf("INIT\n");
                 #endif
@@ -135,7 +136,7 @@ int main(){
                 sc=fscanf(f_in, "%d", &gen_comandi.rigx);
                 sc=fscanf(f_in, "%d", &gen_comandi.v);
                 sc=fscanf(f_in, "%d", &gen_comandi.raggio);
-                comando_change_cost(mappa, gen_comandi.rigx, gen_comandi.colx, gen_comandi.v, gen_comandi.raggio, f_out);
+                comando_change_cost(gen_comandi.rigx, gen_comandi.colx, gen_comandi.v, gen_comandi.raggio, f_out);
                 #ifdef DEBUG
                 printf("CHANGE_COST\n");
                 #endif
@@ -146,7 +147,7 @@ int main(){
                         sc=fscanf(f_in, "%d", &gen_comandi.rigx);
                         sc=fscanf(f_in, "%d", &gen_comandi.coly);
                         sc=fscanf(f_in, "%d", &gen_comandi.rigy);
-                        comando_air_route(mappa, gen_comandi.rigx, gen_comandi.colx, gen_comandi.rigy, gen_comandi.coly, f_out);
+                        comando_air_route(gen_comandi.rigx, gen_comandi.colx, gen_comandi.rigy, gen_comandi.coly, f_out);
                         #ifdef DEBUG
                         printf("AIR_ROUTE\n");
                         #endif
@@ -158,7 +159,7 @@ int main(){
                             sc=fscanf(f_in, "%d", &gen_comandi.rigx);
                             sc=fscanf(f_in, "%d", &gen_comandi.coly);
                             sc=fscanf(f_in, "%d", &gen_comandi.rigy);
-                            comando_travel_cost(mappa, gen_comandi.rigx, gen_comandi.colx, gen_comandi.rigy, gen_comandi.coly, f_out);
+                            comando_travel_cost(gen_comandi.rigx, gen_comandi.colx, gen_comandi.rigy, gen_comandi.coly, f_out);
                             #ifdef DEBUG
                             printf("TRAVEL\n");
                             #endif
@@ -174,10 +175,10 @@ int main(){
 }
 
 //alloca mappa
-void alloca_mappa(esagono_t *mappa){
+void alloca_mappa(){
     mappa=malloc(dim_mappa.dimx*dim_mappa.dimy*sizeof(esagono_t));
 }
-void libera_mappa(esagono_t *mappa){
+void libera_mappa(){
     if (mappa==NULL)
     {
         return;
@@ -190,7 +191,7 @@ void libera_mappa(esagono_t *mappa){
 
 
 //comando init: costo di ogni esagono inizializzato a 1 (ottimizzabile)
-void comando_init(esagono_t *mappa, FILE *output){
+void comando_init(FILE *output){
     for (int i = 0; i <dim_mappa.dimx*dim_mappa.dimy; i++)
     {
         mappa[i].costo=1;
@@ -214,7 +215,7 @@ void comando_init(esagono_t *mappa, FILE *output){
 
 
 //comando change cost
-void comando_change_cost(esagono_t *mappa, int x, int y, int v, int raggio, FILE *output){
+void comando_change_cost(int x, int y, int v, int raggio, FILE *output){
     int dist_esagoni=0;
     int xloc;
     int yloc;
@@ -243,7 +244,7 @@ void comando_change_cost(esagono_t *mappa, int x, int y, int v, int raggio, FILE
     fprintf(output, "coda allocata\n");
     #endif
     //aggiornamento nodo sorgente
-    aggiorna_costo(mappa, x, y, v, raggio, dist_esagoni);
+    aggiorna_costo(x, y, v, raggio, dist_esagoni);
     #ifdef DEBUG
     fprintf(output, "%u\n %d\n", mappa[x*dim_mappa.dimy +y].costo, dist_esagoni);
     #endif
@@ -288,7 +289,7 @@ void comando_change_cost(esagono_t *mappa, int x, int y, int v, int raggio, FILE
     while (i<indice_coda)
     {
         dist_esagoni=dist_esag(x, y, coda[i][0], coda[i][1]);
-        aggiorna_costo(mappa, coda[i][0], coda[i][1], v, raggio, dist_esagoni);
+        aggiorna_costo(coda[i][0], coda[i][1], v, raggio, dist_esagoni);
         i++;
     }
     fprintf(output, "%s\n", AFFERMATIVO);
@@ -307,7 +308,7 @@ void comando_change_cost(esagono_t *mappa, int x, int y, int v, int raggio, FILE
 }
 
 //comando air_route
-void comando_air_route(esagono_t* mappa, int x1, int y1, int x2, int y2, FILE *output){
+void comando_air_route(int x1, int y1, int x2, int y2, FILE *output){
     float mediapercosto=0;
     x1=dim_mappa.dimx-x1-1;
     x2=dim_mappa.dimx-x2-1;
@@ -411,7 +412,7 @@ void comando_air_route(esagono_t* mappa, int x1, int y1, int x2, int y2, FILE *o
     }
 }
 
-void comando_travel_cost(esagono_t *mappa, int x1, int y1, int x2, int y2, FILE *output){
+void comando_travel_cost(int x1, int y1, int x2, int y2, FILE *output){
     heap nodi[MAX_HEAP];
     u_int16_t costi[dim_mappa.dimx*dim_mappa.dimy];
     u_int8_t visitati[dim_mappa.dimx*dim_mappa.dimy];
@@ -592,7 +593,7 @@ float max(float n1, float n2){
         return n2;
     }
 }
-void aggiorna_costo(esagono_t *mappa, int xloc, int yloc, int v, int raggio, int dist_esagoni){
+void aggiorna_costo(int xloc, int yloc, int v, int raggio, int dist_esagoni){
     int prog=0;
     prog=mappa[xloc*dim_mappa.dimy+yloc].costo+floorf((float)v*max(0.0f,(raggio-dist_esagoni)/(float)raggio));
     if (prog<0)
