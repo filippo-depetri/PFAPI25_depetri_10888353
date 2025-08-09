@@ -118,7 +118,8 @@ int main(){
     }while(ssc!=EOF);
     #endif
     //FINE PREPARATIVI
-    while (fscanf(f_in, "%s", comando)==1){
+    sc=fscanf(f_in, "%s", comando);
+    while (sc==1){
         if(comando[0]==INIT){
                 libera_mappa();
                 sc=fscanf(f_in, "%d", &dim_mappa.dimy);
@@ -166,6 +167,7 @@ int main(){
                     }
                 }
             }
+        sc=fscanf(f_in, "%s", comando);
     }
     fclose(f_in);
     fclose(f_out);
