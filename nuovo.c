@@ -103,7 +103,7 @@ int main(){
     //PREPARATIVI
     //variabili per gestione comandi
         char comando[LUNGHEZZA_STR_COMANDO_MAX];
-        int sc;
+        int sc=0;
         FILE *f_in, *f_out;
         f_in=stdin;
         f_out=stdout;
@@ -118,7 +118,7 @@ int main(){
     }while(ssc!=EOF);
     #endif
     //FINE PREPARATIVI
-    do{
+    while (sc!=EOF){
         sc=fscanf(f_in, "%s", comando);
         if(comando[0]==INIT){
                 libera_mappa();
@@ -167,7 +167,7 @@ int main(){
                     }
                 }
             }
-    }while(sc!=EOF);
+    }
     fclose(f_in);
     fclose(f_out);
     libera_mappa(mappa);
