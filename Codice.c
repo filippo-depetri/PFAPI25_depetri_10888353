@@ -94,6 +94,9 @@ float max (float n1, float n2);
 void aggiorna_costo(int xloc, int yloc, int v, int raggio, int dist_esagoni);
 void nodi_adiacenti(int x, int y);
 int dist_esag(int startX, int startY, int arrX, int arrY);
+void quicksort (elemento_coda_t coda[MAX_DIM], int head, int tail);
+int partition(elemento_coda_t coda[MAX_DIM], int head, int tail);
+void swap(elemento_coda_t coda[MAX_DIM], int i, int j);
 
 int main(){
     //PREPARATIVI
