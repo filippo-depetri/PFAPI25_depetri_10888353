@@ -401,9 +401,9 @@ void comando_air_route(int x1, int y1, int x2, int y2, FILE *output){
         mappa[x1*dim_mappa.dimy + y1].x_ar=realloc(mappa[x1*dim_mappa.dimy + y1].x_ar, mappa[x1*dim_mappa.dimy+y1].dim_rotte*sizeof(int));
         mappa[x1*dim_mappa.dimy + y1].y_ar=realloc(mappa[x1*dim_mappa.dimy + y1].y_ar, mappa[x1*dim_mappa.dimy+y1].dim_rotte*sizeof(int));
         mappa[x1*dim_mappa.dimy + y1].costo_ar=realloc(mappa[x1*dim_mappa.dimy + y1].costo_ar, mappa[x1*dim_mappa.dimy+y1].dim_rotte*sizeof(u_int8_t));
-        mappa[x1*dim_mappa.dimy + y1].x_ar[mappa[x1*dim_mappa.dimy+y1].dim_rotte]=x2;
-        mappa[x1*dim_mappa.dimy + y1].y_ar[mappa[x1*dim_mappa.dimy+y1].dim_rotte]=y2;
-        mappa[x1*dim_mappa.dimy + y1].costo_ar[mappa[x1*dim_mappa.dimy+y1].dim_rotte]=mediapercosto;
+        mappa[x1*dim_mappa.dimy + y1].x_ar[mappa[x1*dim_mappa.dimy+y1].dim_rotte-1]=x2;
+        mappa[x1*dim_mappa.dimy + y1].y_ar[mappa[x1*dim_mappa.dimy+y1].dim_rotte-1]=y2;
+        mappa[x1*dim_mappa.dimy + y1].costo_ar[mappa[x1*dim_mappa.dimy+y1].dim_rotte-1]=mediapercosto;
         fprintf(output, "%s\n", AFFERMATIVO);
         #ifdef DEBUG
         fprintf(output, "%d %d %d %d", x1, y1, x2, y2);
