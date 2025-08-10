@@ -563,7 +563,7 @@ int partition(elemento_coda_t coda[MAX_DIM], int head, int tail, int pos[dim_map
 void swap(elemento_coda_t coda[MAX_DIM], int i, int j, int pos[dim_mappa.dimx*dim_mappa.dimy]){
     elemento_coda_t temp;
     int pos_temp;
-    pos_temp=coda[i].x*dim_mappa.dimy+coda[i].y;
+    pos_temp=pos[coda[i].x*dim_mappa.dimy+coda[i].y];
     pos[coda[i].x*dim_mappa.dimy+coda[i].y]=pos[coda[j].x*dim_mappa.dimy+coda[j].y];
     pos[coda[j].x*dim_mappa.dimy+coda[j].y]=pos_temp;
     temp=coda[i];
