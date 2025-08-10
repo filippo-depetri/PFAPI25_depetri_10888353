@@ -45,7 +45,6 @@ Consegna:   Movhex è una compagnia di autotrasporti che dispone di una flotta d
 #define COLLEGAMENTI 6
 #define MAX_COST 65535
 #define MAX_ALLOCATED 255
-#define MAX_DIM 10000      //possibile tirare giù?
 #define VISITED 1
 
 
@@ -94,9 +93,9 @@ float max (float n1, float n2);
 void aggiorna_costo(int xloc, int yloc, int v, int raggio, int dist_esagoni);
 void nodi_adiacenti(int x, int y);
 int dist_esag(int startX, int startY, int arrX, int arrY);
-void quicksort (elemento_coda_t coda[MAX_DIM], int head, int tail, int pos[dim_mappa.dimx*dim_mappa.dimy]);
-int partition(elemento_coda_t coda[MAX_DIM], int head, int tail, int pos[dim_mappa.dimx*dim_mappa.dimy]);
-void swap(elemento_coda_t coda[MAX_DIM], int i, int j, int pos[dim_mappa.dimx*dim_mappa.dimy]);
+void quicksort (elemento_coda_t coda[dim_mappa.dimx*dim_mappa.dimy], int head, int tail, int pos[dim_mappa.dimx*dim_mappa.dimy]);
+int partition(elemento_coda_t coda[dim_mappa.dimx*dim_mappa.dimy], int head, int tail, int pos[dim_mappa.dimx*dim_mappa.dimy]);
+void swap(elemento_coda_t coda[dim_mappa.dimx*dim_mappa.dimy], int i, int j, int pos[dim_mappa.dimx*dim_mappa.dimy]);
 
 int main(){
     //PREPARATIVI
@@ -409,7 +408,7 @@ void comando_air_route(int x1, int y1, int x2, int y2, FILE *output){
 }
 
 void comando_travel_cost(int x1, int y1, int x2, int y2, FILE *output){
-    elemento_coda_t coda[MAX_DIM];
+    elemento_coda_t coda[dim_mappa.dimx*dim_mappa.dimy];
     u_int16_t costi[dim_mappa.dimx*dim_mappa.dimy];
     u_int8_t visitati[dim_mappa.dimx*dim_mappa.dimy];
     int pos[dim_mappa.dimx*dim_mappa.dimy];
@@ -542,7 +541,7 @@ void comando_travel_cost(int x1, int y1, int x2, int y2, FILE *output){
     return;
 }
 
-void quicksort(elemento_coda_t coda[MAX_DIM], int head, int tail, int pos[dim_mappa.dimx*dim_mappa.dimy]){
+void quicksort(elemento_coda_t coda[dim_mappa.dimx*dim_mappa.dimy], int head, int tail, int pos[dim_mappa.dimx*dim_mappa.dimy]){
     int q;
     if (head<tail)
     {
@@ -551,7 +550,7 @@ void quicksort(elemento_coda_t coda[MAX_DIM], int head, int tail, int pos[dim_ma
         quicksort(coda, q+1, tail, pos);
     }
 }
-int partition(elemento_coda_t coda[MAX_DIM], int head, int tail, int pos[dim_mappa.dimx*dim_mappa.dimy]){
+int partition(elemento_coda_t coda[dim_mappa.dimx*dim_mappa.dimy], int head, int tail, int pos[dim_mappa.dimx*dim_mappa.dimy]){
     int costo=coda[tail].costo;
     int i=head-1;
     for (int j = head; j < tail; j++)
@@ -566,7 +565,7 @@ int partition(elemento_coda_t coda[MAX_DIM], int head, int tail, int pos[dim_map
     return i+1;
 }
 
-void swap(elemento_coda_t coda[MAX_DIM], int i, int j, int pos[dim_mappa.dimx*dim_mappa.dimy]){
+void swap(elemento_coda_t coda[dim_mappa.dimx*dim_mappa.dimy], int i, int j, int pos[dim_mappa.dimx*dim_mappa.dimy]){
     elemento_coda_t temp;
     int pos_temp;
     pos_temp=pos[coda[i].x*dim_mappa.dimy+coda[i].y];
