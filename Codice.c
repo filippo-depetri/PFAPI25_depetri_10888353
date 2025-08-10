@@ -340,34 +340,30 @@ void comando_air_route(int x1, int y1, int x2, int y2, FILE *output){
         return;
     }
     //cancellazione rotta aerea
-    if (mappa[x1*dim_mappa.dimy+y1].dim_rotte==1)
+    for (int i = 0; i < mappa[x1*dim_mappa.dimy+y1].dim_rotte; i++)
     {
-        if (mappa[x1*dim_mappa.dimy+y1].x_ar[0]==x2 && mappa[x1*dim_mappa.dimy+y1].y_ar[0]==y2)
+        if (mappa[x1*dim_mappa.dimy+y1].x_ar[i]==x2 && mappa[x1*dim_mappa.dimy+y1].y_ar[i]==y2)
         {
-            #ifdef DEBUG
-            fprintf(output, "%d %d %d %d", x1, y1, x2, y2);
-            #endif
-            mappa[x1*dim_mappa.dimy+y1].dim_rotte--;
-            free(mappa[x1*dim_mappa.dimy+y1].x_ar);       //cancello rotta aerea
-            free(mappa[x1*dim_mappa.dimy+y1].y_ar);
-            free(mappa[x1*dim_mappa.dimy+y1].costo_ar);
-            mappa[x1*dim_mappa.dimy+y1].x_ar=NULL;
-            mappa[x1*dim_mappa.dimy+y1].y_ar=NULL;
-            mappa[x1*dim_mappa.dimy+y1].costo_ar=NULL;
-            fprintf(output, "%s\n", AFFERMATIVO);
-            return;
-        }
-    }
-    else
-    {
-        //cancello rotta
-        for (int i = 0; i < mappa[x1*dim_mappa.dimy+y1].dim_rotte; i++)
-        {
-            if (mappa[x1*dim_mappa.dimy+y1].x_ar[i]==x2 && mappa[x1*dim_mappa.dimy+y1].y_ar[i]==y2)
+            if (mappa[x1*dim_mappa.dimy+y1].dim_rotte==1)
             {
                 #ifdef DEBUG
                 fprintf(output, "%d %d %d %d", x1, y1, x2, y2);
                 #endif
+                mappa[x1*dim_mappa.dimy+y1].dim_rotte--;
+                free(mappa[x1*dim_mappa.dimy+y1].x_ar);       //cancello rotta aerea
+                free(mappa[x1*dim_mappa.dimy+y1].y_ar);
+                free(mappa[x1*dim_mappa.dimy+y1].costo_ar);
+                mappa[x1*dim_mappa.dimy+y1].x_ar=NULL;
+                mappa[x1*dim_mappa.dimy+y1].y_ar=NULL;
+                mappa[x1*dim_mappa.dimy+y1].costo_ar=NULL;
+                fprintf(output, "%s\n", AFFERMATIVO);
+                return;
+            }
+            #ifdef DEBUG
+            fprintf(output, "%d %d %d %d", x1, y1, x2, y2);
+            #endif
+            else
+            {
                 for(int j=i; j<mappa[x1*dim_mappa.dimy+y1].dim_rotte-1; j++)
                 {
                     mappa[x1*dim_mappa.dimy+y1].x_ar[j]=mappa[x1*dim_mappa.dimy+y1].x_ar[j+1];
@@ -382,35 +378,35 @@ void comando_air_route(int x1, int y1, int x2, int y2, FILE *output){
                 return;
             }
         }
-        if (mappa[x1*dim_mappa.dimy+y1].dim_rotte>=MAX_ROTTE_AR)
-        {
-            fprintf(output, "%s\n", FALSO);
-            return;
-        }
-        for (int i = 0; i < mappa[x1*dim_mappa.dimy+y1].dim_rotte; i++)
-        {
-            mediapercosto+=mappa[x1*dim_mappa.dimy+y1].costo_ar[i];
-        }
-        mediapercosto+=mappa[x1*dim_mappa.dimy + y1].costo;
-        mediapercosto=floor(mediapercosto/(float)(mappa[x1*dim_mappa.dimy+y1].dim_rotte+1));
-
-        #ifdef DEBUG
-        fprintf(output, "%f", mediapercosto);
-        #endif
-        mappa[x1*dim_mappa.dimy+y1].dim_rotte++;
-        mappa[x1*dim_mappa.dimy + y1].x_ar=realloc(mappa[x1*dim_mappa.dimy + y1].x_ar, mappa[x1*dim_mappa.dimy+y1].dim_rotte*sizeof(int));
-        mappa[x1*dim_mappa.dimy + y1].y_ar=realloc(mappa[x1*dim_mappa.dimy + y1].y_ar, mappa[x1*dim_mappa.dimy+y1].dim_rotte*sizeof(int));
-        mappa[x1*dim_mappa.dimy + y1].costo_ar=realloc(mappa[x1*dim_mappa.dimy + y1].costo_ar, mappa[x1*dim_mappa.dimy+y1].dim_rotte*sizeof(u_int8_t));
-        mappa[x1*dim_mappa.dimy + y1].x_ar[mappa[x1*dim_mappa.dimy+y1].dim_rotte-1]=x2;
-        mappa[x1*dim_mappa.dimy + y1].y_ar[mappa[x1*dim_mappa.dimy+y1].dim_rotte-1]=y2;
-        mappa[x1*dim_mappa.dimy + y1].costo_ar[mappa[x1*dim_mappa.dimy+y1].dim_rotte-1]=mediapercosto;
-        fprintf(output, "%s\n", AFFERMATIVO);
-        #ifdef DEBUG
-        fprintf(output, "%d %d %d %d", x1, y1, x2, y2);
-        fprintf(output, "%d", mappa[x1*dim_mappa.dimy+y1].dim_rotte-1);
-        #endif
+    }
+    if (mappa[x1*dim_mappa.dimy+y1].dim_rotte>=MAX_ROTTE_AR)
+    {
+        fprintf(output, "%s\n", FALSO);
         return;
     }
+    for (int i = 0; i < mappa[x1*dim_mappa.dimy+y1].dim_rotte; i++)
+    {
+        mediapercosto+=mappa[x1*dim_mappa.dimy+y1].costo_ar[i];
+    }
+    mediapercosto+=mappa[x1*dim_mappa.dimy + y1].costo;
+    mediapercosto=floor(mediapercosto/(float)(mappa[x1*dim_mappa.dimy+y1].dim_rotte+1));
+
+    #ifdef DEBUG
+    fprintf(output, "%f", mediapercosto);
+    #endif
+    mappa[x1*dim_mappa.dimy+y1].dim_rotte++;
+    mappa[x1*dim_mappa.dimy + y1].x_ar=realloc(mappa[x1*dim_mappa.dimy + y1].x_ar, mappa[x1*dim_mappa.dimy+y1].dim_rotte*sizeof(int));
+    mappa[x1*dim_mappa.dimy + y1].y_ar=realloc(mappa[x1*dim_mappa.dimy + y1].y_ar, mappa[x1*dim_mappa.dimy+y1].dim_rotte*sizeof(int));
+    mappa[x1*dim_mappa.dimy + y1].costo_ar=realloc(mappa[x1*dim_mappa.dimy + y1].costo_ar, mappa[x1*dim_mappa.dimy+y1].dim_rotte*sizeof(u_int8_t));
+    mappa[x1*dim_mappa.dimy + y1].x_ar[mappa[x1*dim_mappa.dimy+y1].dim_rotte-1]=x2;
+    mappa[x1*dim_mappa.dimy + y1].y_ar[mappa[x1*dim_mappa.dimy+y1].dim_rotte-1]=y2;
+    mappa[x1*dim_mappa.dimy + y1].costo_ar[mappa[x1*dim_mappa.dimy+y1].dim_rotte-1]=mediapercosto;
+    fprintf(output, "%s\n", AFFERMATIVO);
+    #ifdef DEBUG
+    fprintf(output, "%d %d %d %d", x1, y1, x2, y2);
+    fprintf(output, "%d", mappa[x1*dim_mappa.dimy+y1].dim_rotte-1);
+    #endif
+    return;
 }
 
 void comando_travel_cost(int x1, int y1, int x2, int y2, FILE *output){
