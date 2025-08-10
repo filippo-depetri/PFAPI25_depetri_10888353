@@ -94,9 +94,9 @@ float max (float n1, float n2);
 void aggiorna_costo(int xloc, int yloc, int v, int raggio, int dist_esagoni);
 void nodi_adiacenti(int x, int y);
 int dist_esag(int startX, int startY, int arrX, int arrY);
-void quicksort (elemento_coda_t coda[MAX_DIM], int head, int tail);
-int partition(elemento_coda_t coda[MAX_DIM], int head, int tail);
-void swap(elemento_coda_t coda[MAX_DIM], int i, int j);
+void quicksort (elemento_coda_t coda[MAX_DIM], int head, int tail, int pos[dim_mappa.dimx*dim_mappa.dimy]);
+int partition(elemento_coda_t coda[MAX_DIM], int head, int tail, int pos[dim_mappa.dimx*dim_mappa.dimy]);
+void swap(elemento_coda_t coda[MAX_DIM], int i, int j, int pos[dim_mappa.dimx*dim_mappa.dimy]);
 
 int main(){
     //PREPARATIVI
@@ -523,7 +523,7 @@ void comando_travel_cost(int x1, int y1, int x2, int y2, FILE *output){
         }
         if (aggiornato==1)
         {
-            quicksort(coda, head, tail-1);
+            quicksort(coda, head, tail-1, pos);
         }
     }
     if (costi[x2*dim_mappa.dimy+y2]>=MAX_COST)
@@ -536,16 +536,16 @@ void comando_travel_cost(int x1, int y1, int x2, int y2, FILE *output){
     return;
 }
 
-void quicksort (elemento_coda_t coda[MAX_DIM], int head, int tail){
+void quicksort(elemento_coda_t coda[MAX_DIM], int head, int tail, int pos[dim_mappa.dimx*dim_mappa.dimy]){
     int q;
     if (head<tail)
     {
-        q=partition(coda, head, tail);
-        quicksort(coda, head, q-1);
-        quicksort(coda, q+1, tail);
+        q=partition(coda, head, tail, pos);
+        quicksort(coda, head, q-1, pos);
+        quicksort(coda, q+1, tail, pos);
     }
 }
-int partition(elemento_coda_t coda[MAX_DIM], int head, int tail){
+int partition(elemento_coda_t coda[MAX_DIM], int head, int tail, int pos[dim_mappa.dimx*dim_mappa.dimy]){
     int costo=coda[tail].costo;
     int i=head-1;
     for (int j = head; j < tail; j++)
@@ -553,24 +553,22 @@ int partition(elemento_coda_t coda[MAX_DIM], int head, int tail){
         if (coda[j].costo<=costo)
         {
             i++;
-            swap(coda, i, j);
+            swap(coda, i, j, pos);
         }
     }
-    swap(coda, i+1, tail);
+    swap(coda, i+1, tail, pos);
     return i+1;
 }
 
-void swap(elemento_coda_t coda[MAX_DIM], int i, int j){
-    int temp;
-    temp=coda[i].x;
-    coda[i].x=coda[j].x;
-    coda[j].x=temp;
-    temp=coda[i].y;
-    coda[i].y=coda[j].y;
-    coda[j].y=temp;
-    temp=coda[i].costo;
-    coda[i].costo=coda[j].costo;
-    coda[j].costo=temp;
+void swap(elemento_coda_t coda[MAX_DIM], int i, int j, int pos[dim_mappa.dimx*dim_mappa.dimy]){
+    elemento_coda_t temp;
+    int pos_temp;
+    pos_temp=coda[i].x*dim_mappa.dimy+coda[i].y;
+    pos[coda[i].x*dim_mappa.dimy+coda[i].y]=pos[coda[j].x*dim_mappa.dimy+coda[j].y];
+    pos[coda[j].x*dim_mappa.dimy+coda[j].y]=pos_temp;
+    temp=coda[i];
+    coda[i]=coda[j];
+    coda[j]=temp;
     return;
 }
 
