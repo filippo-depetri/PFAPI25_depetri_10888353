@@ -457,8 +457,7 @@ void comando_travel_cost(int x1, int y1, int x2, int y2, FILE *output){
     while (tail>head)
     {
         nodo_corrente=coda[head];
-        tail--;
-        memmove(&coda[0], &coda[1], tail*sizeof(elemento_coda_t));
+        head++;
         index=nodo_corrente.x*dim_mappa.dimy+nodo_corrente.y;
         visitati[index]=VISITED;
         pos[index]=NOT_VALID_TRAVEL;
