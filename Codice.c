@@ -524,6 +524,13 @@ void comando_travel_cost(int x1, int y1, int x2, int y2, FILE *output){
         {
             quicksort(coda, head, tail-1, pos);
         }
+        #ifdef DEBUG
+        for (i = head; i < tail; i++)
+        {
+            printf("%d, %d, %d\n", coda[i].x, coda[i].y, coda[i].costo);
+        }
+        printf("\n");
+        #endif
     }
     if (costi[x2*dim_mappa.dimy+y2]>=MAX_COST)
     {
