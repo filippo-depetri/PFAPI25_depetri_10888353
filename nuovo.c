@@ -546,7 +546,7 @@ void min_heapify(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int value, int size, 
     }
     if (min!=value)
     {
-        swap(&nodo[value], &nodo[min]);
+        swap(&nodo[min], &nodo[value]);
         temp=pos_heap[nodo[value].x_heap*dim_mappa.dimy+nodo[value].y_heap];
         pos_heap[nodo[value].x_heap*dim_mappa.dimy+nodo[value].y_heap]=pos_heap[nodo[min].x_heap*dim_mappa.dimy+nodo[min].y_heap];
         pos_heap[nodo[min].x_heap*dim_mappa.dimy+nodo[min].y_heap]=temp;
