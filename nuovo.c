@@ -27,7 +27,7 @@ Consegna:   Movhex è una compagnia di autotrasporti che dispone di una flotta d
 
 //define
 //#define DEBUGTEST
-#define DEBUG
+//#define DEBUG
 #define INIT 'i'
 #define CAMBIO_COSTO 'c'
 #define ROTTA_AEREA 'o'
@@ -571,14 +571,6 @@ void push_heap(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int *size, int x, int y
     nodo[pos].y_heap=y;
     pos_heap[x*dim_mappa.dimy+y]=pos;
     heap_decrease_key(nodo, pos, costo, pos_heap);
-    #ifdef DEBUG
-    for (int i = 0; i < *size; i++)
-    {
-        printf("%d, %d, %d\n", dim_mappa.dimx-nodo[i].x_heap-1, nodo[i].y_heap, nodo[i].costo_h);
-    }
-    printf("\n");
-    #endif
-    
 }
 void heap_decrease_key(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int pos, int costo, int pos_heap[dim_mappa.dimx*dim_mappa.dimy]){
     nodo[pos].costo_h=costo;
