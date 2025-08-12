@@ -552,10 +552,10 @@ void min_heapify(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int value, int size, 
     }
     if (min!=value)
     {
-        swap(&nodo[value], &nodo[min]);
         temp=pos_heap[nodo[value].x_heap*dim_mappa.dimy+nodo[value].y_heap];
         pos_heap[nodo[value].x_heap*dim_mappa.dimy+nodo[value].y_heap]=pos_heap[nodo[min].x_heap*dim_mappa.dimy+nodo[min].y_heap];
         pos_heap[nodo[min].x_heap*dim_mappa.dimy+nodo[min].y_heap]=temp;
+        swap(&nodo[value], &nodo[min]);
         min_heapify(nodo, min, size, pos_heap);
     }
 }
@@ -576,9 +576,9 @@ void heap_decrease_key(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int pos, int co
     nodo[pos].costo_h=costo;
     while (pos>0 && nodo[(pos-1)/2].costo_h>nodo[pos].costo_h)
     {
-        swap(&nodo[pos], &nodo[(pos-1)/2]);
         pos_heap[nodo[pos].x_heap*dim_mappa.dimy+nodo[pos].y_heap]=(pos-1)/2;
         pos_heap[nodo[(pos-1)/2].x_heap*dim_mappa.dimy+nodo[(pos-1)/2].y_heap]=pos;
+        swap(&nodo[pos], &nodo[(pos-1)/2]);
         pos=(pos-1)/2;
     }
 }
