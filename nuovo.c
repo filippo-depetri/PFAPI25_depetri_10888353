@@ -52,7 +52,7 @@ Consegna:   Movhex è una compagnia di autotrasporti che dispone di una flotta d
 typedef struct heap{
     int x_heap;
     int y_heap;
-    u_int8_t costo_h;
+    u_int16_t costo_h;
 }heap;  //djikstra
 typedef struct esagono
 {
