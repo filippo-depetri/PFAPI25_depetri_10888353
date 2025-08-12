@@ -473,7 +473,7 @@ void comando_travel_cost(int x1, int y1, int x2, int y2, FILE *output){
             {
                 successivo=mappa[index].x_ar[i]*dim_mappa.dimy+mappa[index].y_ar[i];
                 costo_corrente=mappa[index].costo_ar[i];
-                if (visitati[successivo]==0 && costi[index] + costo_corrente<=costi[successivo] && (mappa[successivo].costo!=NOT_VALID_COST || (mappa[successivo].costo==NOT_VALID_COST && successivo==x2*dim_mappa.dimy+y2)))
+                if (visitati[successivo]==0 && costi[index] + costo_corrente<costi[successivo] && (mappa[successivo].costo!=NOT_VALID_COST || (mappa[successivo].costo==NOT_VALID_COST && successivo==x2*dim_mappa.dimy+y2)))
                 {
                     costi[successivo]=costi[index] + costo_corrente;
                     if (pos[successivo]==-1)
@@ -495,7 +495,7 @@ void comando_travel_cost(int x1, int y1, int x2, int y2, FILE *output){
             {
                 successivo=coordinate[i][0]*dim_mappa.dimy+coordinate[i][1];
                 costo_corrente=mappa[index].costo;
-                if (visitati[successivo]==0 && costi[index] + costo_corrente<=costi[successivo] && (mappa[successivo].costo!=NOT_VALID_COST || (mappa[successivo].costo==NOT_VALID_COST && successivo==x2*dim_mappa.dimy+y2)))
+                if (visitati[successivo]==0 && costi[index] + costo_corrente<costi[successivo] && (mappa[successivo].costo!=NOT_VALID_COST || (mappa[successivo].costo==NOT_VALID_COST && successivo==x2*dim_mappa.dimy+y2)))
                 {
                     costi[successivo]=costi[index] + costo_corrente;
                     if (pos[coordinate[i][0]*dim_mappa.dimy+coordinate[i][1]]==-1)
