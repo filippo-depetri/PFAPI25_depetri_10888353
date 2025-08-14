@@ -616,34 +616,34 @@ void aggiorna_costo(int xloc, int yloc, int v, int raggio, int dist_esagoni){
     #endif
 }
 void nodi_adiacenti(int x, int y){
-    if (x%2==0)
+    if (y%2==0)
     {
-        coordinate[0][0]=x+1;
-        coordinate[0][1]=y;
-        coordinate[1][0]=x;
-        coordinate[1][1]=y+1;
-        coordinate[2][0]=x-1;
-        coordinate[2][1]=y;
-        coordinate[3][0]=x-1;
-        coordinate[3][1]=y-1;
-        coordinate[4][0]=x;
-        coordinate[4][1]=y-1;
-        coordinate[5][0]=x+1;
-        coordinate[5][1]=y-1;
-    }
-    else{
-        coordinate[0][0]=x+1;
-        coordinate[0][1]=y;
+        coordinate[0][0]=x;
+        coordinate[0][1]=y-1;
         coordinate[1][0]=x+1;
-        coordinate[1][1]=y+1;
-        coordinate[2][0]=x;
-        coordinate[2][1]=y+1;
-        coordinate[3][0]=x-1;
+        coordinate[1][1]=y-1;
+        coordinate[2][0]=x+1;
+        coordinate[2][1]=y;
+        coordinate[3][0]=x;
         coordinate[3][1]=y+1;
         coordinate[4][0]=x-1;
         coordinate[4][1]=y;
-        coordinate[5][0]=x;
+        coordinate[5][0]=x-1;
         coordinate[5][1]=y-1;
+    }
+    else{
+        coordinate[0][0]=x;
+        coordinate[0][1]=y-1;
+        coordinate[1][0]=x+1;
+        coordinate[1][1]=y;
+        coordinate[2][0]=x+1;
+        coordinate[2][1]=y+1;
+        coordinate[3][0]=x;
+        coordinate[3][1]=y+1;
+        coordinate[4][0]=x-1;
+        coordinate[4][1]=y+1;
+        coordinate[5][0]=x-1;
+        coordinate[5][1]=y;
     }
 }
 
