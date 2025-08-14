@@ -27,7 +27,7 @@ Consegna:   Movhex è una compagnia di autotrasporti che dispone di una flotta d
 
 //define
 //#define DEBUGTEST
-//#define DEBUG
+#define DEBUG
 #define INIT 'i'
 #define CAMBIO_COSTO 'c'
 #define ROTTA_AEREA 'o'
@@ -203,14 +203,6 @@ void comando_init(FILE *output){
         mappa[i].costo_ar=NULL;
     }
     fprintf(output, "%s\n", AFFERMATIVO);
-    #ifdef DEBUG
-    for (int i = 0; i <dim_mappa.dimx*dim_mappa.dimy; i++)
-    {
-
-        fprintf(output, "%d", mappa[i].costo);
-        fprintf(output, "%d\n", mappa[i].already_visited);
-    }
-    #endif
     return;   
 }
 
@@ -247,7 +239,7 @@ void comando_change_cost(int x, int y, int v, int raggio, FILE *output){
     //aggiornamento nodo sorgente
     aggiorna_costo(x, y, v, raggio, dist_esagoni);
     #ifdef DEBUG
-    fprintf(output, "%u\n %d\n", mappa[x*dim_mappa.dimy +y].costo, dist_esagoni);
+    fprintf(output, "%d\n %d\n", mappa[x*dim_mappa.dimy +y].costo, dist_esagoni);
     #endif
     mappa[x*dim_mappa.dimy+y].already_visited=GRIGIO;
     xloc=x;
@@ -272,9 +264,6 @@ void comando_change_cost(int x, int y, int v, int raggio, FILE *output){
                 }
             }
         }
-        #ifdef DEBUG
-        fprintf(output, "%d\n", j);
-        #endif
         if (j==indice_coda){
             break;
         }
@@ -611,9 +600,6 @@ void aggiorna_costo(int xloc, int yloc, int v, int raggio, int dist_esagoni){
             mappa[xloc*dim_mappa.dimy+yloc].costo_ar[i]=prog;
         }
     }
-    #ifdef DEBUG
-    printf("costo modificato\n");
-    #endif
 }
 void nodi_adiacenti(int x, int y){
     if ((x+1)%2==0)
