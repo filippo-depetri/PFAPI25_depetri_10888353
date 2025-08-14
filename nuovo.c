@@ -402,7 +402,6 @@ void comando_travel_cost(int x1, int y1, int x2, int y2, FILE *output){
     u_int16_t costi[dim_mappa.dimx*dim_mappa.dimy];
     u_int8_t visitati[dim_mappa.dimx*dim_mappa.dimy];
     int pos[dim_mappa.dimx*dim_mappa.dimy];
-    int costo;
     int i;
     int dim_heap=0;
     heap nodo_corrente;
@@ -498,13 +497,12 @@ void comando_travel_cost(int x1, int y1, int x2, int y2, FILE *output){
         #endif
             
     }
-    costo=costi[x2*dim_mappa.dimy+y2];
-    if (costo>=MAX_COST)
+    if (costi[x2*dim_mappa.dimy+y2]>=MAX_COST)
     {
         fprintf(output, "%d\n", NOT_VALID_TRAVEL);
     }
     else{
-        fprintf(output, "%d\n", costo);
+        fprintf(output, "%d\n", costi[x2*dim_mappa.dimy+y2]);
     }
     return;
 }
