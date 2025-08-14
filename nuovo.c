@@ -310,7 +310,7 @@ void comando_change_cost(int x, int y, int v, int raggio, FILE *output){
 
 //comando air_route
 void comando_air_route(int x1, int y1, int x2, int y2, FILE *output){
-    float mediapercosto=0;
+    int mediapercosto=0;
     x1=dim_mappa.dimx-x1-1;
     x2=dim_mappa.dimx-x2-1;
     if (mappa==NULL)        //check se mappa è stata creata
@@ -392,7 +392,7 @@ void comando_air_route(int x1, int y1, int x2, int y2, FILE *output){
             mediapercosto+=mappa[x1*dim_mappa.dimy+y1].costo_ar[i];
         }
         mediapercosto+=mappa[x1*dim_mappa.dimy + y1].costo;
-        mediapercosto=floor(mediapercosto/(float)(mappa[x1*dim_mappa.dimy+y1].dim_rotte+1));
+        mediapercosto=floorf((float)mediapercosto/(float)(mappa[x1*dim_mappa.dimy+y1].dim_rotte+1));
 
         #ifdef DEBUG
         fprintf(output, "%f", mediapercosto);
