@@ -27,7 +27,7 @@ Consegna:   Movhex è una compagnia di autotrasporti che dispone di una flotta d
 
 //define
 //#define DEBUGTEST
-#define DEBUG
+//#define DEBUG
 #define INIT 'i'
 #define CAMBIO_COSTO 'c'
 #define ROTTA_AEREA 'o'
@@ -217,7 +217,6 @@ void comando_change_cost(int x, int y, int v, int raggio, FILE *output){
     int j=0;
     int i=0;
     int coda[dim_mappa.dimx*dim_mappa.dimy][2];
-    x=dim_mappa.dimx-x-1;
     if (mappa==NULL)        //check se mappa è stata creata
     {
         fprintf(output, "%s\n", FALSO);
@@ -300,8 +299,6 @@ void comando_change_cost(int x, int y, int v, int raggio, FILE *output){
 //comando air_route
 void comando_air_route(int x1, int y1, int x2, int y2, FILE *output){
     int mediapercosto=0;
-    x1=dim_mappa.dimx-x1-1;
-    x2=dim_mappa.dimx-x2-1;
     if (mappa==NULL)        //check se mappa è stata creata
     {
         fprintf(output, "%s\n", FALSO);
@@ -384,7 +381,7 @@ void comando_air_route(int x1, int y1, int x2, int y2, FILE *output){
         mediapercosto=floorf((float)mediapercosto/(float)(mappa[x1*dim_mappa.dimy+y1].dim_rotte+1));
 
         #ifdef DEBUG
-        fprintf(output, "%f", mediapercosto);
+        fprintf(output, "%d", mediapercosto);
         #endif
         mappa[x1*dim_mappa.dimy+y1].dim_rotte++;
         mappa[x1*dim_mappa.dimy + y1].x_ar=realloc(mappa[x1*dim_mappa.dimy + y1].x_ar, mappa[x1*dim_mappa.dimy+y1].dim_rotte*sizeof(int));
@@ -415,8 +412,6 @@ void comando_travel_cost(int x1, int y1, int x2, int y2, FILE *output){
     int successivo;
     int costo_corrente;
     int index;
-    x1=dim_mappa.dimx-x1-1;
-    x2=dim_mappa.dimx-x2-1;
     if (mappa==NULL)
     {
         fprintf(output, "%d\n", NOT_VALID_TRAVEL);
@@ -602,7 +597,7 @@ void aggiorna_costo(int xloc, int yloc, int v, int raggio, int dist_esagoni){
     }
 }
 void nodi_adiacenti(int x, int y){
-    if ((x+1)%2==0)
+    if (x%2==0)
     {
         coordinate[0][0]=x+1;
         coordinate[0][1]=y;
