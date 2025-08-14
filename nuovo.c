@@ -616,7 +616,7 @@ void aggiorna_costo(int xloc, int yloc, int v, int raggio, int dist_esagoni){
     #endif
 }
 void nodi_adiacenti(int x, int y){
-    if (x%2==0)
+    if ((x+1)%2==0)
     {
         coordinate[0][0]=x+1;
         coordinate[0][1]=y;
