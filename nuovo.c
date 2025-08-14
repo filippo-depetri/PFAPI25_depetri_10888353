@@ -404,7 +404,6 @@ void comando_travel_cost(int x1, int y1, int x2, int y2, FILE *output){
     int pos[dim_mappa.dimx*dim_mappa.dimy];
     int costo;
     int i;
-    int partenza;
     int dim_heap=0;
     heap nodo_corrente;
     int successivo;
@@ -434,8 +433,7 @@ void comando_travel_cost(int x1, int y1, int x2, int y2, FILE *output){
     }
     
     //algoritmo di djikstra
-    partenza=x1*dim_mappa.dimy+y1;
-    costi[partenza]=NOT_VALID_COST;
+    costi[x1*dim_mappa.dimy+y1]=NOT_VALID_COST;
     push_heap(nodi, &dim_heap, x1, y1, NOT_VALID_COST, pos);
     while (dim_heap>0)
     {
