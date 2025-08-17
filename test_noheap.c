@@ -42,7 +42,7 @@ Consegna:   Movhex è una compagnia di autotrasporti che dispone di una flotta d
 #define BIANCO 9
 #define COLLEGAMENTI 6
 #define MAX_COST 65535
-#define MAX_HEAP 3000
+#define MAX_HEAP 8000
 #define VISITED 1
 
 
@@ -91,10 +91,9 @@ float max (float n1, float n2);
 void aggiorna_costo(int xloc, int yloc, int v, int raggio, int dist_esagoni);
 void nodi_adiacenti(int x, int y);
 int dist_esag(int startX, int startY, int arrX, int arrY);
-heap pop_heap(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int *dim_heap, int pos_heap[dim_mappa.dimx*dim_mappa.dimy]);
-void swap(heap *nodo1, heap *nodo2);
-void push_heap(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int *size, int x, int y, int costo, int pos[dim_mappa.dimx*dim_mappa.dimy]);
-void heap_decrease_key(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int pos, int costo, int pos_heap[dim_mappa.dimx*dim_mappa.dimy]);
+void quicksort(heap coda[dim_mappa.dimx*dim_mappa.dimy], int head, int tail, int pos[dim_mappa.dimx*dim_mappa.dimy]);
+int partition(heap coda[dim_mappa.dimx*dim_mappa.dimy], int head, int tail, int pos[dim_mappa.dimx*dim_mappa.dimy]);
+void swap(heap coda[dim_mappa.dimx*dim_mappa.dimy], int i, int j, int pos[dim_mappa.dimx*dim_mappa.dimy]);
 
 int main(){
     //PREPARATIVI
@@ -400,8 +399,10 @@ void comando_travel_cost(int x1, int y1, int x2, int y2, FILE *output){
     heap nodi[MAX_HEAP];
     u_int16_t costi[dim_mappa.dimx*dim_mappa.dimy];
     u_int8_t visitati[dim_mappa.dimx*dim_mappa.dimy];
+    u_int8_t aggiornato;
     int pos[dim_mappa.dimx*dim_mappa.dimy];
     int i;
+    int head=0;
     int dim_heap=0;
     heap nodo_corrente;
     int successivo;
@@ -432,13 +433,18 @@ void comando_travel_cost(int x1, int y1, int x2, int y2, FILE *output){
     
     //algoritmo di djikstra
     costi[x1*dim_mappa.dimy+y1]=NOT_VALID_COST;
-    push_heap(nodi, &dim_heap, x1, y1, NOT_VALID_COST, pos);
-    while (dim_heap>0)
+    nodi[head].x_heap=x1;
+    nodi[head].y_heap=y1;
+    nodi[head].costo_h=NOT_VALID_COST;
+    dim_heap++;
+    while (head<dim_heap)
     {
-        nodo_corrente=pop_heap(nodi, &dim_heap, pos);
+        nodo_corrente=nodi[head];
         index=nodo_corrente.x_heap*dim_mappa.dimy+nodo_corrente.y_heap;
         visitati[index]=VISITED;
         pos[index]=NOT_VALID_TRAVEL;
+        head++;
+        aggiornato=0;
         //se sono arrivato al nodo destinazione
         if (nodo_corrente.x_heap==x2 && nodo_corrente.y_heap==y2)
         {
@@ -456,11 +462,20 @@ void comando_travel_cost(int x1, int y1, int x2, int y2, FILE *output){
                     costi[successivo]=costi[index] + costo_corrente;
                     if (pos[successivo]==-1)
                     {
-                        push_heap(nodi, &dim_heap, mappa[index].x_ar[i], mappa[index].y_ar[i], costi[successivo], pos);
+                        nodi[dim_heap].x_heap=mappa[index].x_ar[i];
+                        nodi[dim_heap].y_heap=mappa[index].y_ar[i];
+                        nodi[dim_heap].costo_h=costi[successivo];
+                        pos[successivo]=dim_heap;
+                        dim_heap++;
+                        if (nodo_corrente.costo_h>costi[successivo])
+                        {
+                            aggiornato=1;
+                        }
                     }
                     else
                     {
-                        heap_decrease_key(nodi, pos[successivo], costi[successivo], pos);
+                        nodi[pos[successivo]].costo_h=costi[successivo];
+                        quicksort(nodi, head, dim_heap, pos);
                     }
                 }
             }
@@ -478,14 +493,27 @@ void comando_travel_cost(int x1, int y1, int x2, int y2, FILE *output){
                     costi[successivo]=costi[index] + costo_corrente;
                     if (pos[coordinate[i][0]*dim_mappa.dimy+coordinate[i][1]]==-1)
                     {
-                        push_heap(nodi, &dim_heap, coordinate[i][0], coordinate[i][1], costi[successivo], pos);
+                        nodi[dim_heap].x_heap=coordinate[i][0];
+                        nodi[dim_heap].y_heap=coordinate[i][1];
+                        nodi[dim_heap].costo_h=costi[successivo];
+                        pos[successivo]=dim_heap;
+                        dim_heap++;
+                        if (nodo_corrente.costo_h>costi[successivo])
+                        {
+                            aggiornato=1;
+                        }
                     }
                     else
                     {
-                        heap_decrease_key(nodi, pos[coordinate[i][0]*dim_mappa.dimy+coordinate[i][1]], costi[successivo], pos);
+                        nodi[pos[successivo]].costo_h=costi[successivo];
+                        quicksort(nodi, head, dim_heap, pos);
                     }
                 }
             }
+        }
+        if (aggiornato==1)
+        {
+            quicksort(nodi, head, dim_heap, pos);
         }
         #ifdef DEBUG
         for (i = 0; i < dim_heap; i++)
@@ -505,63 +533,40 @@ void comando_travel_cost(int x1, int y1, int x2, int y2, FILE *output){
     }
     return;
 }
-heap pop_heap(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int *dim_heap, int pos_heap[dim_mappa.dimx*dim_mappa.dimy]){
-    heap min=nodo[0];
-    nodo[0]=nodo[*dim_heap-1];
-    pos_heap[nodo[0].x_heap*dim_mappa.dimy+nodo[0].y_heap]=0;
-    *dim_heap=*dim_heap-1;
-    int l;
-    int r;
-    int min_int;
-    int temp;
-    int value=0;
-    while (1)
+void quicksort(heap coda[dim_mappa.dimx*dim_mappa.dimy], int head, int tail, int pos[dim_mappa.dimx*dim_mappa.dimy]){
+    int q;
+    if (head<tail)
     {
-        l=2*value+1;
-        r=2*value+2;
-        if (l<*dim_heap && nodo[l].costo_h<nodo[value].costo_h)
-        {
-            min_int=l;
-        }
-        else min_int=value;
-        if (r<*dim_heap && nodo[r].costo_h<nodo[min_int].costo_h)
-        {
-            min_int=r;
-        }
-        if (min_int!=value)
-        {
-            temp=pos_heap[nodo[value].x_heap*dim_mappa.dimy+nodo[value].y_heap];
-            pos_heap[nodo[value].x_heap*dim_mappa.dimy+nodo[value].y_heap]=pos_heap[nodo[min_int].x_heap*dim_mappa.dimy+nodo[min_int].y_heap];
-            pos_heap[nodo[min_int].x_heap*dim_mappa.dimy+nodo[min_int].y_heap]=temp;
-            swap(&nodo[value], &nodo[min_int]);
-            value=min_int;
-        }
-        else break;
+        q=partition(coda, head, tail, pos);
+        quicksort(coda, head, q-1, pos);
+        quicksort(coda, q+1, tail, pos);
     }
-    return min;
 }
-void swap(heap *nodo1, heap *nodo2){
-    heap temp=*nodo1;
-    *nodo1=*nodo2;
-    *nodo2=temp;
-}
-void push_heap(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int *size, int x, int y, int costo, int pos_heap[dim_mappa.dimx*dim_mappa.dimy]){
-    int pos=*size;
-    *size=*size+1;
-    nodo[pos].x_heap=x;
-    nodo[pos].y_heap=y;
-    pos_heap[x*dim_mappa.dimy+y]=pos;
-    heap_decrease_key(nodo, pos, costo, pos_heap);
-}
-void heap_decrease_key(heap nodo[dim_mappa.dimx*dim_mappa.dimy], int pos, int costo, int pos_heap[dim_mappa.dimx*dim_mappa.dimy]){
-    nodo[pos].costo_h=costo;
-    while (pos>0 && nodo[(pos-1)/2].costo_h>nodo[pos].costo_h)
+int partition(heap coda[dim_mappa.dimx*dim_mappa.dimy], int head, int tail, int pos[dim_mappa.dimx*dim_mappa.dimy]){
+    int costo=coda[tail].costo_h;
+    int i=head-1;
+    for (int j = head; j < tail; j++)
     {
-        pos_heap[nodo[pos].x_heap*dim_mappa.dimy+nodo[pos].y_heap]=(pos-1)/2;
-        pos_heap[nodo[(pos-1)/2].x_heap*dim_mappa.dimy+nodo[(pos-1)/2].y_heap]=pos;
-        swap(&nodo[pos], &nodo[(pos-1)/2]);
-        pos=(pos-1)/2;
+        if (coda[j].costo_h<=costo)
+        {
+            i++;
+            swap(coda, i, j, pos);
+        }
     }
+    swap(coda, i+1, tail, pos);
+    return i+1;
+}
+
+void swap(heap coda[dim_mappa.dimx*dim_mappa.dimy], int i, int j, int pos[dim_mappa.dimx*dim_mappa.dimy]){
+    heap temp;
+    int pos_temp;
+    pos_temp=pos[coda[i].x_heap*dim_mappa.dimy+coda[i].y_heap];
+    pos[coda[i].x_heap*dim_mappa.dimy+coda[i].y_heap]=pos[coda[j].x_heap*dim_mappa.dimy+coda[j].y_heap];
+    pos[coda[j].x_heap*dim_mappa.dimy+coda[j].y_heap]=pos_temp;
+    temp=coda[i];
+    coda[i]=coda[j];
+    coda[j]=temp;
+    return;
 }
 
 float max(float n1, float n2){
