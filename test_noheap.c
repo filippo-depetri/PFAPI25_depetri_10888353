@@ -42,7 +42,7 @@ Consegna:   Movhex è una compagnia di autotrasporti che dispone di una flotta d
 #define BIANCO 9
 #define COLLEGAMENTI 6
 #define MAX_COST 65535
-#define MAX_HEAP 8000
+#define MAX_HEAP 10000
 #define VISITED 1
 
 
@@ -475,7 +475,7 @@ void comando_travel_cost(int x1, int y1, int x2, int y2, FILE *output){
                     else
                     {
                         nodi[pos[successivo]].costo_h=costi[successivo];
-                        quicksort(nodi, head, dim_heap, pos);
+                        quicksort(nodi, head, dim_heap-1, pos);
                     }
                 }
             }
@@ -506,14 +506,14 @@ void comando_travel_cost(int x1, int y1, int x2, int y2, FILE *output){
                     else
                     {
                         nodi[pos[successivo]].costo_h=costi[successivo];
-                        quicksort(nodi, head, dim_heap, pos);
+                        quicksort(nodi, head, dim_heap-1, pos);
                     }
                 }
             }
         }
         if (aggiornato==1)
         {
-            quicksort(nodi, head, dim_heap, pos);
+            quicksort(nodi, head, dim_heap-1, pos);
         }
         #ifdef DEBUG
         for (i = 0; i < dim_heap; i++)
@@ -545,7 +545,7 @@ void quicksort(heap coda[dim_mappa.dimx*dim_mappa.dimy], int head, int tail, int
 int partition(heap coda[dim_mappa.dimx*dim_mappa.dimy], int head, int tail, int pos[dim_mappa.dimx*dim_mappa.dimy]){
     int costo=coda[tail].costo_h;
     int i=head-1;
-    for (int j = head; j < tail; j++)
+    for (int j = head; j < tail-1; j++)
     {
         if (coda[j].costo_h<=costo)
         {
