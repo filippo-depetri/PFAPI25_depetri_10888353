@@ -608,10 +608,114 @@ void nodi_adiacenti(int x, int y){
 
 int dist_esag(int startX, int startY, int arrX, int arrY){
     int dist=0;
-    int z_cubiche_start=startY-(startX-(startX & 1))/2;
+    /*int z_cubiche_start=startY-(startX-(startX & 1))/2;
     int y_cubiche_start=-startX-z_cubiche_start;
     int z_cubiche_arr=arrY-(arrX-(arrX & 1))/2;
     int y_cubiche_arr=-arrX-z_cubiche_arr;
-    dist=(abs(arrX-startX)+abs(y_cubiche_arr-y_cubiche_start)+abs(z_cubiche_arr-z_cubiche_start))/2;
+    dist=(abs(arrX-startX)+abs(y_cubiche_arr-y_cubiche_start)+abs(z_cubiche_arr-z_cubiche_start))/2;*/
+    while (startX!=arrX || startY!=arrY)
+    {
+        if (startX==arrX)
+        {
+            dist+=abs(arrY-startY);
+            break;
+        }
+        if(startY==arrY)
+        {
+            dist+=abs(arrX-startX);
+            break;
+        }
+        if (startX%2==0)
+        {
+            if (startX>arrX)
+            {
+                if (startY>arrY)
+                {
+                    startX=startX-1;
+                    startY=startY-1;
+                }
+                else{
+                    if (startY<arrY)
+                    {
+                        startX=startX-1;
+                    }
+                    
+                }
+                
+            }
+            else{
+                if (startX<arrX)
+                {
+                    if (startY>arrY)
+                    {
+                        startX=startX+1;
+                        startY=startY-1;
+                    }
+                    else{
+                        if(startY<arrY)
+                        {
+                            startX=startX+1;
+                        }
+                    
+                    }
+                }
+                
+            }
+            
+        }
+        else{
+            if (startX>arrX)
+            {
+                if (startY>arrY)
+                {
+                    startX=startX-1;
+                }
+                else{
+                    if (startY<arrY)
+                    {
+                        startX=startX-1;
+                        startY=startY+1;
+                    }
+                    
+                }
+                
+            }
+            else{
+                if (startX<arrX)
+                {
+                    if (startY>arrY)
+                    {
+                        startX=startX+1;
+                    }
+                    else{
+                        if(startY<arrY)
+                        {
+                            startX=startX+1;
+                            startY=startY+1;
+                        }
+                    
+                    }
+                }
+                
+            }
+        }
+        if (startX<0)
+        {
+            startX=0;
+        }
+        if (startX>=dim_mappa.dimx)
+        {
+            startX=dim_mappa.dimx-1;
+        }
+        if (startY<0)
+        {
+            startY=0;
+        }
+        if (startY>=dim_mappa.dimy)
+        {
+            startY=dim_mappa.dimy-1;
+        }
+        dist++;
+    }
     return dist;
 }
