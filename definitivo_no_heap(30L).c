@@ -50,6 +50,7 @@ typedef struct queue{
     u_int16_t y;
     u_int16_t costo;
 }queue;  //djikstra
+
 typedef struct esagono
 {
     int *x_ar;          
@@ -70,6 +71,7 @@ struct generale_comandi
     int v;
     int raggio;
 }gen_comandi;
+
 struct dimensioni_mappa
 {
     int dimx;     //dim righe
@@ -160,11 +162,11 @@ int main(){
     libera_mappa(mappa);
     return 0;
 }
-
 //alloca mappa
 void alloca_mappa(){
     mappa=malloc(dim_mappa.dimx*dim_mappa.dimy*sizeof(esagono_t));
 }
+//libera mappa
 void libera_mappa(){
     if (mappa==NULL)
     {
@@ -175,8 +177,6 @@ void libera_mappa(){
     }
     mappa=NULL;
 }
-
-
 //comando init: costo di ogni esagono inizializzato a 1
 void comando_init(FILE *output){
     for (int i = 0; i <dim_mappa.dimx*dim_mappa.dimy; i++)
@@ -190,8 +190,6 @@ void comando_init(FILE *output){
     fprintf(output, "%s\n", AFFERMATIVO);
     return;   
 }
-
-
 //comando change cost
 void comando_change_cost(int x, int y, int v, int raggio, FILE *output){
     int dist_esagoni=0;
@@ -280,7 +278,6 @@ void comando_change_cost(int x, int y, int v, int raggio, FILE *output){
     mappa[x*dim_mappa.dimy + y].already_visited=BIANCO;
     return;
 }
-
 //comando air_route
 void comando_air_route(int x1, int y1, int x2, int y2, FILE *output){
     if (mappa==NULL)        //check se mappa è stata creata
@@ -367,7 +364,7 @@ void comando_air_route(int x1, int y1, int x2, int y2, FILE *output){
         return;
     }
 }
-
+//comando travel_cost
 void comando_travel_cost(int x1, int y1, int x2, int y2, FILE *output){
     queue nodi[MAX_DIM_QUEUE];
     u_int16_t costi[dim_mappa.dimx*dim_mappa.dimy];
