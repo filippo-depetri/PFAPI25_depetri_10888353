@@ -38,20 +38,19 @@ Consegna:   Movhex è una compagnia di autotrasporti che dispone di una flotta d
 #define LUNGHEZZA_STR_COMANDO_MAX 30
 #define MAX_ROTTE_AR 5
 #define NOT_VALID_TRAVEL -1
-#define GRIGIO 7
-#define BIANCO 9
+#define GRIGIO 2
+#define BIANCO 3
 #define COLLEGAMENTI 6
-#define MAX_COST 65535
-#define MAX_HEAP 480000
+#define COSTO_MAX 65535
+#define MAX_DIM_QUEUE 480000
 #define VISITED 1
 
-
 //strutture
-typedef struct heap{
-    u_int16_t x_heap;
-    u_int16_t y_heap;
-    u_int16_t costo_h;
-}heap;  //djikstra
+typedef struct queue{
+    u_int16_t x;
+    u_int16_t y;
+    u_int16_t costo;
+}queue;  //djikstra
 typedef struct esagono
 {
     int *x_ar;          
@@ -80,6 +79,7 @@ struct dimensioni_mappa
 
 esagono_t *mappa;
 
+//prototipi
 void comando_init(FILE *output);
 void comando_change_cost(int x, int y, int v, int raggio, FILE *output);
 void comando_air_route(int x1, int y1, int x2, int y2, FILE *output);
@@ -90,10 +90,11 @@ float max (float n1, float n2);
 void aggiorna_costo(int xloc, int yloc, int v, int raggio, int dist_esagoni);
 void nodi_adiacenti(int x, int y);
 int dist_esag(int startX, int startY, int arrX, int arrY);
-void quicksort(heap coda[dim_mappa.dimx*dim_mappa.dimy], int head, int tail, int pos[dim_mappa.dimx*dim_mappa.dimy]);
-int partition(heap coda[dim_mappa.dimx*dim_mappa.dimy], int head, int tail, int pos[dim_mappa.dimx*dim_mappa.dimy]);
-void swap(heap coda[dim_mappa.dimx*dim_mappa.dimy], int i, int j, int pos[dim_mappa.dimx*dim_mappa.dimy]);
+void quicksort(queue coda[MAX_DIM_QUEUE], int head, int tail, int pos[dim_mappa.dimx*dim_mappa.dimy]);
+int partition(queue coda[MAX_DIM_QUEUE], int head, int tail, int pos[dim_mappa.dimx*dim_mappa.dimy]);
+void swap(queue coda[MAX_DIM_QUEUE], int i, int j, int pos[dim_mappa.dimx*dim_mappa.dimy]);
 
+//programma
 int main(){
     //PREPARATIVI
     //variabili per gestione comandi
@@ -186,7 +187,7 @@ void libera_mappa(){
 }
 
 
-//comando init: costo di ogni esagono inizializzato a 1 (ottimizzabile)
+//comando init: costo di ogni esagono inizializzato a 1
 void comando_init(FILE *output){
     for (int i = 0; i <dim_mappa.dimx*dim_mappa.dimy; i++)
     {
@@ -302,33 +303,34 @@ void comando_air_route(int x1, int y1, int x2, int y2, FILE *output){
         fprintf(output, "%s\n", FALSO);
         return;
     }
-    if (mappa[x1*dim_mappa.dimy+y1].x_ar==NULL)
+    int index=x1*dim_mappa.dimy+y1;
+    if (mappa[index].x_ar==NULL)
     {
-        mappa[x1*dim_mappa.dimy+y1].x_ar=malloc(sizeof(int));
-        mappa[x1*dim_mappa.dimy+y1].y_ar=malloc(sizeof(int));
-        mappa[x1*dim_mappa.dimy+y1].x_ar[mappa[x1*dim_mappa.dimy+y1].dim_rotte]=x2;
-        mappa[x1*dim_mappa.dimy+y1].y_ar[mappa[x1*dim_mappa.dimy+y1].dim_rotte]=y2;
-        mappa[x1*dim_mappa.dimy+y1].dim_rotte++;
+        mappa[index].x_ar=malloc(sizeof(int));
+        mappa[index].y_ar=malloc(sizeof(int));
+        mappa[index].x_ar[mappa[index].dim_rotte]=x2;
+        mappa[index].y_ar[mappa[index].dim_rotte]=y2;
+        mappa[index].dim_rotte++;
         fprintf(output, "%s\n", AFFERMATIVO);
         #ifdef DEBUG
         fprintf(output, "%d %d %d %d", x1, y1, x2, y2);
-        fprintf(output, "%d", mappa[x1*dim_mappa.dimy+y1].dim_rotte-1);
+        fprintf(output, "%d", mappa[index].dim_rotte-1);
         #endif
         return;
     }
     //cancellazione rotta aerea
-    if (mappa[x1*dim_mappa.dimy+y1].dim_rotte==1)
+    if (mappa[index].dim_rotte==1)
     {
-        if (mappa[x1*dim_mappa.dimy+y1].x_ar[0]==x2 && mappa[x1*dim_mappa.dimy+y1].y_ar[0]==y2)
+        if (mappa[index].x_ar[0]==x2 && mappa[index].y_ar[0]==y2)
         {
             #ifdef DEBUG
             fprintf(output, "%d %d %d %d", x1, y1, x2, y2);
             #endif
-            mappa[x1*dim_mappa.dimy+y1].dim_rotte--;
-            free(mappa[x1*dim_mappa.dimy+y1].x_ar);       //cancello rotta aerea
-            free(mappa[x1*dim_mappa.dimy+y1].y_ar);
-            mappa[x1*dim_mappa.dimy+y1].x_ar=NULL;
-            mappa[x1*dim_mappa.dimy+y1].y_ar=NULL;
+            mappa[index].dim_rotte--;
+            free(mappa[index].x_ar);       //cancello rotta aerea
+            free(mappa[index].y_ar);
+            mappa[index].x_ar=NULL;
+            mappa[index].y_ar=NULL;
             fprintf(output, "%s\n", AFFERMATIVO);
             return;
         }
@@ -336,26 +338,27 @@ void comando_air_route(int x1, int y1, int x2, int y2, FILE *output){
     else
     {
         //cancello rotta
-        for (int i = 0; i < mappa[x1*dim_mappa.dimy+y1].dim_rotte; i++)
+        for (int i = 0; i < mappa[index].dim_rotte; i++)
         {
-            if (mappa[x1*dim_mappa.dimy+y1].x_ar[i]==x2 && mappa[x1*dim_mappa.dimy+y1].y_ar[i]==y2)
+            if (mappa[index].x_ar[i]==x2 && mappa[index].y_ar[i]==y2)
             {
                 #ifdef DEBUG
                 fprintf(output, "%d %d %d %d", x1, y1, x2, y2);
                 #endif
-                for(int j=i; j<mappa[x1*dim_mappa.dimy+y1].dim_rotte-1; j++)
+                for(int j=i; j<mappa[index].dim_rotte-1; j++)
                 {
-                    mappa[x1*dim_mappa.dimy+y1].x_ar[j]=mappa[x1*dim_mappa.dimy+y1].x_ar[j+1];
-                    mappa[x1*dim_mappa.dimy+y1].y_ar[j]=mappa[x1*dim_mappa.dimy+y1].y_ar[j+1];
+                    mappa[index].x_ar[j]=mappa[index].x_ar[j+1];
+                    mappa[index].y_ar[j]=mappa[index].y_ar[j+1];
                 }
-                mappa[x1*dim_mappa.dimy+y1].dim_rotte--;
-                mappa[x1*dim_mappa.dimy+y1].x_ar=realloc(mappa[x1*dim_mappa.dimy+y1].x_ar, mappa[x1*dim_mappa.dimy+y1].dim_rotte*sizeof(int));
-                mappa[x1*dim_mappa.dimy+y1].y_ar=realloc(mappa[x1*dim_mappa.dimy+y1].y_ar, mappa[x1*dim_mappa.dimy+y1].dim_rotte*sizeof(int));  
+                mappa[index].dim_rotte--;
+                mappa[index].x_ar=realloc(mappa[index].x_ar, mappa[index].dim_rotte*sizeof(int));
+                mappa[index].y_ar=realloc(mappa[index].y_ar, mappa[index].dim_rotte*sizeof(int));  
                 fprintf(output, "%s\n", AFFERMATIVO);
                 return;
             }
         }
-        if (mappa[x1*dim_mappa.dimy+y1].dim_rotte>=MAX_ROTTE_AR)
+        //check se max rotte_ar raggiunte
+        if (mappa[index].dim_rotte>=MAX_ROTTE_AR)
         {
             fprintf(output, "%s\n", FALSO);
             return;
@@ -364,30 +367,31 @@ void comando_air_route(int x1, int y1, int x2, int y2, FILE *output){
         #ifdef DEBUG
         fprintf(output, "%d", mediapercosto);
         #endif
-        mappa[x1*dim_mappa.dimy+y1].dim_rotte++;
-        mappa[x1*dim_mappa.dimy + y1].x_ar=realloc(mappa[x1*dim_mappa.dimy + y1].x_ar, mappa[x1*dim_mappa.dimy+y1].dim_rotte*sizeof(int));
-        mappa[x1*dim_mappa.dimy + y1].y_ar=realloc(mappa[x1*dim_mappa.dimy + y1].y_ar, mappa[x1*dim_mappa.dimy+y1].dim_rotte*sizeof(int));
-        mappa[x1*dim_mappa.dimy + y1].x_ar[mappa[x1*dim_mappa.dimy+y1].dim_rotte-1]=x2;
-        mappa[x1*dim_mappa.dimy + y1].y_ar[mappa[x1*dim_mappa.dimy+y1].dim_rotte-1]=y2;
+        //aggiunta rotta
+        mappa[index].dim_rotte++;
+        mappa[index].x_ar=realloc(mappa[index].x_ar, mappa[index].dim_rotte*sizeof(int));
+        mappa[index].y_ar=realloc(mappa[index].y_ar, mappa[index].dim_rotte*sizeof(int));
+        mappa[index].x_ar[mappa[index].dim_rotte-1]=x2;
+        mappa[index].y_ar[mappa[index].dim_rotte-1]=y2;
         fprintf(output, "%s\n", AFFERMATIVO);
         #ifdef DEBUG
         fprintf(output, "%d %d %d %d", x1, y1, x2, y2);
-        fprintf(output, "%d", mappa[x1*dim_mappa.dimy+y1].dim_rotte-1);
+        fprintf(output, "%d", mappa[index].dim_rotte-1);
         #endif
         return;
     }
 }
 
 void comando_travel_cost(int x1, int y1, int x2, int y2, FILE *output){
-    heap nodi[MAX_HEAP];
+    queue nodi[MAX_DIM_QUEUE];
     u_int16_t costi[dim_mappa.dimx*dim_mappa.dimy];
     u_int8_t visitati[dim_mappa.dimx*dim_mappa.dimy];
     u_int8_t aggiornato;
     int pos[dim_mappa.dimx*dim_mappa.dimy];
     int i;
     int head=0;
-    int dim_heap=0;
-    heap nodo_corrente;
+    int dim_coda=0;
+    queue nodo_corrente;
     int successivo;
     int costo_corrente;
     int index;
@@ -407,29 +411,30 @@ void comando_travel_cost(int x1, int y1, int x2, int y2, FILE *output){
         fprintf(output, "%d\n", NOT_VALID_COST);
         return;
     }
+    //algoritmo di dijkstra: inizializzazione strutture
     for (i = 0; i < dim_mappa.dimx*dim_mappa.dimy; i++)
     {
-        costi[i]=MAX_COST;
+        costi[i]=COSTO_MAX;
         visitati[i]=NOT_VALID_COST;
         pos[i]=NOT_VALID_TRAVEL;
     }
-    
-    //algoritmo di djikstra
+    //push primo nodo
     costi[x1*dim_mappa.dimy+y1]=NOT_VALID_COST;
-    nodi[head].x_heap=x1;
-    nodi[head].y_heap=y1;
-    nodi[head].costo_h=NOT_VALID_COST;
-    dim_heap++;
-    while (head<dim_heap)
+    nodi[head].x=x1;
+    nodi[head].y=y1;
+    nodi[head].costo=NOT_VALID_COST;
+    dim_coda++;
+    while (head<dim_coda)
     {
+        //extract nodo
         nodo_corrente=nodi[head];
-        index=nodo_corrente.x_heap*dim_mappa.dimy+nodo_corrente.y_heap;
+        index=nodo_corrente.x*dim_mappa.dimy+nodo_corrente.y;
         visitati[index]=VISITED;
         pos[index]=NOT_VALID_TRAVEL;
         head++;
-        aggiornato=0;
+        aggiornato=NOT_VALID_COST;
         //se sono arrivato al nodo destinazione
-        if (nodo_corrente.x_heap==x2 && nodo_corrente.y_heap==y2)
+        if (nodo_corrente.x==x2 && nodo_corrente.y==y2)
         {
             break;
         }
@@ -440,63 +445,63 @@ void comando_travel_cost(int x1, int y1, int x2, int y2, FILE *output){
             {
                 successivo=mappa[index].x_ar[i]*dim_mappa.dimy+mappa[index].y_ar[i];
                 costo_corrente=mappa[index].costo;
-                if (visitati[successivo]==0 && costi[index] + costo_corrente<costi[successivo] && (mappa[successivo].costo!=NOT_VALID_COST || (mappa[successivo].costo==NOT_VALID_COST && successivo==x2*dim_mappa.dimy+y2)))
+                if (visitati[successivo]==NOT_VALID_COST && costi[index] + costo_corrente<costi[successivo] && (mappa[successivo].costo!=NOT_VALID_COST || (mappa[successivo].costo==NOT_VALID_COST && successivo==x2*dim_mappa.dimy+y2)))
                 {
                     costi[successivo]=costi[index] + costo_corrente;
                     if (pos[successivo]==-1)
                     {
-                        nodi[dim_heap].x_heap=mappa[index].x_ar[i];
-                        nodi[dim_heap].y_heap=mappa[index].y_ar[i];
-                        nodi[dim_heap].costo_h=costi[successivo];
-                        pos[successivo]=dim_heap;
-                        dim_heap++;
-                        if (nodo_corrente.costo_h>costi[successivo])
+                        nodi[dim_coda].x=mappa[index].x_ar[i];
+                        nodi[dim_coda].y=mappa[index].y_ar[i];
+                        nodi[dim_coda].costo=costi[successivo];
+                        pos[successivo]=dim_coda;
+                        dim_coda++;
+                        if (nodo_corrente.costo>costi[successivo])
                         {
                             aggiornato=1;
                         }
                     }
                     else
                     {
-                        nodi[pos[successivo]].costo_h=costi[successivo];
-                        quicksort(nodi, head, dim_heap-1, pos);
+                        nodi[pos[successivo]].costo=costi[successivo];
+                        quicksort(nodi, head, dim_coda-1, pos);
                     }
                 }
             }
         }
         //cerco via terra
-        nodi_adiacenti(nodo_corrente.x_heap, nodo_corrente.y_heap);
+        nodi_adiacenti(nodo_corrente.x, nodo_corrente.y);
         for (i = 0; i < COLLEGAMENTI; i++)
         {
             if (coordinate[i][0]>=0 && coordinate[i][0]<dim_mappa.dimx && coordinate[i][1]>=0 && coordinate[i][1]<dim_mappa.dimy)
             {
                 successivo=coordinate[i][0]*dim_mappa.dimy+coordinate[i][1];
                 costo_corrente=mappa[index].costo;
-                if (visitati[successivo]==0 && costi[index] + costo_corrente<costi[successivo] && (mappa[successivo].costo!=NOT_VALID_COST || (mappa[successivo].costo==NOT_VALID_COST && successivo==x2*dim_mappa.dimy+y2)))
+                if (visitati[successivo]==NOT_VALID_COST && costi[index] + costo_corrente<costi[successivo] && (mappa[successivo].costo!=NOT_VALID_COST || (mappa[successivo].costo==NOT_VALID_COST && successivo==x2*dim_mappa.dimy+y2)))
                 {
                     costi[successivo]=costi[index] + costo_corrente;
                     if (pos[coordinate[i][0]*dim_mappa.dimy+coordinate[i][1]]==-1)
                     {
-                        nodi[dim_heap].x_heap=coordinate[i][0];
-                        nodi[dim_heap].y_heap=coordinate[i][1];
-                        nodi[dim_heap].costo_h=costi[successivo];
-                        pos[successivo]=dim_heap;
-                        dim_heap++;
-                        if (nodo_corrente.costo_h>costi[successivo])
+                        nodi[dim_coda].x=coordinate[i][0];
+                        nodi[dim_coda].y=coordinate[i][1];
+                        nodi[dim_coda].costo=costi[successivo];
+                        pos[successivo]=dim_coda;
+                        dim_coda++;
+                        if (nodo_corrente.costo>costi[successivo])
                         {
                             aggiornato=1;
                         }
                     }
                     else
                     {
-                        nodi[pos[successivo]].costo_h=costi[successivo];
-                        quicksort(nodi, head, dim_heap-1, pos);
+                        nodi[pos[successivo]].costo=costi[successivo];
+                        quicksort(nodi, head, dim_coda-1, pos);
                     }
                 }
             }
         }
-        if (aggiornato==1)
+        if (aggiornato)
         {
-            quicksort(nodi, head, dim_heap-1, pos);
+            quicksort(nodi, head, dim_coda-1, pos);
         }
         #ifdef DEBUG
         for (i = 0; i < dim_heap; i++)
@@ -507,7 +512,7 @@ void comando_travel_cost(int x1, int y1, int x2, int y2, FILE *output){
         #endif
             
     }
-    if (costi[x2*dim_mappa.dimy+y2]>=MAX_COST)
+    if (costi[x2*dim_mappa.dimy+y2]>=COSTO_MAX)
     {
         fprintf(output, "%d\n", NOT_VALID_TRAVEL);
     }
@@ -516,7 +521,8 @@ void comando_travel_cost(int x1, int y1, int x2, int y2, FILE *output){
     }
     return;
 }
-void quicksort(heap coda[dim_mappa.dimx*dim_mappa.dimy], int head, int tail, int pos[dim_mappa.dimx*dim_mappa.dimy]){
+//funzioni gestione dijkstra
+void quicksort(queue coda[MAX_DIM_QUEUE], int head, int tail, int pos[dim_mappa.dimx*dim_mappa.dimy]){
     int q;
     if (head<tail)
     {
@@ -525,12 +531,12 @@ void quicksort(heap coda[dim_mappa.dimx*dim_mappa.dimy], int head, int tail, int
         quicksort(coda, q+1, tail, pos);
     }
 }
-int partition(heap coda[dim_mappa.dimx*dim_mappa.dimy], int head, int tail, int pos[dim_mappa.dimx*dim_mappa.dimy]){
-    int costo=coda[tail].costo_h;
+int partition(queue coda[MAX_DIM_QUEUE], int head, int tail, int pos[dim_mappa.dimx*dim_mappa.dimy]){
+    int costo=coda[tail].costo;
     int i=head-1;
     for (int j = head; j < tail-1; j++)
     {
-        if (coda[j].costo_h<=costo)
+        if (coda[j].costo<=costo)
         {
             i++;
             swap(coda, i, j, pos);
@@ -539,19 +545,18 @@ int partition(heap coda[dim_mappa.dimx*dim_mappa.dimy], int head, int tail, int 
     swap(coda, i+1, tail, pos);
     return i+1;
 }
-
-void swap(heap coda[dim_mappa.dimx*dim_mappa.dimy], int i, int j, int pos[dim_mappa.dimx*dim_mappa.dimy]){
-    heap temp;
+void swap(queue coda[MAX_DIM_QUEUE], int i, int j, int pos[dim_mappa.dimx*dim_mappa.dimy]){
+    queue temp;
     int pos_temp;
-    pos_temp=pos[coda[i].x_heap*dim_mappa.dimy+coda[i].y_heap];
-    pos[coda[i].x_heap*dim_mappa.dimy+coda[i].y_heap]=pos[coda[j].x_heap*dim_mappa.dimy+coda[j].y_heap];
-    pos[coda[j].x_heap*dim_mappa.dimy+coda[j].y_heap]=pos_temp;
+    pos_temp=pos[coda[i].x*dim_mappa.dimy+coda[i].y];
+    pos[coda[i].x*dim_mappa.dimy+coda[i].y]=pos[coda[j].x*dim_mappa.dimy+coda[j].y];
+    pos[coda[j].x*dim_mappa.dimy+coda[j].y]=pos_temp;
     temp=coda[i];
     coda[i]=coda[j];
     coda[j]=temp;
     return;
 }
-
+//calcolo del massimo numero
 float max(float n1, float n2){
     if (n1>n2)
     {
@@ -561,6 +566,7 @@ float max(float n1, float n2){
         return n2;
     }
 }
+//aggiornamento costo change_cost
 void aggiorna_costo(int xloc, int yloc, int v, int raggio, int dist_esagoni){
     int prog=0;
     prog=mappa[xloc*dim_mappa.dimy+yloc].costo+floorf((float)v*max(0.0f,(raggio-dist_esagoni)/(float)raggio));
@@ -574,6 +580,7 @@ void aggiorna_costo(int xloc, int yloc, int v, int raggio, int dist_esagoni){
     }
     mappa[xloc*dim_mappa.dimy+yloc].costo=prog;
 }
+//calcolo nodi vicini
 void nodi_adiacenti(int x, int y){
     if (x%2==0)
     {
@@ -605,7 +612,7 @@ void nodi_adiacenti(int x, int y){
         coordinate[5][1]=y-1;
     }
 }
-
+//calcolo distanza esagoni
 int dist_esag(int startX, int startY, int arrX, int arrY){
     int dist=0;
     while (startX!=arrX || startY!=arrY)
