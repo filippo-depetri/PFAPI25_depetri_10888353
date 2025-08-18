@@ -363,10 +363,6 @@ void comando_air_route(int x1, int y1, int x2, int y2, FILE *output){
             fprintf(output, "%s\n", FALSO);
             return;
         }
-
-        #ifdef DEBUG
-        fprintf(output, "%d", mediapercosto);
-        #endif
         //aggiunta rotta
         mappa[index].dim_rotte++;
         mappa[index].x_ar=realloc(mappa[index].x_ar, mappa[index].dim_rotte*sizeof(int));
@@ -504,9 +500,9 @@ void comando_travel_cost(int x1, int y1, int x2, int y2, FILE *output){
             quicksort(nodi, head, dim_coda-1, pos);
         }
         #ifdef DEBUG
-        for (i = 0; i < dim_heap; i++)
+        for (i = 0; i < dim_coda; i++)
         {
-            printf("%d, %d, %d\n", nodi[i].x_heap, nodi[i].y_heap, nodi[i].costo_h);
+            printf("%d, %d, %d\n", nodi[i].x, nodi[i].y, nodi[i].costo);
         }
         printf("\n");
         #endif
