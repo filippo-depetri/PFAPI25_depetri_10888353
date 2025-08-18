@@ -26,7 +26,6 @@ Consegna:   Movhex è una compagnia di autotrasporti che dispone di una flotta d
 #include <math.h>
 
 //define
-//#define DEBUGTEST
 //#define DEBUG
 #define INIT 'i'
 #define CAMBIO_COSTO 'c'
@@ -104,15 +103,6 @@ int main(){
         f_in=stdin;
         f_out=stdout;
         mappa=NULL;
-    //fine variabili gestione comandi
-    #ifdef DEBUGTEST
-    int ssc;
-    char c;
-    do{
-        ssc=fscanf(f_in, "%c", &c);
-        fprintf(f_out, "%c", c);
-    }while(ssc!=EOF);
-    #endif
     //FINE PREPARATIVI
     sc=fscanf(f_in, "%s", comando);
     while (sc==1){
