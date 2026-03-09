@@ -12,3 +12,5 @@ Ultima sottoposizione: 21/08/2025 18:20
 Tempo finale ultima sottoposizione: 8,125 secondi
 
 Memoria utilizzata: 21,2 MB
+
+Voto: 30L
