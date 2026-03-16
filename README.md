@@ -1,16 +1,16 @@
 # PFAPI25_depetri_10888353
 Prova finale di Algoritmi e Principi dell'Informatica
 
-Autore: Depetri Filippo
+Author: Depetri Filippo
 
 CP: 10888353
 
-Matricola: 236852
+ID: 236852
 
-Ultima sottoposizione: 21/08/2025 18:20
+Last submission: 21/08/2025 18:20
 
-Tempo finale ultima sottoposizione: 8,125 secondi
+Last submission time: 8,125 seconds
 
-Memoria utilizzata: 21,2 MB
+Memory used: 21,2 MB
 
-Voto: 30L
+Grade: 30L
