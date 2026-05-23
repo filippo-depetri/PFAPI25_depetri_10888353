@@ -29,7 +29,7 @@ This final exam represents a practical application of algorithms and computer sc
 
 ## 🛠️ Technologies Used
 
-- **Language:** [C]
+- **Language:** C
 
 ---
 
@@ -44,7 +44,7 @@ This final exam represents a practical application of algorithms and computer sc
 ## 📧 Contact
 
 **Author:** Filippo Depetri  
-**Email:** [filippo.depetri@mail.polim.it]
+**Email:** filippo.depetri@mail.polimi.it
 
 ---
 
