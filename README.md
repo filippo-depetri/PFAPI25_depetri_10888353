@@ -1,16 +1,51 @@
-# PFAPI25_depetri_10888353
-Prova finale di Algoritmi e Principi dell'Informatica
+# PFAPI25 - Final Exam in Algorithms and Principles of Computer Science
 
-Author: Depetri Filippo
+## 📋 General Information
 
-CP: 10888353
+**Project:** Final Exam in Algorithms and Principles of Computer Science  
+**Author:** Filippo Depetri  
+**Student ID:** 10888353  
+**ID:** 236852  
+**Grade:** 30L (Cum Laude)  
 
-ID: 236852
+---
 
-Last submission: 21/08/2025 18:20
+## 📊 Evaluation Statistics
 
-Last submission time: 8,125 seconds
+| Metric | Value |
+|--------|-------|
+| **Last Submission** | 21/08/2025 18:20 |
+| **Execution Time** | 8,125 seconds |
+| **Memory Used** | 21,2 MB |
+| **Final Grade** | 30L |
 
-Memory used: 21,2 MB
+---
 
-Grade: 30L
+## 🎯 Objectives
+
+This final exam represents a practical application of algorithms and computer science principles covered throughout the course.
+
+---
+
+## 🛠️ Technologies Used
+
+- **Language:** [C]
+
+---
+
+## 📈 Performance
+
+- **Execution Time:** 8,125 seconds
+- **Maximum Memory Used:** 21,2 MB
+
+
+---
+
+## 📧 Contact
+
+**Author:** Filippo Depetri  
+**Email:** [filippo.depetri@mail.polim.it]
+
+---
+
+**Last Modified:** 21/08/2025
