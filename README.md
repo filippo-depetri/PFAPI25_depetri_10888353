@@ -1,4 +1,4 @@
-# PFAPI25 - Final Exam in Algorithms and Principles of Computer Science
+# PFAPI25 - Prova Finale di Algoritmi e Strutture Dati Polimi (A.A. 24/25)
 
 ## 📋 General Information
 
